@@ -38,16 +38,16 @@ export class JwtService {
   }
 
   createTokenPair(payload: PayloadToken, privateKey: string) {
-    const accessToken = this.signAccessToken(payload, privateKey);
-    const refreshToken = this.signRefreshToekn(payload, privateKey);
+    const { id, email } = payload;
+    const accessToken = this.signAccessToken({ id, email }, privateKey);
+    const refreshToken = this.signRefreshToekn({ id, email }, privateKey);
     return { accessToken, refreshToken };
   }
 
   async verifyAccessToken(req: Request, next: NextFunction) {
     try {
       const clientId = req.headers[headers.CLIENT_ID] as string;
-      const header = req.headers[headers.AUTHORIZATION];
-
+      const header = req.headers[headers.AUTHORIZATION] as string;
       if (!clientId || !header)
         throw new HttpException(
           'Missing request header!',
@@ -62,8 +62,7 @@ export class JwtService {
       if (!keyToken)
         throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
 
-      const token = header[0].substring(7);
-
+      const token = header.substring(7);
       const decoded = this.decodeToken(token, keyToken.publicKey);
       if (!decoded || clientId != decoded.id)
         throw new HttpException('Invalid Token!', HttpStatus.FORBIDDEN);
@@ -90,7 +89,6 @@ export class JwtService {
     const token = req.cookies[headers.COOKIE_REFRESH_TOKEN];
     if (!token)
       throw new HttpException('Un Authorization', HttpStatus.NOT_FOUND);
-
     const user = await this.authRepository.findById(clientId);
     if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
 
@@ -116,14 +114,13 @@ export class JwtService {
       if (!keyToken)
         throw new HttpException('Un Authorization', HttpStatus.FORBIDDEN);
 
-      decoded = this.decodeToken(token, refreshTokenUsed.publicKey);
-
+      decoded = this.decodeToken(token, keyToken.publicKey);
       if (decoded.id !== clientId)
         throw new HttpException('Un Authorization', HttpStatus.FORBIDDEN);
 
       const { refreshToken, accessToken } = this.createTokenPair(
         decoded,
-        keyToken.publicKey,
+        keyToken.privateKey,
       );
       await this.keyTokenRepository.update(token, refreshToken);
 
@@ -136,7 +133,7 @@ export class JwtService {
 
   decodeToken(token: string, publicKey: string) {
     return jwt.verify(token, publicKey, {
-      algorithsm: 'RS256',
+      algorithms: ['RS256'], // fix the typo here
     });
   }
 }

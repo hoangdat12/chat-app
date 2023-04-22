@@ -13,7 +13,7 @@ abstract class SuccessResponse<T> {
   }
 
   public sender(res: Response) {
-    return res.status(this.status).json(this.metaData);
+    return res.status(this.status).json(this);
   }
 }
 

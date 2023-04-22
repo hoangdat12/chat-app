@@ -23,3 +23,20 @@ export class UserLogin {
   @IsNotEmpty()
   password: string;
 }
+
+export class ChangePassword {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  olderPassword: string;
+
+  @IsNotEmpty()
+  newPassword: string;
+}
+
+export class ChangeUsername {
+  firstName: string;
+  lastName: string;
+}

@@ -43,7 +43,7 @@ export class KeyTokenRepository {
 
   async createKeyToken(data: KeyTokenCreate): Promise<void> {
     const token = await this.keyTokenModel.findOneAndUpdate(
-      { user: data.user.id },
+      { user: data.user._id },
       { ...data, refreshTokenUsed: [] },
       { new: true, upsert: true },
     );

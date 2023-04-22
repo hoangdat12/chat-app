@@ -17,7 +17,7 @@ export class User {
   @Prop()
   password: string;
 
-  @Prop({ default: process.env.AVATAR_DEFAULT_URI })
+  @Prop({ default: `${process.env.IMAGE_URL}/default.avatar.jpg` })
   avatarUrl: string;
 
   @Prop({ default: false })

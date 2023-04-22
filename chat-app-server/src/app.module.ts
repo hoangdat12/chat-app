@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
@@ -9,6 +14,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PassportModule } from '@nestjs/passport';
 import { JwtMiddleWare } from './jwt/jwt.middleware';
+import { MailSenderModule } from './mail-sender/mail-sender.module';
+import { ConversationModule } from './conversation/conversation.module';
 
 @Module({
   imports: [
@@ -26,12 +33,19 @@ import { JwtMiddleWare } from './jwt/jwt.middleware';
     UserModule,
     MessageModule,
     JwtModule,
+    MailSenderModule,
+    ConversationModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleWare).exclude('auth/(.*)').forRoutes('*');
-  }
-}
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(JwtMiddleWare).exclude('auth/(.*)').forRoutes('*');
+
+//     consumer
+//       .apply(JwtMiddleWare)
+//       .forRoutes({ path: 'auth/logout', method: RequestMethod.POST });
+//   }
+// }
+export class AppModule {}

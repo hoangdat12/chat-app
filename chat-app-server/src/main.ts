@@ -6,6 +6,7 @@ import * as compression from 'compression';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { ErrorHandler } from './handler/error.handler';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,7 @@ async function bootstrap() {
   app.use(compression());
   app.setGlobalPrefix('api/v1');
   app.useGlobalFilters(new ErrorHandler());
+  app.use(cookieParser());
   app.use(
     session({
       secret: process.env.SESSION_SECRET_KEY,
@@ -22,9 +24,14 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         maxAge: 60000,
+        secure: false,
       },
     }),
   );
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
   app.use(passport.initialize());
   app.use(passport.session());
 

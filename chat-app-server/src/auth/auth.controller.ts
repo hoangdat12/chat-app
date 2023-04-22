@@ -7,36 +7,65 @@ import {
   Req,
   UseGuards,
   HttpStatus,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserLogin, UserRegister } from './auth.dto';
+import { ChangePassword, UserLogin, UserRegister } from './auth.dto';
 import { Response, Request } from 'express';
 import { GoogleAuthGuard } from './google/google.guard';
 import { IUserCreated } from './repository/auth.repository';
 import { GitHubAuthGuard } from './github/github.guard';
+import { JwtService } from '../jwt/jwt.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   @Post('register')
   async register(@Body() body: UserRegister, @Res() res: Response) {
-    const { refreshToken, response } = await this.authService.register(body);
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      maxAge: 129600000,
-    });
-    return response.sender(res);
+    try {
+      return (await this.authService.register(body)).sender(res);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Post('active/:token')
+  async activeAccount(@Param('token') token: string, @Res() res: Response) {
+    try {
+      const { refreshToken, response } = await this.authService.activeAccount(
+        token,
+      );
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        maxAge: 129600000,
+        // secure: true,
+      });
+      return response.sender(res);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   @Post('login')
   async login(@Body() body: UserLogin, @Res() res: Response) {
-    const { refreshToken, response } = await this.authService.login(body);
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      maxAge: 129600000,
-    });
-    return response.sender(res);
+    try {
+      const { refreshToken, response } = await this.authService.login(body);
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        maxAge: 129600000,
+        // secure: true,
+      });
+      return response.sender(res);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   @Get('login/google')
@@ -77,20 +106,85 @@ export class AuthController {
 
   @Get('status')
   async getUser(@Res() res: Response, @Req() req: Request) {
-    if (req.user) {
-      const user = req.user as IUserCreated;
-      const { refreshToken, response } = await this.authService.loginWithOauth2(
-        user.email,
+    try {
+      if (req.user) {
+        const user = req.user as IUserCreated;
+        const { refreshToken, response } =
+          await this.authService.loginWithOauth2(user.email);
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          maxAge: 129600000,
+          secure: true,
+        });
+        return response.sender(res);
+      } else {
+        return res
+          .status(HttpStatus.FORBIDDEN)
+          .json({ msg: 'Un Authorization!' });
+      }
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    try {
+      const { refreshToken, response } = await this.jwtService.refreshToken(
+        req,
       );
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         maxAge: 129600000,
+        secure: true,
       });
       return response.sender(res);
-    } else {
-      return res
-        .status(HttpStatus.FORBIDDEN)
-        .json({ msg: 'Un Authorization!' });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Post('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    try {
+      return (await this.authService.logout(req)).sender(res);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    try {
+      return await this.authService.forgetPassword(email);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Post('verify-otp/:token')
+  async verifyOtpToken(@Param('token') token: string) {
+    try {
+      return await this.authService.verifyOtpToken(token);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Post('change-password/:secret')
+  async changPassword(
+    @Body() data: ChangePassword,
+    @Param('secret') secret: string,
+  ) {
+    try {
+      return await this.authService.changePassword(data, secret);
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
   }
 }

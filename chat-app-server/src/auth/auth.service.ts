@@ -1,11 +1,18 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { AuthRepository } from './repository/auth.repository';
-import { UserLogin, UserRegister } from './auth.dto';
+import { AuthRepository, IUserCreated } from './repository/auth.repository';
+import { ChangePassword, UserLogin, UserRegister } from './auth.dto';
 import * as bcrypt from 'bcrypt';
 import { Created, Ok } from '../ultils/response';
 import * as crypto from 'crypto';
 import { JwtService } from '../jwt/jwt.service';
 import { KeyTokenRepository } from './repository/keyToken.repository';
+import { Request } from 'express';
+import { OtpTokenRepository } from './repository/otpToken.repository';
+import { MailSenderService } from '../mail-sender/mail-sender.service';
+import {
+  activeAccountTemplate,
+  confirmEmail,
+} from '../mail-sender/mail-sender.template';
 
 export interface ILoginWithGoogleData {
   email: string;
@@ -18,9 +25,11 @@ export interface ILoginWithGoogleData {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
-    private readonly keyToeknRepository: KeyTokenRepository,
+    private readonly authRepository: AuthRepository,
+    private readonly keyTokenRepository: KeyTokenRepository,
+    private readonly otpTokenRepository: OtpTokenRepository,
+    private readonly mailSender: MailSenderService,
   ) {}
 
   async register(data: UserRegister) {
@@ -42,11 +51,38 @@ export class AuthService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
 
+    const otpToken = await this.otpTokenRepository.createOtpToken(email);
+    console.log(otpToken);
+
+    // Send mail
+    const link = `http://localhost:8080/active/${otpToken.token}`;
+    const userName = `${newUser.firstName} ${newUser.lastName}`;
+    const content = activeAccountTemplate(userName, link);
+    await this.mailSender.sendEmailWithText(email, 'Change Password', content);
+
+    return new Ok<string>(
+      `We send email ${email} an account activation link, please follow the instructions to activate your account`,
+      'Register success!',
+    );
+  }
+
+  async activeAccount(tokenActive: string) {
+    if (!tokenActive)
+      throw new HttpException('Missing value!', HttpStatus.BAD_REQUEST);
+
+    const otpToken = await this.otpTokenRepository.findByToken(tokenActive);
+    if (!otpToken) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+
+    const userUpdate = await this.authRepository.activeUser(otpToken.email);
+    if (!userUpdate) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+
+    await this.otpTokenRepository.deleteByToken(tokenActive);
+
     const { privateKey, publicKey } = await this.generateKeyPair();
 
     const payload = {
-      id: newUser.id,
-      email: newUser.email,
+      id: userUpdate._id as unknown as string,
+      email: userUpdate.email,
     };
     const { accessToken, refreshToken } = this.jwtService.createTokenPair(
       payload,
@@ -54,16 +90,18 @@ export class AuthService {
     );
 
     const dataKeyToken = {
-      user: newUser,
+      user: userUpdate,
       refreshToken,
       publicKey,
       privateKey,
     };
-    await this.keyToeknRepository.createKeyToken(dataKeyToken);
 
-    delete newUser.password;
+    await this.keyTokenRepository.createKeyToken(dataKeyToken);
+
+    delete userUpdate.password;
+
     const metaData = {
-      user: newUser,
+      user: userUpdate,
       token: accessToken,
     };
     return {
@@ -89,15 +127,23 @@ export class AuthService {
 
     delete user.password;
 
-    const { privateKey } = this.generateKeyPair();
+    const { publicKey, privateKey } = this.generateKeyPair();
     const payload = {
-      id: user.id,
+      id: user._id,
       email: user.email,
     };
     const { accessToken, refreshToken } = this.jwtService.createTokenPair(
       payload,
       privateKey,
     );
+
+    const dataKeyToken = {
+      user: user,
+      refreshToken,
+      publicKey,
+      privateKey,
+    };
+    await this.keyTokenRepository.createKeyToken(dataKeyToken);
 
     const metaData = {
       user: user,
@@ -137,7 +183,7 @@ export class AuthService {
     const { privateKey } = this.generateKeyPair();
 
     const payload = {
-      id: userExist.id,
+      id: userExist._id,
       email: userExist.email,
     };
 
@@ -156,6 +202,71 @@ export class AuthService {
       refreshToken,
       response: new Ok<any>(metaData, 'Login sucess!'),
     };
+  }
+
+  async logout(req: Request) {
+    const user = req.user as IUserCreated;
+    await this.keyTokenRepository.deleteByUserId(user._id);
+    return new Ok<string>('Logout success!');
+  }
+
+  async forgetPassword(email: string) {
+    const userExist = await this.authRepository.findByEmail(email);
+    if (!userExist)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    if (userExist.loginWith !== 'email') {
+      return new Ok<string>(`Not valid!`, 'Error!');
+    } else {
+      const otpToken = await this.otpTokenRepository.createOtpToken(email);
+      console.log(otpToken);
+      // Send mail
+      const link = `http://localhost:8080/verify-otp/${otpToken.token}`;
+      const userName = `${userExist.firstName} ${userExist.lastName}`;
+      const content = confirmEmail(userName, link);
+      await this.mailSender.sendEmailWithText(
+        email,
+        'Change Password',
+        content,
+      );
+
+      return new Ok<string>(
+        `We send email ${email} an account activation link, please follow the instructions to activate your account`,
+        'Success!',
+      );
+    }
+  }
+
+  async verifyOtpToken(token: string) {
+    const otpToken = await this.otpTokenRepository.findByToken(token);
+    return new Ok<any>(otpToken, 'Success!');
+  }
+
+  async changePassword(data: ChangePassword, secret: string) {
+    const otpToken = await this.otpTokenRepository.findBySecret(secret);
+    if (!otpToken) throw new HttpException('Wrong!', HttpStatus.BAD_REQUEST);
+
+    const email = data.email;
+    const userExist = await this.authRepository.findByEmail(email);
+    if (!userExist)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    const isValidPassword = bcrypt.compareSync(
+      data.olderPassword,
+      userExist.password,
+    );
+    if (!isValidPassword)
+      throw new HttpException('Wrong older Password!', HttpStatus.BAD_REQUEST);
+
+    const hashPassword = bcrypt.hashSync(data.newPassword, 10);
+    const userChangePassoword = await this.authRepository.changePassword(
+      email,
+      hashPassword,
+    );
+    if (!userChangePassoword)
+      throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    return new Ok<string>('Change password success!', 'success');
   }
 
   generateKeyPair() {
