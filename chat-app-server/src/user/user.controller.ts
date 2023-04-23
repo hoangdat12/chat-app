@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UploadedFile,
@@ -30,7 +31,7 @@ export class UserController {
     }
   }
 
-  @Post('change-username')
+  @Patch('change-username')
   async changeUsername(@Req() req: Request, @Body() data: ChangeUsername) {
     try {
       const user = req.user as IUserCreated;
@@ -41,7 +42,7 @@ export class UserController {
     }
   }
 
-  @Post('change-avatar')
+  @Patch('change-avatar')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

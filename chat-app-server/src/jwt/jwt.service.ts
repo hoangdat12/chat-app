@@ -67,8 +67,10 @@ export class JwtService {
       if (!decoded || clientId != decoded.id)
         throw new HttpException('Invalid Token!', HttpStatus.FORBIDDEN);
 
+      delete user.password;
+
       // req.keyToken = keyToken;
-      req.user = decoded;
+      req.user = user;
 
       next();
     } catch (err) {

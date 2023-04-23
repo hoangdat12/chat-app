@@ -17,10 +17,18 @@ export class MessageRepository {
   ) {}
 
   async createMessageConversation(data: PayloadCreateMessage) {
-    return await this.messageConversationModel.create(data);
+    const { message_type_model, ...payload } = data;
+    return await this.messageConversationModel.create({
+      ...payload,
+      message_conversation: message_type_model,
+    });
   }
 
   async createMessageGroup(data: PayloadCreateMessage) {
-    return await this.messageGroupModel.create(data);
+    const { message_type_model, ...payload } = data;
+    return await this.messageGroupModel.create({
+      ...payload,
+      message_group: message_type_model,
+    });
   }
 }

@@ -7,11 +7,11 @@ export class GroupDTO {
 
   participants: UserSenderMessage[];
 
-  lastMessage: string;
+  lastMessage: string | null;
 
-  lastMessageSendAt: Date;
+  lastMessageSendAt: Date | null;
 
-  nameGroup: string;
+  topic: string | null;
 
-  topic: string;
+  nameGroup: string | null;
 }

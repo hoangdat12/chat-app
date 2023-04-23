@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Received, UserSenderMessage } from '../../message/message.dto';
-import { Types } from 'mongoose';
-import { Group } from './group.model';
+import * as mongoose from 'mongoose';
 import { Conversation } from './conversation.model';
+import { Group } from './group.model';
 
 @Schema({ collection: 'MessageConversation', timestamps: true })
 export class MessageConversation {
@@ -15,7 +15,7 @@ export class MessageConversation {
   @Prop({ required: true })
   message_sender_by: UserSenderMessage;
 
-  @Prop({ type: Types.ObjectId, ref: 'Conversation' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' })
   message_conversation: Conversation;
 
   @Prop({ required: true })
@@ -33,7 +33,7 @@ export class MessageGroup {
   @Prop({ required: true })
   message_sender_by: UserSenderMessage;
 
-  @Prop({ type: Types.ObjectId, ref: 'Group' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Group' })
   message_group: Group;
 
   @Prop({ required: true })

@@ -5,9 +5,9 @@ export class ConversationDTO {
 
   participants: UserSenderMessage[];
 
-  lastMessage: string;
+  lastMessage: string | null;
 
-  lastMessageSendAt: Date;
+  lastMessageSendAt: Date | null;
 
-  topic: string;
+  topic: string | null;
 }

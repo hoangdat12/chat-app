@@ -39,13 +39,12 @@ import { ConversationModule } from './conversation/conversation.module';
   controllers: [],
   providers: [],
 })
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(JwtMiddleWare).exclude('auth/(.*)').forRoutes('*');
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(JwtMiddleWare).exclude('auth/(.*)').forRoutes('*');
 
-//     consumer
-//       .apply(JwtMiddleWare)
-//       .forRoutes({ path: 'auth/logout', method: RequestMethod.POST });
-//   }
-// }
-export class AppModule {}
+    consumer
+      .apply(JwtMiddleWare)
+      .forRoutes({ path: 'auth/logout', method: RequestMethod.POST });
+  }
+}

@@ -6,12 +6,14 @@ import { Group } from '../schema/model/group.model';
 import { UserSenderMessage } from 'src/message/message.dto';
 
 export interface IPayloadCreateConversation {
+  conversation_type: string;
   participants: UserSenderMessage[];
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
 }
 
 export interface IPayloadCreateGroup {
+  conversation_type: string;
   participants: UserSenderMessage[];
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
@@ -36,6 +38,7 @@ export class ConversationRepository {
   }
 
   async createConversation(payload: IPayloadCreateConversation) {
+    console.log('? is not function');
     return await this.conversationModel.create(payload);
   }
 

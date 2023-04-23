@@ -4,6 +4,9 @@ import { UserSenderMessage } from '../../message/message.dto';
 @Schema({ collection: 'Group', timestamps: true })
 export class Group {
   @Prop({ required: true })
+  conversation_type: string;
+
+  @Prop({ required: true })
   creator: UserSenderMessage;
 
   @Prop({ required: true })
