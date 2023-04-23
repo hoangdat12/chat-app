@@ -15,7 +15,11 @@ export class MessageConversation {
   @Prop({ required: true })
   message_sender_by: UserSenderMessage;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Conversation',
+    index: true,
+  })
   message_conversation: Conversation;
 
   @Prop({ required: true })
@@ -33,7 +37,7 @@ export class MessageGroup {
   @Prop({ required: true })
   message_sender_by: UserSenderMessage;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Group' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Group', index: true })
   message_group: Group;
 
   @Prop({ required: true })

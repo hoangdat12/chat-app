@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Conversation } from '../schema/model/conversation.model';
@@ -29,6 +29,17 @@ export class ConversationRepository {
     @InjectModel(Group.name) private readonly groupModel: Model<Group>,
   ) {}
 
+  async findById(type: string, conversationId: string) {
+    switch (type) {
+      case 'conversation':
+        return await this.findConversationById(conversationId);
+      case 'group':
+        return await this.findGroupById(conversationId);
+      default:
+        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
+    }
+  }
+
   async findConversationById(conversationId: string) {
     return await this.conversationModel.findById(conversationId).lean();
   }
@@ -38,7 +49,6 @@ export class ConversationRepository {
   }
 
   async createConversation(payload: IPayloadCreateConversation) {
-    console.log('? is not function');
     return await this.conversationModel.create(payload);
   }
 
