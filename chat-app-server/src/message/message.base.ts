@@ -156,6 +156,15 @@ export class ConversationMessage extends BaseMessage {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    const conversation =
+      await this.conversationRepository.updateLastConversationMessage(
+        this.conversationId,
+        message.message_content,
+      );
+    if (!conversation)
+      throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
+
     return new Ok<any>(message, 'Success!');
   }
 
@@ -200,6 +209,14 @@ export class GroupMessage extends BaseMessage {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    const group = await this.conversationRepository.updateLastGroupMessage(
+      this.conversationId,
+      message.message_content,
+    );
+
+    if (!group)
+      throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
+
     return new Ok<any>(message, 'Success!');
   }
 

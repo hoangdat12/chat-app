@@ -46,12 +46,14 @@ export class MessageGroup {
 
 const MessageConversationSchema =
   SchemaFactory.createForClass(MessageConversation);
+MessageConversationSchema.index({ createdAt: 1 });
 export const MessageConversationModel = {
   name: MessageConversation.name,
   schema: MessageConversationSchema,
 };
 
 const MessageGroupSchema = SchemaFactory.createForClass(MessageGroup);
+MessageGroupSchema.index({ createdAt: 1 });
 export const MessageGroupModel = {
   name: MessageGroup.name,
   schema: MessageGroupSchema,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { MessageController } from './message.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,9 +13,10 @@ import { ConversationModule } from '../conversation/conversation.module';
 @Module({
   imports: [
     MongooseModule.forFeature([MessageConversationModel, MessageGroupModel]),
-    ConversationModule,
+    // ConversationModule,
   ],
   providers: [MessageService, MessageFactory, MessageRepository],
   controllers: [MessageController],
+  exports: [MessageRepository],
 })
 export class MessageModule {}

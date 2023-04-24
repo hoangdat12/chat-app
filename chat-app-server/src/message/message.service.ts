@@ -18,11 +18,21 @@ export class MessageService {
   ) {}
 
   async createMessage(user: IUserCreated, data: CreateMessageData) {
-    const payload = this.getPayload(user, data) as unknown as Constructor;
-    return await this.messageFactory.createNewMessage(
-      payload.message_type,
-      payload,
+    const conversation = await this.conversationRepository.findById(
+      data.message_type,
+      data.conversationId,
     );
+    if (!conversation)
+      throw new HttpException(
+        'Conversation not found!',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const payload = this.getPayload(user, data) as unknown as Constructor;
+    return await this.messageFactory.createNewMessage(payload.message_type, {
+      ...payload,
+      message_received: conversation.participants,
+    });
   }
 
   async delete(

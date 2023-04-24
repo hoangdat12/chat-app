@@ -17,6 +17,12 @@ export interface IDateUpdateMessage extends IDataDeleteMessage {
   messageContent: string;
 }
 
+export interface IMessagePagination {
+  page: number | 1;
+  limit: number | 50;
+  sortBy: string | 'ctime';
+}
+
 @Injectable()
 export class MessageRepository {
   constructor(
@@ -47,6 +53,35 @@ export class MessageRepository {
 
   async getGroupMessage(messageId: string) {
     return await this.messageGroupModel.findOne({ _id: messageId }).lean();
+  }
+
+  async findMessageOfConversation(
+    type: string,
+    conversationId: string,
+    pagination: IMessagePagination,
+  ) {
+    const { page, limit, sortBy } = pagination;
+    const offset = (page - 1) * limit;
+    switch (type) {
+      case 'conversation':
+        return await this.messageConversationModel
+          .find({ message_conversation: conversationId })
+          .limit(limit)
+          .skip(offset)
+          .sort(sortBy === 'ctime' ? { createdAt: -1 } : { id: 1 })
+          .lean()
+          .exec();
+      case 'group':
+        return await this.messageGroupModel
+          .find({ message_group: conversationId })
+          .limit(limit)
+          .skip(offset)
+          .sort(sortBy === 'ctime' ? { createdAt: -1 } : { id: 1 })
+          .lean()
+          .exec();
+      default:
+        throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
+    }
   }
 
   // async create(type: string, data: PayloadCreateMessage) {

@@ -7,6 +7,7 @@ export class Received {
   email: string;
   avatarUrl: string;
   userName: string;
+  enable?: boolean;
 }
 
 export class UserSenderMessage {
@@ -14,6 +15,7 @@ export class UserSenderMessage {
   email: string;
   avatarUrl: string;
   userName: string;
+  enable?: boolean;
 }
 
 export class PayloadCreateMessage {
@@ -43,8 +45,8 @@ export class CreateMessageData {
   @IsNotEmpty()
   conversationId: string;
 
-  @IsNotEmpty()
-  message_received: Received | Received[];
+  // @IsNotEmpty()
+  // message_received: Received | Received[];
 }
 
 export class DelelteMessageData {

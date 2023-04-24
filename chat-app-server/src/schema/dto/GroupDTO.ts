@@ -3,7 +3,7 @@ import { UserSenderMessage } from 'src/message/message.dto';
 export class GroupDTO {
   id: string;
 
-  creator: UserSenderMessage;
+  creators: UserSenderMessage[];
 
   participants: UserSenderMessage[];
 

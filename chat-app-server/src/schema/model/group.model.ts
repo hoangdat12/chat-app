@@ -7,7 +7,7 @@ export class Group {
   conversation_type: string;
 
   @Prop({ required: true })
-  creator: UserSenderMessage;
+  creators: UserSenderMessage[];
 
   @Prop({ required: true })
   participants: UserSenderMessage[];
