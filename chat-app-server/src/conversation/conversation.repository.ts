@@ -3,21 +3,21 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Conversation } from '../schema/model/conversation.model';
 import { Group } from '../schema/model/group.model';
-import { Received, UserSenderMessage } from 'src/message/message.dto';
+import { UserJoinChat } from 'src/message/message.dto';
 
 export interface IPayloadCreateConversation {
   conversation_type: string;
-  participants: UserSenderMessage[];
+  participants: UserJoinChat[];
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
 }
 
 export interface IPayloadCreateGroup {
   conversation_type: string;
-  participants: UserSenderMessage[];
+  participants: UserJoinChat[];
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
-  creators: UserSenderMessage[] | null;
+  creators: UserJoinChat[] | null;
   name: string | null;
 }
 
@@ -77,13 +77,35 @@ export class ConversationRepository {
     );
   }
 
+  // Kik user out of group
   async deletePaticipantOfGroup(conversationId: string, participantId: string) {
+    return await this.groupModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+        participants: { $elemMatch: { userId: participantId } },
+      },
+      {
+        $set: {
+          'participants.$.enable': false,
+        },
+      },
+      { new: true },
+    );
+  }
+
+  // Check user is exist in conversation
+  // if exist then set Inable true
+  // else add new Member
+  async addPaticipantOfConversation(
+    conversationId: string,
+    paticipant: UserJoinChat,
+  ) {
     return await this.groupModel.findOneAndUpdate(
       { _id: conversationId },
       {
-        $pull: {
+        $push: {
           participants: {
-            userId: participantId,
+            paticipant,
           },
         },
       },
@@ -91,8 +113,26 @@ export class ConversationRepository {
     );
   }
 
+  async addPaticipantOfExistInConversation(
+    conversationId: string,
+    participantId: string,
+  ) {
+    return await this.groupModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+        participants: { $elemMatch: { userId: participantId } },
+      },
+      {
+        $set: {
+          'participants.$.enable': true,
+        },
+      },
+      { new: true },
+    );
+  }
+
   // ULTILS
-  modifyDataPaticipants(paticipants: Received[]) {
+  modifyDataPaticipants(paticipants: UserJoinChat[]) {
     let result = [];
     for (let paticipant of paticipants) {
       result.push({ ...paticipant, enable: true });

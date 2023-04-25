@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ConstructorMessage, Received, UserSenderMessage } from './message.dto';
+import { ConstructorMessage, UserJoinChat } from './message.dto';
 import { MessageRepository } from './message.repository';
 import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
@@ -7,7 +7,7 @@ import { Group } from 'src/schema/model/group.model';
 import { Conversation } from 'src/schema/model/conversation.model';
 
 export interface Constructor extends ConstructorMessage {
-  message_sender_by: UserSenderMessage | null;
+  message_sender_by: UserJoinChat | null;
   messageRepository: MessageRepository | null;
   conversationRepository: ConversationRepository | null;
 }
@@ -42,14 +42,14 @@ export class MessageFactory {
 export abstract class BaseMessage {
   message_type: string;
   message_content: string;
-  message_sender_by: UserSenderMessage;
+  message_sender_by: UserJoinChat;
   protected readonly messageRepository: MessageRepository;
   protected readonly conversationRepository: ConversationRepository;
 
   constructor(
     message_type: string,
     message_content: string,
-    message_sender_by: UserSenderMessage,
+    message_sender_by: UserJoinChat,
     messageRepository: MessageRepository,
     conversationRepository: ConversationRepository,
   ) {
@@ -125,7 +125,7 @@ export abstract class BaseMessage {
 }
 
 export class ConversationMessage extends BaseMessage {
-  message_received: Received;
+  message_received: UserJoinChat;
   conversationId: string;
 
   constructor(payload: Constructor) {
@@ -136,7 +136,7 @@ export class ConversationMessage extends BaseMessage {
       payload.messageRepository,
       payload.conversationRepository,
     );
-    this.message_received = (payload.message_received as Received) || null;
+    this.message_received = (payload.message_received as UserJoinChat) || null;
     this.conversationId = payload.conversationId;
   }
 
@@ -179,7 +179,7 @@ export class ConversationMessage extends BaseMessage {
 
 export class GroupMessage extends BaseMessage {
   conversationId: string;
-  message_received: Received[];
+  message_received: UserJoinChat[];
 
   constructor(payload: Constructor) {
     super(
@@ -189,7 +189,8 @@ export class GroupMessage extends BaseMessage {
       payload.messageRepository,
       payload.conversationRepository,
     );
-    this.message_received = (payload.message_received as Received[]) || null;
+    this.message_received =
+      (payload.message_received as UserJoinChat[]) || null;
     this.conversationId = payload.conversationId;
   }
 

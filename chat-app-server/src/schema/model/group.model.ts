@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { UserSenderMessage } from '../../message/message.dto';
+import { UserJoinChat } from '../../message/message.dto';
 
 @Schema({ collection: 'Group', timestamps: true })
 export class Group {
@@ -7,10 +7,10 @@ export class Group {
   conversation_type: string;
 
   @Prop({ required: true })
-  creators: UserSenderMessage[];
+  creators: UserJoinChat[];
 
   @Prop({ required: true })
-  participants: UserSenderMessage[];
+  participants: UserJoinChat[];
 
   @Prop()
   lastMessage: string;

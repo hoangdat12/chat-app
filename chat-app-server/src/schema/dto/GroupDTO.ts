@@ -1,11 +1,11 @@
-import { UserSenderMessage } from 'src/message/message.dto';
+import { UserJoinChat } from 'src/message/message.dto';
 
 export class GroupDTO {
   id: string;
 
-  creators: UserSenderMessage[];
+  creators: UserJoinChat[];
 
-  participants: UserSenderMessage[];
+  participants: UserJoinChat[];
 
   lastMessage: string | null;
 

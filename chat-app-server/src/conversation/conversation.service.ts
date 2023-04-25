@@ -7,7 +7,8 @@ import {
 import { ConversationRepository } from './conversation.repository';
 import { Ok } from '../ultils/response';
 import {
-  GetMessageOfConversation,
+  GetDeleteMessageOfConversation,
+  PayloadAddPaticipant,
   PayloadCreateConversation,
   PayloadDeletePaticipant,
 } from './conversation.dto';
@@ -20,7 +21,6 @@ import {
 export class ConversationService {
   constructor(
     private readonly conversationFactory: ConversationFactory,
-    private readonly authRepository: AuthRepository,
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,
   ) {}
@@ -58,28 +58,29 @@ export class ConversationService {
 
   async getMessageOfConversation(
     user: IUserCreated,
-    data: GetMessageOfConversation,
+    data: GetDeleteMessageOfConversation,
     pagination: IMessagePagination,
   ) {
-    const userSendMessage = {
-      userId: user._id,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-      userName: `${user.firstName} ${user.lastName}`,
-    };
-
     const dataUpdate = {
       ...data,
-      participants: [userSendMessage],
     };
 
     const payload = this.getPayloadForConstructorConversation(dataUpdate);
 
     return await this.conversationFactory.getMessageOfConversation(
       data.conversationType,
+      user,
       payload,
       pagination,
     );
+  }
+
+  async deleteConversation(
+    user: IUserCreated,
+    data: GetDeleteMessageOfConversation,
+  ) {
+    const payload = this.getPayloadForConstructorConversation(data);
+    return await this.conversationFactory.deleteConversation(user, payload);
   }
 
   async deletePaticipantOfConversation(
@@ -95,6 +96,23 @@ export class ConversationService {
     return await this.conversationFactory.deletePaticipantOfConversation(
       user,
       data.paticipantId,
+      payload,
+    );
+  }
+
+  async addPaticipantOfConversation(
+    user: IUserCreated,
+    data: PayloadAddPaticipant,
+  ) {
+    const dataUpdate = {
+      ...data,
+      conversation_type: 'group',
+    };
+    const payload = this.getPayloadForConstructorConversation(dataUpdate);
+
+    return await this.conversationFactory.addPaticipantOfConversation(
+      user,
+      data.paticipant,
       payload,
     );
   }

@@ -27,7 +27,6 @@ export class MessageService {
         'Conversation not found!',
         HttpStatus.BAD_REQUEST,
       );
-
     const payload = this.getPayload(user, data) as unknown as Constructor;
     return await this.messageFactory.createNewMessage(payload.message_type, {
       ...payload,
@@ -50,13 +49,13 @@ export class MessageService {
 
   async update(user: IUserCreated, messageId: string, data: UpdateMessageData) {
     const payload = this.getPayload(user, data) as unknown as Constructor;
-    const dataReceived = await this.messageFactory.updateMessage(
+    const dataUserJoinChat = await this.messageFactory.updateMessage(
       payload.message_type,
       messageId,
       payload,
     );
-    console.log(dataReceived);
-    return dataReceived;
+    console.log(dataUserJoinChat);
+    return dataUserJoinChat;
   }
 
   getPayload(user: IUserCreated, data: any) {

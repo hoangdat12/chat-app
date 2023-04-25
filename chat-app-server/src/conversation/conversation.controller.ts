@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Param,
   Patch,
   Post,
@@ -11,6 +12,7 @@ import { ConversationService } from './conversation.service';
 import { Request } from 'express';
 import { IUserCreated } from 'src/auth/repository/auth.repository';
 import {
+  PayloadAddPaticipant,
   PayloadCreateConversation,
   PayloadDeletePaticipant,
 } from './conversation.dto';
@@ -63,7 +65,25 @@ export class ConversationController {
     }
   }
 
-  @Patch('/group/paticipant')
+  @Delete('/:conversationId')
+  async deleteConversation(
+    @Param('conversationId') conversationId: string,
+    @Req() req: Request,
+    @Body('conversationType') conversationType: string,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return await this.conversationService.deleteConversation(user, {
+        conversationId,
+        conversationType,
+      });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Patch('/group/participant/delele')
   async deletePaticipantOfConversation(
     @Req() req: Request,
     @Body() body: PayloadDeletePaticipant,
@@ -71,6 +91,23 @@ export class ConversationController {
     try {
       const user = req.user as IUserCreated;
       return await this.conversationService.deletePaticipantOfConversation(
+        user,
+        body,
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Patch('/group/participant/add')
+  async addPaticipantOfConversation(
+    @Req() req: Request,
+    @Body() body: PayloadAddPaticipant,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return await this.conversationService.addPaticipantOfConversation(
         user,
         body,
       );

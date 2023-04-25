@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Received, UserSenderMessage } from '../message/message.dto';
+import { UserJoinChat } from '../message/message.dto';
 import { ConversationRepository } from './conversation.repository';
 import { PayloadCreateConversation } from './conversation.dto';
 import {
@@ -32,13 +32,26 @@ export class ConversationFactory {
 
   async getMessageOfConversation(
     type: string,
+    user: IUserCreated,
     payload: IConstructorConversation,
     pagination: IMessagePagination,
   ) {
     const classRef = ConversationFactory.typeConversation[type];
     if (!classRef)
       throw new HttpException('Type not found!', HttpStatus.NOT_FOUND);
-    else return new classRef(payload).getMessageOfConversation(pagination);
+    else
+      return new classRef(payload).getMessageOfConversation(user, pagination);
+  }
+
+  async deleteConversation(
+    user: IUserCreated,
+    payload: IConstructorConversation,
+  ) {
+    const classRef =
+      ConversationFactory.typeConversation[payload.conversation_type];
+    if (!classRef)
+      throw new HttpException('Type not found!', HttpStatus.NOT_FOUND);
+    else return new classRef(payload).deleteConversation(user);
   }
 
   async deletePaticipantOfConversation(
@@ -48,11 +61,19 @@ export class ConversationFactory {
   ) {
     return new Group(payload).deleteParticipant(user, paticipantId);
   }
+
+  async addPaticipantOfConversation(
+    user: IUserCreated,
+    participant: UserJoinChat,
+    payload: IConstructorConversation,
+  ) {
+    return new Group(payload).addParticipant(user, participant);
+  }
 }
 
 export abstract class BaseConversation {
   conversation_type: string;
-  participants: UserSenderMessage[] | null;
+  participants: UserJoinChat[] | null;
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
   conversationId: string;
@@ -61,7 +82,7 @@ export abstract class BaseConversation {
 
   constructor(
     conversation_type: string,
-    participants: UserSenderMessage[],
+    participants: UserJoinChat[],
     lastMessage: string,
     lastMessageSendAt: Date,
     conversationRepository: ConversationRepository,
@@ -79,7 +100,10 @@ export abstract class BaseConversation {
 
   abstract create(): Promise<any>;
 
-  async getMessageOfConversation(pagination: IMessagePagination) {
+  async getMessageOfConversation(
+    user: IUserCreated,
+    pagination: IMessagePagination,
+  ) {
     const conversationExist = await this.conversationRepository.findById(
       this.conversation_type,
       this.conversationId,
@@ -92,14 +116,8 @@ export abstract class BaseConversation {
 
     let userValidInConversation = false;
     for (let participant of conversationExist.participants) {
-      // const condition =
-      //   participant.userId.toString() ===
-      //     this.participants[0].userId.toString() &&
-      //   participant.email === this.participants[0].email;
-      // if (condition) {
-      //   userValidInConversation = true;
-      // }
-      if (participant.email === this.participants[0].email) {
+      const condition = participant.userId.toString() === user._id.toString();
+      if (condition) {
         userValidInConversation = true;
       }
     }
@@ -108,12 +126,14 @@ export abstract class BaseConversation {
         'You not permission get message!',
         HttpStatus.BAD_REQUEST,
       );
-    console;
+
     const messages = await this.messageRepository.findMessageOfConversation(
       this.conversation_type,
+      user._id,
       this.conversationId,
       pagination,
     );
+
     if (!messages)
       throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
     else {
@@ -125,18 +145,46 @@ export abstract class BaseConversation {
     }
   }
 
-  // async deleteConversation() {
-  //   const conversation = this.conversationRepository.findById(
-  //     this.conversation_type,
-  //     this.conversationId,
-  //   );
-  //   if (!conversation)
-  //     throw new HttpException(
-  //       'Conversation not found!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   // if (conversation)
-  // }
+  async deleteConversation(user: IUserCreated) {
+    const conversation = await this.checkConversationExist(
+      this.conversation_type,
+    );
+
+    let isValid = false;
+    for (let participant of conversation.participants) {
+      if (participant.userId.toString() === user._id.toString()) {
+        isValid = true;
+      }
+    }
+    if (isValid) {
+      const conversationUpdate = this.messageRepository.deleteConversation(
+        this.conversation_type,
+        user._id,
+        this.conversationId,
+        user._id,
+      );
+      if (!conversationUpdate)
+        throw new HttpException('DB erorr!', HttpStatus.INTERNAL_SERVER_ERROR);
+      else {
+        return new Ok<string>('Delete conversation success!', 'success');
+      }
+    } else {
+      throw new HttpException('You not permission!', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async checkConversationExist(type: string) {
+    const conversation = await this.conversationRepository.findById(
+      type,
+      this.conversationId,
+    );
+    if (!conversation)
+      throw new HttpException(
+        'Conversation not found!',
+        HttpStatus.BAD_REQUEST,
+      );
+    return conversation;
+  }
 }
 
 export class Conversation extends BaseConversation {
@@ -157,13 +205,16 @@ export class Conversation extends BaseConversation {
     return await this.conversationRepository.createConversation(payload);
   }
 
-  async getMessageOfConversation(pagination: IMessagePagination) {
-    return await super.getMessageOfConversation(pagination);
+  async getMessageOfConversation(
+    user: IUserCreated,
+    pagination: IMessagePagination,
+  ) {
+    return await super.getMessageOfConversation(user, pagination);
   }
 }
 
 export class Group extends BaseConversation {
-  creators: UserSenderMessage[] | null;
+  creators: UserJoinChat[] | null;
   name: string | null;
 
   constructor(payload: IConstructorConversation) {
@@ -185,19 +236,17 @@ export class Group extends BaseConversation {
     return await this.conversationRepository.createGroup(payload);
   }
 
-  async getMessageOfConversation(pagination: IMessagePagination) {
-    return await super.getMessageOfConversation(pagination);
+  async getMessageOfConversation(
+    user: IUserCreated,
+    pagination: IMessagePagination,
+  ) {
+    return await super.getMessageOfConversation(user, pagination);
   }
 
   async deleteParticipant(user: IUserCreated, participantId: string) {
-    const conversation = await this.conversationRepository.findGroupById(
-      this.conversationId,
-    );
-    if (!conversation)
-      throw new HttpException(
-        'Conversation not found!',
-        HttpStatus.BAD_REQUEST,
-      );
+    const conversation = (await super.checkConversationExist(
+      'group',
+    )) as unknown as Group;
 
     let isValid = false;
     for (let creator of conversation.creators) {
@@ -226,6 +275,59 @@ export class Group extends BaseConversation {
       throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
     else {
       return new Ok<string>('Delete member success!', 'success');
+    }
+  }
+
+  async addParticipant(user: IUserCreated, participant: UserJoinChat) {
+    const conversation = (await super.checkConversationExist(
+      'group',
+    )) as unknown as Group;
+
+    let isValid = false;
+    for (let creator of conversation.creators) {
+      if (creator.userId.toString() === user._id.toString()) {
+        isValid = true;
+      }
+    }
+    if (!isValid)
+      throw new HttpException(
+        'User not permission delete member out of group!',
+        HttpStatus.FORBIDDEN,
+      );
+
+    let userExistConversation = null;
+    for (let participant of conversation.participants) {
+      if (participant.userId === user._id) {
+        userExistConversation = participant;
+      }
+    }
+    let updateParticipantGroup = null;
+
+    if (userExistConversation) {
+      if (userExistConversation.enable)
+        throw new HttpException(
+          'User is already exist in conversation!',
+          HttpStatus.CONFLICT,
+        );
+      else {
+        updateParticipantGroup =
+          await this.conversationRepository.addPaticipantOfExistInConversation(
+            this.conversationId,
+            participant.userId,
+          );
+      }
+    } else {
+      updateParticipantGroup =
+        await this.conversationRepository.addPaticipantOfConversation(
+          this.conversationId,
+          participant,
+        );
+    }
+
+    if (!updateParticipantGroup)
+      throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
+    else {
+      return new Ok<string>('Add member success!', 'success');
     }
   }
 }

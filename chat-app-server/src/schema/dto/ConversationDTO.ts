@@ -1,9 +1,9 @@
-import { UserSenderMessage } from 'src/message/message.dto';
+import { UserJoinChat } from 'src/message/message.dto';
 
 export class ConversationDTO {
   id: string;
 
-  participants: UserSenderMessage[];
+  participants: UserJoinChat[];
 
   lastMessage: string | null;
 

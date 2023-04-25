@@ -1,19 +1,16 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 import { Conversation } from '../schema/model/conversation.model';
 import { Group } from 'src/schema/model/group.model';
 
-export class Received {
+export class UserJoinChat {
+  @IsNotEmpty()
   userId: string;
+  @IsNotEmpty()
+  @IsEmail()
   email: string;
+  @IsNotEmpty()
   avatarUrl: string;
-  userName: string;
-  enable?: boolean;
-}
-
-export class UserSenderMessage {
-  userId: string;
-  email: string;
-  avatarUrl: string;
+  @IsNotEmpty()
   userName: string;
   enable?: boolean;
 }
@@ -22,7 +19,7 @@ export class PayloadCreateMessage {
   message_type: string;
   message_content: string;
   message_type_model: Group | Conversation;
-  message_received: Received | Received[] | null;
+  message_received: UserJoinChat | UserJoinChat[] | null;
 }
 
 export class ConstructorMessage {
@@ -32,7 +29,7 @@ export class ConstructorMessage {
 
   conversationId: string;
 
-  message_received?: Received | Received[] | null;
+  message_received?: UserJoinChat | UserJoinChat[] | null;
 }
 
 export class CreateMessageData {
@@ -46,7 +43,7 @@ export class CreateMessageData {
   conversationId: string;
 
   // @IsNotEmpty()
-  // message_received: Received | Received[];
+  // message_received: UserJoinChat | UserJoinChat[];
 }
 
 export class DelelteMessageData {

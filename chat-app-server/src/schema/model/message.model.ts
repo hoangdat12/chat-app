@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Received, UserSenderMessage } from '../../message/message.dto';
+import { UserJoinChat } from '../../message/message.dto';
 import * as mongoose from 'mongoose';
 import { Conversation } from './conversation.model';
 import { Group } from './group.model';
@@ -13,17 +13,16 @@ export class MessageConversation {
   message_content: string;
 
   @Prop({ required: true })
-  message_sender_by: UserSenderMessage;
+  message_sender_by: UserJoinChat;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Conversation',
-    index: true,
   })
   message_conversation: Conversation;
 
   @Prop({ required: true })
-  message_received: Received;
+  message_received: UserJoinChat;
 }
 
 @Schema({ collection: 'MessageGroup', timestamps: true })
@@ -35,25 +34,38 @@ export class MessageGroup {
   message_content: string;
 
   @Prop({ required: true })
-  message_sender_by: UserSenderMessage;
+  message_sender_by: UserJoinChat;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Group', index: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Group' })
   message_group: Group;
 
   @Prop({ required: true })
-  message_received: Received[];
+  message_received: UserJoinChat[];
 }
 
 const MessageConversationSchema =
   SchemaFactory.createForClass(MessageConversation);
+// Index
 MessageConversationSchema.index({ createdAt: 1 });
+MessageConversationSchema.index({
+  message_conversation: 1,
+  'message_received.enable': 1,
+  'message_received.userId': 1,
+});
+
 export const MessageConversationModel = {
   name: MessageConversation.name,
   schema: MessageConversationSchema,
 };
 
 const MessageGroupSchema = SchemaFactory.createForClass(MessageGroup);
+// Index
 MessageGroupSchema.index({ createdAt: 1 });
+MessageGroupSchema.index({
+  message_group: 1,
+  'message_received.enable': 1,
+  'message_received.userId': 1,
+});
 export const MessageGroupModel = {
   name: MessageGroup.name,
   schema: MessageGroupSchema,

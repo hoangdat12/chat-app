@@ -32,6 +32,7 @@ export class MessageRepository {
     private readonly messageGroupModel: Model<MessageGroup>,
   ) {}
 
+  // COMMON
   async get(type: string, messageId: string) {
     switch (type) {
       case 'conversation':
@@ -45,18 +46,55 @@ export class MessageRepository {
     }
   }
 
-  async getConversationMessage(messageId: string) {
-    return await this.messageConversationModel
-      .findOne({ _id: messageId })
-      .lean();
-  }
-
-  async getGroupMessage(messageId: string) {
-    return await this.messageGroupModel.findOne({ _id: messageId }).lean();
+  async deleteConversation(
+    type: string,
+    userId: string,
+    conversationId: string,
+    participantId: string,
+  ) {
+    switch (type) {
+      case 'conversation':
+        return await this.messageConversationModel.updateMany(
+          {
+            message_conversation: conversationId,
+            message_received: {
+              $elemMatch: {
+                enable: true,
+                userId: userId.toString(),
+              },
+            },
+          },
+          { $set: { 'message_received.$[elem].enable': false } },
+          {
+            multi: true,
+            arrayFilters: [{ 'elem.userId': userId.toString() }],
+          },
+        );
+      case 'group':
+        return await this.messageGroupModel.updateMany(
+          {
+            message_group: conversationId,
+            message_received: {
+              $elemMatch: {
+                enable: true,
+                userId: userId.toString(),
+              },
+            },
+          },
+          { $set: { 'message_received.$[elem].enable': false } },
+          {
+            multi: true,
+            arrayFilters: [{ 'elem.userId': userId.toString() }],
+          },
+        );
+      default:
+        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async findMessageOfConversation(
     type: string,
+    userId: string,
     conversationId: string,
     pagination: IMessagePagination,
   ) {
@@ -65,7 +103,15 @@ export class MessageRepository {
     switch (type) {
       case 'conversation':
         return await this.messageConversationModel
-          .find({ message_conversation: conversationId })
+          .find({
+            message_conversation: conversationId,
+            message_received: {
+              $elemMatch: {
+                enable: true,
+                userId: userId.toString(),
+              },
+            },
+          })
           .limit(limit)
           .skip(offset)
           .sort(sortBy === 'ctime' ? { createdAt: -1 } : { id: 1 })
@@ -73,7 +119,15 @@ export class MessageRepository {
           .exec();
       case 'group':
         return await this.messageGroupModel
-          .find({ message_group: conversationId })
+          .find({
+            message_group: conversationId,
+            message_received: {
+              $elemMatch: {
+                enable: true,
+                userId: userId.toString(),
+              },
+            },
+          })
           .limit(limit)
           .skip(offset)
           .sort(sortBy === 'ctime' ? { createdAt: -1 } : { id: 1 })
@@ -82,40 +136,6 @@ export class MessageRepository {
       default:
         throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
     }
-  }
-
-  // async create(type: string, data: PayloadCreateMessage) {
-  //   const { message_type_model, ...payload } = data;
-  //   switch (type) {
-  //     case 'conversation':
-  //       return await this.messageConversationModel.create({
-  //         ...payload,
-  //         message_conversation: message_type_model,
-  //       });
-  //     case 'group':
-  //       return await this.messageGroupModel.create({
-  //         ...payload,
-  //         message_group: message_type_model,
-  //       });
-  //     default:
-  //       throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
-  //   }
-  // }
-
-  async createMessageConversation(data: PayloadCreateMessage) {
-    const { message_type_model, ...payload } = data;
-    return await this.messageConversationModel.create({
-      ...payload,
-      message_conversation: message_type_model,
-    });
-  }
-
-  async createMessageGroup(data: PayloadCreateMessage) {
-    const { message_type_model, ...payload } = data;
-    return await this.messageGroupModel.create({
-      ...payload,
-      message_group: message_type_model,
-    });
   }
 
   async updateMessage(data: IDateUpdateMessage) {
@@ -152,5 +172,34 @@ export class MessageRepository {
       default:
         throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  // CONVERSATION MESSAGE
+
+  async getConversationMessage(messageId: string) {
+    return await this.messageConversationModel
+      .findOne({ _id: messageId })
+      .lean();
+  }
+
+  async createMessageConversation(data: PayloadCreateMessage) {
+    const { message_type_model, ...payload } = data;
+    return await this.messageConversationModel.create({
+      ...payload,
+      message_conversation: message_type_model,
+    });
+  }
+
+  // GROUP MESSAGE
+  async getGroupMessage(messageId: string) {
+    return await this.messageGroupModel.findOne({ _id: messageId }).lean();
+  }
+
+  async createMessageGroup(data: PayloadCreateMessage) {
+    const { message_type_model, ...payload } = data;
+    return await this.messageGroupModel.create({
+      ...payload,
+      message_group: message_type_model,
+    });
   }
 }
