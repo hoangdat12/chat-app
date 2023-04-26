@@ -1,7 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserJoinChat } from '../message/message.dto';
 import { ConversationRepository } from './conversation.repository';
-import { PayloadCreateConversation } from './conversation.dto';
+import {
+  IInforUserChangeNickname,
+  PayloadCreateConversation,
+} from './conversation.dto';
 import {
   IMessagePagination,
   MessageRepository,
@@ -24,10 +27,8 @@ export class ConversationFactory {
   }
 
   async createConversation(type: string, payload: IConstructorConversation) {
-    const classRef = ConversationFactory.typeConversation[type];
-    if (!classRef)
-      throw new HttpException('Type not found!', HttpStatus.NOT_FOUND);
-    else return new classRef(payload).create();
+    const classRef = this.getClassRef(type);
+    return new classRef(payload).create();
   }
 
   async getMessageOfConversation(
@@ -36,22 +37,16 @@ export class ConversationFactory {
     payload: IConstructorConversation,
     pagination: IMessagePagination,
   ) {
-    const classRef = ConversationFactory.typeConversation[type];
-    if (!classRef)
-      throw new HttpException('Type not found!', HttpStatus.NOT_FOUND);
-    else
-      return new classRef(payload).getMessageOfConversation(user, pagination);
+    const classRef = this.getClassRef(type);
+    return new classRef(payload).getMessageOfConversation(user, pagination);
   }
 
   async deleteConversation(
     user: IUserCreated,
     payload: IConstructorConversation,
   ) {
-    const classRef =
-      ConversationFactory.typeConversation[payload.conversation_type];
-    if (!classRef)
-      throw new HttpException('Type not found!', HttpStatus.NOT_FOUND);
-    else return new classRef(payload).deleteConversation(user);
+    const classRef = this.getClassRef(payload.conversation_type);
+    return new classRef(payload).deleteConversation(user);
   }
 
   async deletePaticipantOfConversation(
@@ -68,6 +63,35 @@ export class ConversationFactory {
     payload: IConstructorConversation,
   ) {
     return new Group(payload).addParticipant(user, participant);
+  }
+
+  async setNickNameForParticipant(
+    user: IUserCreated,
+    users: IInforUserChangeNickname[],
+    payload: IConstructorConversation,
+  ) {
+    const classRef = this.getClassRef(payload.conversation_type);
+    return new classRef(payload).setNickNameForParticipant(user, users);
+  }
+
+  async changeTopicConversation(
+    user: IUserCreated,
+    topic: string,
+    payload: IConstructorConversation,
+  ) {
+    const classRef = this.getClassRef(payload.conversation_type);
+    return new classRef(payload).changeTopicConversation(user, topic);
+  }
+
+  async renameGroup(user: IUserCreated, payload: IConstructorConversation) {
+    return new Group(payload).renameGroup(user);
+  }
+
+  getClassRef(type: string) {
+    const classRef = ConversationFactory.typeConversation[type];
+    if (!classRef)
+      throw new HttpException('Type not found!', HttpStatus.NOT_FOUND);
+    else return classRef;
   }
 }
 
@@ -104,28 +128,10 @@ export abstract class BaseConversation {
     user: IUserCreated,
     pagination: IMessagePagination,
   ) {
-    const conversationExist = await this.conversationRepository.findById(
+    const conversation = await this.checkConversationExist(
       this.conversation_type,
-      this.conversationId,
     );
-    if (!conversationExist)
-      throw new HttpException(
-        'Conversation not found!',
-        HttpStatus.BAD_REQUEST,
-      );
-
-    let userValidInConversation = false;
-    for (let participant of conversationExist.participants) {
-      const condition = participant.userId.toString() === user._id.toString();
-      if (condition) {
-        userValidInConversation = true;
-      }
-    }
-    if (!userValidInConversation)
-      throw new HttpException(
-        'You not permission get message!',
-        HttpStatus.BAD_REQUEST,
-      );
+    await this.checkUserIsPermission(user._id, conversation.participants);
 
     const messages = await this.messageRepository.findMessageOfConversation(
       this.conversation_type,
@@ -150,26 +156,70 @@ export abstract class BaseConversation {
       this.conversation_type,
     );
 
-    let isValid = false;
+    await this.checkUserIsPermission(user._id, conversation.participants);
+
+    const conversationUpdate = this.messageRepository.deleteConversation(
+      this.conversation_type,
+      user._id,
+      this.conversationId,
+      user._id,
+    );
+    if (!conversationUpdate)
+      throw new HttpException('DB erorr!', HttpStatus.INTERNAL_SERVER_ERROR);
+    else {
+      return new Ok<string>('Delete conversation success!', 'success');
+    }
+  }
+
+  async setNickNameForParticipant(
+    user: IUserCreated,
+    payloads: IInforUserChangeNickname[],
+  ) {
+    // const conversation = await this.checkConversationExist(
+    //   this.conversation_type,
+    // );
+
+    const conversation =
+      await this.conversationRepository.findByIdWithMethodSave(
+        this.conversation_type,
+        this.conversationId,
+      );
+    if (!conversation)
+      throw new HttpException(
+        'Conversation not found!',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    // await this.checkUserIsPermission(user._id, conversation.participants);
     for (let participant of conversation.participants) {
-      if (participant.userId.toString() === user._id.toString()) {
-        isValid = true;
+      for (let payload of payloads) {
+        if (payload.userId === participant.userId) {
+          participant.userName = payload.userName;
+          break;
+        }
       }
     }
-    if (isValid) {
-      const conversationUpdate = this.messageRepository.deleteConversation(
+
+    conversation.save();
+    return new Ok<any>(conversation, 'success!');
+  }
+
+  async changeTopicConversation(user: IUserCreated, topic: string) {
+    const conversation = await this.checkConversationExist(
+      this.conversation_type,
+    );
+    await this.checkUserIsPermission(user._id, conversation.participants);
+
+    const changeTopic =
+      await this.conversationRepository.changeTopicConversation(
         this.conversation_type,
-        user._id,
         this.conversationId,
-        user._id,
+        topic,
       );
-      if (!conversationUpdate)
-        throw new HttpException('DB erorr!', HttpStatus.INTERNAL_SERVER_ERROR);
-      else {
-        return new Ok<string>('Delete conversation success!', 'success');
-      }
-    } else {
-      throw new HttpException('You not permission!', HttpStatus.FORBIDDEN);
+    if (!changeTopic)
+      throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
+    else {
+      return new Ok<any>(changeTopic, 'success');
     }
   }
 
@@ -184,6 +234,21 @@ export abstract class BaseConversation {
         HttpStatus.BAD_REQUEST,
       );
     return conversation;
+  }
+
+  async checkUserIsPermission(userId: string, datas: UserJoinChat[]) {
+    let isValid = false;
+    for (let data of datas) {
+      if (data.userId.toString() === userId.toString()) {
+        isValid = true;
+        break;
+      }
+    }
+    if (!isValid)
+      throw new HttpException(
+        'User not permission delete member out of group!',
+        HttpStatus.FORBIDDEN,
+      );
   }
 }
 
@@ -283,17 +348,7 @@ export class Group extends BaseConversation {
       'group',
     )) as unknown as Group;
 
-    let isValid = false;
-    for (let creator of conversation.creators) {
-      if (creator.userId.toString() === user._id.toString()) {
-        isValid = true;
-      }
-    }
-    if (!isValid)
-      throw new HttpException(
-        'User not permission delete member out of group!',
-        HttpStatus.FORBIDDEN,
-      );
+    await super.checkUserIsPermission(user._id, conversation.creators);
 
     let userExistConversation = null;
     for (let participant of conversation.participants) {
@@ -328,6 +383,24 @@ export class Group extends BaseConversation {
       throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
     else {
       return new Ok<string>('Add member success!', 'success');
+    }
+  }
+
+  async renameGroup(user: IUserCreated) {
+    const conversation = (await super.checkConversationExist(
+      'group',
+    )) as unknown as Group;
+
+    await super.checkUserIsPermission(user._id, conversation.participants);
+
+    const updateNameGroup = await this.conversationRepository.renameGroup(
+      this.conversationId,
+      this.name,
+    );
+    if (!updateNameGroup)
+      throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
+    else {
+      return new Ok<any>(updateNameGroup, 'success');
     }
   }
 }

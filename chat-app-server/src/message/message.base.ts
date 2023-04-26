@@ -5,6 +5,7 @@ import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { Group } from 'src/schema/model/group.model';
 import { Conversation } from 'src/schema/model/conversation.model';
+import { IUserCreated } from 'src/auth/repository/auth.repository';
 
 export interface Constructor extends ConstructorMessage {
   message_sender_by: UserJoinChat | null;
@@ -80,6 +81,7 @@ export abstract class BaseMessage {
     else return new Ok<any>(messageUpdate, 'success');
   }
 
+  // Go tin nhan
   async delete(messageId: string, conversationId: string): Promise<any> {
     await this.checkOwnerMessage(messageId, conversationId);
 
@@ -91,6 +93,9 @@ export abstract class BaseMessage {
 
     return new Ok(await this.messageRepository.delete(data), 'success');
   }
+
+  // Xoa tin nhan 1 nguoi
+  async deleteMessageOnlyOfUser(user: IUserCreated) {}
 
   async checkOwnerMessage(messageId: string, conversationId: string) {
     await this.getMessageTypeModel(conversationId);

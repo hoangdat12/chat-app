@@ -12,9 +12,12 @@ import { ConversationService } from './conversation.service';
 import { Request } from 'express';
 import { IUserCreated } from 'src/auth/repository/auth.repository';
 import {
+  ChangeNickNameOfParticipant,
+  ChangeTopic,
   PayloadAddPaticipant,
   PayloadCreateConversation,
   PayloadDeletePaticipant,
+  RenameGroup,
 } from './conversation.dto';
 
 @Controller('conversation')
@@ -111,6 +114,51 @@ export class ConversationController {
         user,
         body,
       );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Patch('/change-username')
+  async setNicknameOfParticipant(
+    @Req() req: Request,
+    @Body() body: ChangeNickNameOfParticipant,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return await this.conversationService.setNickNameForParticipant(
+        user,
+        body,
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Patch('/change-topic')
+  async changeTopicOfConversation(
+    @Req() req: Request,
+    @Body() body: ChangeTopic,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return await this.conversationService.changeTopicOfConversation(
+        user,
+        body,
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Patch('/change-name-group')
+  async renameGroup(@Req() req: Request, @Body() data: RenameGroup) {
+    try {
+      const user = req.user as IUserCreated;
+      return await this.conversationService.renameGroup(user, data);
     } catch (err) {
       console.log(err);
       throw err;

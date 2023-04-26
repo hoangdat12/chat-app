@@ -1,6 +1,11 @@
 import { IsNotEmpty } from 'class-validator';
 import { UserJoinChat } from 'src/message/message.dto';
 
+export interface IInforUserChangeNickname {
+  userId: string;
+  userName: string;
+}
+
 export class PayloadCreateConversation {
   @IsNotEmpty()
   conversation_type: string;
@@ -35,4 +40,19 @@ export class PayloadAddPaticipant {
 
   @IsNotEmpty()
   paticipant: UserJoinChat;
+}
+
+export class ChangeTopic extends GetDeleteMessageOfConversation {
+  @IsNotEmpty()
+  topic: string;
+}
+
+export class ChangeNickNameOfParticipant extends GetDeleteMessageOfConversation {
+  @IsNotEmpty()
+  newNicknameOfUser: IInforUserChangeNickname[];
+}
+
+export class RenameGroup extends GetDeleteMessageOfConversation {
+  @IsNotEmpty()
+  nameGroup: string;
 }

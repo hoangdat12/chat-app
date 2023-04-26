@@ -41,6 +41,40 @@ export class ConversationRepository {
     }
   }
 
+  async findByIdWithMethodSave(type: string, conversationId: string) {
+    switch (type) {
+      case 'conversation':
+        return await this.conversationModel.findOne({ _id: conversationId });
+      case 'group':
+        return await this.groupModel.findOne({ _id: conversationId });
+      default:
+        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async changeTopicConversation(
+    type: string,
+    conversationId: string,
+    topic: string,
+  ) {
+    switch (type) {
+      case 'conversation':
+        return await this.conversationModel.findOneAndUpdate(
+          { _id: conversationId },
+          { topic },
+          { new: true },
+        );
+      case 'group':
+        return await this.groupModel.findOneAndUpdate(
+          { _id: conversationId },
+          { topic },
+          { new: true },
+        );
+      default:
+        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
+    }
+  }
+
   // CONVERSATION
   async findConversationById(conversationId: string) {
     return await this.conversationModel.findOne({ _id: conversationId }).lean();
@@ -73,6 +107,14 @@ export class ConversationRepository {
     return await this.groupModel.findOneAndUpdate(
       { _id: conversationId },
       { lastMessage: content, lastMessageSendAt: Date.now() },
+      { new: true },
+    );
+  }
+
+  async renameGroup(conversationId: string, nameGroup: string) {
+    return await this.groupModel.findOneAndUpdate(
+      { _id: conversationId },
+      { nameGroup },
       { new: true },
     );
   }

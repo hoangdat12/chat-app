@@ -7,10 +7,13 @@ import {
 import { ConversationRepository } from './conversation.repository';
 import { Ok } from '../ultils/response';
 import {
+  ChangeNickNameOfParticipant,
+  ChangeTopic,
   GetDeleteMessageOfConversation,
   PayloadAddPaticipant,
   PayloadCreateConversation,
   PayloadDeletePaticipant,
+  RenameGroup,
 } from './conversation.dto';
 import {
   IMessagePagination,
@@ -117,17 +120,45 @@ export class ConversationService {
     );
   }
 
+  async setNickNameForParticipant(
+    user: IUserCreated,
+    data: ChangeNickNameOfParticipant,
+  ) {
+    const { newNicknameOfUser, ...pload } = data;
+    const payload = this.getPayloadForConstructorConversation(pload);
+    return await this.conversationFactory.setNickNameForParticipant(
+      user,
+      newNicknameOfUser,
+      payload,
+    );
+  }
+
+  async changeTopicOfConversation(user: IUserCreated, data: ChangeTopic) {
+    const { topic, ...dataUpdate } = data;
+    const payload = this.getPayloadForConstructorConversation(dataUpdate);
+    return await this.conversationFactory.changeTopicConversation(
+      user,
+      topic,
+      payload,
+    );
+  }
+
+  async renameGroup(user: IUserCreated, data: RenameGroup) {
+    const payload = this.getPayloadForConstructorConversation(data);
+    return await this.conversationFactory.renameGroup(user, payload);
+  }
+
   getPayloadForConstructorConversation(data: any) {
     return {
       conversationRepository: this.conversationRepository,
       messageRepository: this.messageRepository,
       conversationId: data?.conversationId || null,
-      conversation_type: data.conversationType,
+      conversation_type: data?.conversationType || data?.conversation_type,
       participants: data?.participants || null,
       lastMessage: data?.lastMessage || null,
       lastMessageSendAt: data?.lastMessageSendAt || null,
       creators: data?.creators || null,
-      name: data?.name || null,
+      name: data?.name || data?.nameGroup || null,
     };
   }
 }
