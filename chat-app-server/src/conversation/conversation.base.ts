@@ -11,6 +11,7 @@ import {
 } from '../message/message.repository';
 import { Ok } from '../ultils/response';
 import { IUserCreated } from '../auth/repository/auth.repository';
+import { IParticipant } from '../schema/model/conversation.model';
 
 export interface IConstructorConversation extends PayloadCreateConversation {
   conversationId: string | null;
@@ -48,7 +49,7 @@ export class ConversationFactory {
     const classRef = this.getClassRef(payload.conversation_type);
     return new classRef(payload).deleteConversation(user);
   }
-
+  // Xoa tam thoi
   async deletePaticipantOfConversation(
     user: IUserCreated,
     paticipantId: string,
@@ -56,7 +57,19 @@ export class ConversationFactory {
   ) {
     return new Group(payload).deleteParticipant(user, paticipantId);
   }
-
+  // Xoa han
+  async deleteConversationOfUser(
+    type: string,
+    user: IUserCreated,
+    payload: IConstructorConversation,
+  ) {
+    if (!ConversationFactory.typeConversation[type])
+      throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
+    else
+      return new ConversationFactory.typeConversation[type](
+        payload,
+      ).deleteMessageOnlyOfUser(user, payload.conversationId);
+  }
   async addPaticipantOfConversation(
     user: IUserCreated,
     participant: UserJoinChat,
@@ -97,7 +110,7 @@ export class ConversationFactory {
 
 export abstract class BaseConversation {
   conversation_type: string;
-  participants: UserJoinChat[] | null;
+  participants: IParticipant[] | null;
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
   conversationId: string;
@@ -106,7 +119,7 @@ export abstract class BaseConversation {
 
   constructor(
     conversation_type: string,
-    participants: UserJoinChat[],
+    participants: IParticipant[],
     lastMessage: string,
     lastMessageSendAt: Date,
     conversationRepository: ConversationRepository,
@@ -122,7 +135,7 @@ export abstract class BaseConversation {
     this.conversationId = conversationId;
   }
 
-  abstract create(): Promise<any>;
+  abstract create(userId: string): Promise<any>;
 
   async getMessageOfConversation(
     user: IUserCreated,
@@ -150,7 +163,7 @@ export abstract class BaseConversation {
       return new Ok<any>(metaData, 'Get message success!');
     }
   }
-
+  // Xoa tam thoi
   async deleteConversation(user: IUserCreated) {
     const conversation = await this.checkConversationExist(
       this.conversation_type,
@@ -160,7 +173,6 @@ export abstract class BaseConversation {
 
     const conversationUpdate = this.messageRepository.deleteConversation(
       this.conversation_type,
-      user._id,
       this.conversationId,
       user._id,
     );
@@ -169,6 +181,21 @@ export abstract class BaseConversation {
     else {
       return new Ok<string>('Delete conversation success!', 'success');
     }
+  }
+
+  // Xoa han
+  async deleteMessageOnlyOfUser(user: IUserCreated, conversationId: string) {
+    const conversation = await this.checkConversationExist(
+      this.conversation_type,
+    );
+
+    await this.checkUserIsPermission(user._id, conversation.participants);
+
+    await this.messageRepository.deleteConversationOfUser(
+      this.conversationId,
+      user._id,
+      conversationId,
+    );
   }
 
   async setNickNameForParticipant(
@@ -236,7 +263,10 @@ export abstract class BaseConversation {
     return conversation;
   }
 
-  async checkUserIsPermission(userId: string, datas: UserJoinChat[]) {
+  async checkUserIsPermission(
+    userId: string,
+    datas: IParticipant[] | UserJoinChat[],
+  ) {
     let isValid = false;
     for (let data of datas) {
       if (data.userId.toString() === userId.toString()) {
@@ -265,9 +295,12 @@ export class Conversation extends BaseConversation {
     );
   }
 
-  async create(): Promise<any> {
-    const { conversationRepository, ...payload } = this;
-    return await this.conversationRepository.createConversation(payload);
+  async create(userId: string): Promise<any> {
+    const { conversationRepository, messageRepository, ...payload } = this;
+    return await this.conversationRepository.createConversation(
+      userId,
+      payload,
+    );
   }
 
   async getMessageOfConversation(
@@ -296,7 +329,7 @@ export class Group extends BaseConversation {
     this.name = payload.name || null;
   }
 
-  async create(): Promise<any> {
+  async create(userId: string): Promise<any> {
     const { conversationRepository, ...payload } = this;
     return await this.conversationRepository.createGroup(payload);
   }

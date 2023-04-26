@@ -1,13 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserJoinChat } from '../../message/message.dto';
 
+export interface IParticipant extends UserJoinChat {
+  isReadLastMessage?: boolean;
+}
+
 @Schema({ collection: 'Conversation', timestamps: true })
 export class Conversation {
   @Prop({ required: true })
   conversation_type: string;
 
   @Prop({ required: true })
-  participants: UserJoinChat[];
+  participants: IParticipant[];
 
   @Prop()
   lastMessage: string;

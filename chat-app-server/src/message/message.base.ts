@@ -4,7 +4,10 @@ import { MessageRepository } from './message.repository';
 import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { Group } from 'src/schema/model/group.model';
-import { Conversation } from 'src/schema/model/conversation.model';
+import {
+  Conversation,
+  IParticipant,
+} from 'src/schema/model/conversation.model';
 import { IUserCreated } from 'src/auth/repository/auth.repository';
 
 export interface Constructor extends ConstructorMessage {
@@ -66,6 +69,7 @@ export abstract class BaseMessage {
   // abstract update(): Promise<any>;
 
   async update(messageId: string, conversationId: string) {
+    await this.checkConversationExist(this.message_type, conversationId);
     await this.checkOwnerMessage(messageId, conversationId);
 
     const data = {
@@ -83,6 +87,7 @@ export abstract class BaseMessage {
 
   // Go tin nhan
   async delete(messageId: string, conversationId: string): Promise<any> {
+    await this.checkConversationExist(this.message_type, conversationId);
     await this.checkOwnerMessage(messageId, conversationId);
 
     const data = {
@@ -94,8 +99,52 @@ export abstract class BaseMessage {
     return new Ok(await this.messageRepository.delete(data), 'success');
   }
 
-  // Xoa tin nhan 1 nguoi
-  async deleteMessageOnlyOfUser(user: IUserCreated) {}
+  async checkConversationExist(type: string, conversationId: string) {
+    const conversation = await this.conversationRepository.findById(
+      type,
+      conversationId,
+    );
+    if (!conversation)
+      throw new HttpException(
+        'Conversation not found!',
+        HttpStatus.BAD_REQUEST,
+      );
+    return conversation;
+  }
+
+  async userPermissionSendMessage(
+    participants: IParticipant[],
+    userId: string,
+  ) {
+    let exist = false;
+    for (let participant of participants) {
+      if (participant.userId === userId && participant.enable === true) {
+        exist = true;
+      }
+    }
+    if (!exist)
+      throw new HttpException(
+        'User not exist in conversation',
+        HttpStatus.BAD_REQUEST,
+      );
+  }
+
+  async checkUserExistConversation(
+    participants: IParticipant[],
+    userId: string,
+  ) {
+    let exist = false;
+    for (let participant of participants) {
+      if (participant.userId === userId) {
+        exist = true;
+      }
+    }
+    if (!exist)
+      throw new HttpException(
+        'User not exist in conversation',
+        HttpStatus.BAD_REQUEST,
+      );
+  }
 
   async checkOwnerMessage(messageId: string, conversationId: string) {
     await this.getMessageTypeModel(conversationId);
@@ -147,7 +196,14 @@ export class ConversationMessage extends BaseMessage {
 
   async create() {
     const { messageRepository, ...payload } = this;
-
+    const conversationExist = await super.checkConversationExist(
+      this.message_type,
+      this.conversationId,
+    );
+    await super.userPermissionSendMessage(
+      conversationExist.participants,
+      this.message_sender_by.userId,
+    );
     const message = await this.messageRepository.createMessageConversation({
       ...payload,
       message_type_model: (await super.getMessageTypeModel(
@@ -201,7 +257,14 @@ export class GroupMessage extends BaseMessage {
 
   async create() {
     const { messageRepository, ...payload } = this;
-
+    const conversationExist = await super.checkConversationExist(
+      this.message_type,
+      this.conversationId,
+    );
+    await super.userPermissionSendMessage(
+      conversationExist.participants,
+      this.message_sender_by.userId,
+    );
     const message = await this.messageRepository.createMessageGroup({
       message_type_model: (await super.getMessageTypeModel(
         this.conversationId,

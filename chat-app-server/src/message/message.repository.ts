@@ -45,12 +45,56 @@ export class MessageRepository {
         throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
     }
   }
-
+  // Xoa tam thoi
   async deleteConversation(
+    type: string,
+    conversationId: string,
+    participantId: string,
+  ) {
+    switch (type) {
+      case 'conversation':
+        return await this.messageConversationModel.updateMany(
+          {
+            message_conversation: conversationId,
+            message_received: {
+              $elemMatch: {
+                enable: true,
+                userId: participantId.toString(),
+              },
+            },
+          },
+          { $set: { 'message_received.$[elem].enable': false } },
+          {
+            multi: true,
+            arrayFilters: [{ 'elem.userId': participantId.toString() }],
+          },
+        );
+      case 'group':
+        return await this.messageGroupModel.updateMany(
+          {
+            message_group: conversationId,
+            message_received: {
+              $elemMatch: {
+                enable: true,
+                userId: participantId.toString(),
+              },
+            },
+          },
+          { $set: { 'message_received.$[elem].enable': false } },
+          {
+            multi: true,
+            arrayFilters: [{ 'elem.userId': participantId.toString() }],
+          },
+        );
+      default:
+        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
+    }
+  }
+  // Xoa han
+  async deleteConversationOfUser(
     type: string,
     userId: string,
     conversationId: string,
-    participantId: string,
   ) {
     switch (type) {
       case 'conversation':
@@ -64,10 +108,15 @@ export class MessageRepository {
               },
             },
           },
-          { $set: { 'message_received.$[elem].enable': false } },
+          {
+            $pull: {
+              message_received: {
+                userId,
+              },
+            },
+          },
           {
             multi: true,
-            arrayFilters: [{ 'elem.userId': userId.toString() }],
           },
         );
       case 'group':
@@ -91,7 +140,6 @@ export class MessageRepository {
         throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
     }
   }
-
   async findMessageOfConversation(
     type: string,
     userId: string,
@@ -162,12 +210,12 @@ export class MessageRepository {
       case 'conversation':
         return await this.messageConversationModel.deleteOne({
           _id: data.messageId,
-          conversation: data.conversationId,
+          message_conversation: data.conversationId,
         });
       case 'group':
         return await this.messageGroupModel.deleteOne({
           _id: data.messageId,
-          conversation: data.conversationId,
+          message_group: data.conversationId,
         });
       default:
         throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);

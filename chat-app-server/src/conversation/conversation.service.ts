@@ -19,6 +19,7 @@ import {
   IMessagePagination,
   MessageRepository,
 } from '../message/message.repository';
+import { DelelteMessageData } from 'src/message/message.dto';
 
 @Injectable()
 export class ConversationService {
@@ -116,6 +117,15 @@ export class ConversationService {
     return await this.conversationFactory.addPaticipantOfConversation(
       user,
       data.paticipant,
+      payload,
+    );
+  }
+
+  async deleteConversationOfUser(user: IUserCreated, data: DelelteMessageData) {
+    const payload = this.getPayloadForConstructorConversation(data);
+    return await this.conversationFactory.deleteConversationOfUser(
+      payload.conversation_type,
+      user,
       payload,
     );
   }

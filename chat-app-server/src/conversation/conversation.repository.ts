@@ -1,20 +1,20 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Conversation } from '../schema/model/conversation.model';
+import { Conversation, IParticipant } from '../schema/model/conversation.model';
 import { Group } from '../schema/model/group.model';
 import { UserJoinChat } from 'src/message/message.dto';
 
 export interface IPayloadCreateConversation {
   conversation_type: string;
-  participants: UserJoinChat[];
+  participants: IParticipant[];
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
 }
 
 export interface IPayloadCreateGroup {
   conversation_type: string;
-  participants: UserJoinChat[];
+  participants: IParticipant[];
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
   creators: UserJoinChat[] | null;
@@ -80,14 +80,25 @@ export class ConversationRepository {
     return await this.conversationModel.findOne({ _id: conversationId }).lean();
   }
 
-  async createConversation(payload: IPayloadCreateConversation) {
+  async createConversation(
+    userId: string,
+    payload: IPayloadCreateConversation,
+  ) {
+    payload.participants = this.modifyDataPaticipants(
+      payload.participants,
+      userId,
+    );
     return await this.conversationModel.create(payload);
   }
 
   async updateLastConversationMessage(conversationId: string, content: string) {
     return await this.conversationModel.findOneAndUpdate(
       { _id: conversationId },
-      { lastMessage: content, lastMessageSendAt: Date.now() },
+      {
+        lastMessage: content,
+        lastMessageSendAt: Date.now(),
+        $set: { 'participants.$[].isReadLastMessage': false },
+      },
       { new: true },
     );
   }
@@ -99,7 +110,10 @@ export class ConversationRepository {
 
   async createGroup(payload: IPayloadCreateGroup) {
     const { name, ...data } = payload;
-    data.participants = this.modifyDataPaticipants(data.participants);
+    data.participants = this.modifyDataPaticipants(
+      data.participants,
+      data.creators[0].userId,
+    );
     return await this.groupModel.create({ ...data, nameGroup: name });
   }
 
@@ -174,11 +188,15 @@ export class ConversationRepository {
   }
 
   // ULTILS
-  modifyDataPaticipants(paticipants: UserJoinChat[]) {
-    let result = [];
-    for (let paticipant of paticipants) {
-      result.push({ ...paticipant, enable: true });
+  modifyDataPaticipants(participants: IParticipant[], userId: string) {
+    for (let participant of participants) {
+      if (participant.userId === userId) {
+        participant.isReadLastMessage = true;
+      } else {
+        participant.isReadLastMessage = false;
+      }
+      participant.enable = true;
     }
-    return result;
+    return participants;
   }
 }

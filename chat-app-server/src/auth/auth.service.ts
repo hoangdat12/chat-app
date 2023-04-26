@@ -52,10 +52,8 @@ export class AuthService {
       );
 
     const otpToken = await this.otpTokenRepository.createOtpToken(email);
-    console.log(otpToken);
-
     // Send mail
-    const link = `http://localhost:8080/active/${otpToken.token}`;
+    const link = `http://localhost:8080/api/v1/auth/active/${otpToken.token}`;
     const userName = `${newUser.firstName} ${newUser.lastName}`;
     const content = activeAccountTemplate(userName, link);
     await this.mailSender.sendEmailWithText(email, 'Change Password', content);

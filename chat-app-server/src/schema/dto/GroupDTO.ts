@@ -1,11 +1,12 @@
-import { UserJoinChat } from 'src/message/message.dto';
+import { UserJoinChat } from '../../message/message.dto';
+import { IParticipant } from '../model/conversation.model';
 
 export class GroupDTO {
   id: string;
 
   creators: UserJoinChat[];
 
-  participants: UserJoinChat[];
+  participants: IParticipant[];
 
   lastMessage: string | null;
 

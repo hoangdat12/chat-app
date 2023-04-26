@@ -1,5 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
-import { UserJoinChat } from 'src/message/message.dto';
+import { UserJoinChat } from '../message/message.dto';
+import { IParticipant } from '../schema/model/conversation.model';
 
 export interface IInforUserChangeNickname {
   userId: string;
@@ -11,7 +12,7 @@ export class PayloadCreateConversation {
   conversation_type: string;
 
   @IsNotEmpty()
-  participants: UserJoinChat[];
+  participants: IParticipant[];
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
   creators: UserJoinChat[] | null;

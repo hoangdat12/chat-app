@@ -33,7 +33,7 @@ export class MessageService {
       message_received: conversation.participants,
     });
   }
-
+  // Go Tin nhat
   async delete(
     user: IUserCreated,
     messageId: string,
