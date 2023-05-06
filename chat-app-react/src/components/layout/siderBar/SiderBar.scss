@@ -1,0 +1,32 @@
+.navbar {
+  top: 0;
+  left: 0;
+  transition: all 0.3s ease;
+
+  .navbar__menu {
+    .list {
+      .selectorNav {
+        &:hover {
+          transition: all 0.4s ease;
+        }
+      }
+    }
+  }
+}
+
+.close .show_element:hover .element {
+  display: flex !important;
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+
+  i {
+    display: flex;
+    justify-content: center;
+    min-width: 4rem;
+  }
+}
