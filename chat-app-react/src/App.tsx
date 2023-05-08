@@ -6,7 +6,7 @@ import Login from "./pages/authPage/Login";
 import LoginSuccess from "./pages/authPage/LoginSuccess";
 import Register from "./pages/authPage/Register";
 import RegisterSuccess from "./pages/authPage/RegisterSuccess";
-import Conversation from "./pages/Conversation";
+import Conversation from "./pages/conversation/Conversation";
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
         <Route path='/register/success' element={<RegisterSuccess />} />
         <Route path='/login/success' element={<LoginSuccess />} />
         <Route element={<ProtectedRoutes />}>
-          <Route path='/conversation' element={<Conversation />} />
+          <Route path='/conversation/*' element={<Conversation />} />
         </Route>
       </Routes>
     </Router>

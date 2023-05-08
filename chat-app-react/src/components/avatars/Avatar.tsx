@@ -8,7 +8,7 @@ export interface IPropAvatar {
 const Avatar: FC<IPropAvatar> = (props) => {
   return (
     <div
-      className={`${props?.className} overflow-hidden rounded-full cursor-pointer relative`}
+      className={`${props?.className} overflow-hidden rounded-full cursor-pointer`}
     >
       <img className='w-full rounded-full' src={props.avatarUrl} alt='' />
     </div>

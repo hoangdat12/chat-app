@@ -27,6 +27,10 @@
   --animate-duration: 0.5s;
 }
 
-.animate__animated.animate__fadeOutLeft {
+.animate__animated.animate__fadeInRight {
   --animate-duration: 0.5s;
+}
+
+.w-user-conversation {
+  width: calc(100% - 4rem);
 }

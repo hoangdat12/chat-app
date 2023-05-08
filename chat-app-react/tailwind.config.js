@@ -18,9 +18,14 @@ export default {
         header: "rgba(17, 17, 26, 0.1) 0px 0px 16px",
         "modal-header": "rgba(149, 157, 165, 0.2) 0px 8px 24px",
         search: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+        nomal: "rgba(0, 0, 0, 0.04) 0px 3px 5px",
+        "normal-top": "rgba(0, 0, 0, 0.09) 0px 3px 12px",
       },
       fontSize: {
         "sider-bar": ["0.9rem", "1.35rem"],
+      },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
       },
     },
   },

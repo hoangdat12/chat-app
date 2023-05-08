@@ -12,6 +12,7 @@ import { FC, useState } from "react";
 
 import Avatar from "../../avatars/Avatar";
 import useInnerWidth from "../../../hooks/useInnterWidth";
+import Search from "../../search/Search";
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -72,16 +73,10 @@ const Header: FC<IPropHeader> = ({
         </div>
 
         <div className='sm:col-span-3 w-[70%]'>
-          <div className='flex gap-2 px-[12px] items-center sm:hidden bg-[#f5f7f9] w-full rounded-xl h-10'>
-            <input
-              className='w-full pl-1 h-full bg-transparent border-none outline-none text-black'
-              type='text'
-              placeholder='Search...'
-            />
-            <span className='flex items-center justify-center'>
-              <IoSearch className='text-black text-xl' />
-            </span>
-          </div>
+          <Search
+            className={"sm:hidden text-sm sm:text-base"}
+            width={"w-full"}
+          />
         </div>
 
         <div

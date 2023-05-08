@@ -10,7 +10,6 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showMobile, setShowMobile] = useState(false);
-  console.log(showMobile, isOpen);
   return (
     <>
       <Header
@@ -19,19 +18,18 @@ const Layout = ({ children }: LayoutProps) => {
         setShowMobile={setShowMobile}
         showMobile={showMobile}
       />
+      <div
+        className={`${
+          isOpen ? "md:pl-[250px]" : "md:pl-[65px]"
+        } duration-300 h-screen pt-[76px]`}
+      >
+        {children}
+      </div>
       <SiderBar
         isOpen={isOpen}
         setShowMobile={setShowMobile}
         showMobile={showMobile}
       />
-      {/* <SiderBarMobile showMobile={showMobile} setShowMobile={setShowMobile} /> */}
-      <div
-        className={`${
-          isOpen ? "pl-[250px]" : "pl-[65px]"
-        } duration-300 min-h-screen`}
-      >
-        {children}
-      </div>
     </>
   );
 };

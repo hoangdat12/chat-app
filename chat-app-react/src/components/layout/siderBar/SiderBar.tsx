@@ -6,7 +6,7 @@ import { BsPerson } from "react-icons/bs";
 import { AvatarSquare } from "../../avatars/Avatar";
 
 import LogoPage from "../../../assets/Logo2.png";
-import "./SiderBar.scss";
+import "./siderBar.scss";
 import {
   IoGameControllerOutline,
   IoHelpBuoyOutline,
@@ -91,14 +91,6 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
         }
       };
 
-      if (showMobile) {
-        siderBarMobileRef.current?.classList.add("animate__fadeInLeft");
-        siderBarMobileRef.current?.classList.remove("animate__fadeOutLeft");
-      } else {
-        siderBarMobileRef.current?.classList.add("animate__fadeOutLeft");
-        siderBarMobileRef.current?.classList.remove("animate__fadeInLeft");
-      }
-
       window.addEventListener("mousedown", handleClickOutside);
 
       return () => {
@@ -106,22 +98,24 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
       };
     }
   }, [showMobile]);
-
+  // bg-[#1a1451]
   return (
     <div
       className={
         showMobile
-          ? "animate__animated w-[80%] h-screen fixed top-0 left-0 bg-[#1a1451] text-white"
+          ? "w-full h-screen fixed top-0 left-0 bg-blackOverlay  text-white"
           : `navbar ${
               isOpen ? "w-[250px] " : "w-[65px] overflow-visible"
-            }  fixed h-screen duration-300 text-white bg-blue-500 pt-[18px] pb-2 md:block hidden`
+            }  fixed h-screen duration-300 text-white bg-blue-500 pt-[18px] pb-2 md:block hidden z-[100]`
       }
-      ref={siderBarMobileRef}
     >
       <div
-        className={`navbar__menu h-full flex flex-col justify-between ${
-          !isOpen && "close"
-        } ${showMobile && "py-4"}`}
+        className={`navbar__menu relative flex flex-col justify-between h-full ${
+          showMobile
+            ? "w-[80%] bg-[#1a1451] animate__animated animate__fadeInLeft"
+            : "animate__fadeOutLeft"
+        } ${!isOpen && "close"} ${showMobile && "py-4"}`}
+        ref={siderBarMobileRef}
       >
         <div>
           <div
@@ -181,7 +175,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 <span
                   className={`absolute ${
                     !showMobile && "element"
-                  } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-20 px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
+                  } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
                 >
                   {select.display}
                 </span>
@@ -206,7 +200,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
             {selectNavUtils.map((select, index) => (
               <li
                 key={index}
-                className={`selectorNav show_element flex items-center w-full ${
+                className={`relative selectorNav show_element flex items-center w-full ${
                   showMobile ? "h-[50px]" : "md:h-[44px]"
                 } relative hover:bg-blue-700`}
               >
@@ -226,7 +220,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 <span
                   className={`absolute ${
                     !showMobile && "element"
-                  } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-20 px-4 min-h-[44px] min-w-[120px] bg-blue-700`}
+                  } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4 min-h-[44px] min-w-[120px] bg-blue-700`}
                 >
                   {select.display}
                 </span>
@@ -271,7 +265,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 <span
                   className={`absolute ${
                     !showMobile && "element"
-                  } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-20 px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
+                  } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
                 >
                   {select.display}
                 </span>
@@ -303,7 +297,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
               <span
                 className={`absolute ${
                   !showMobile && "element"
-                } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-20 px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
+                } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
               >
                 {select.display}
               </span>
