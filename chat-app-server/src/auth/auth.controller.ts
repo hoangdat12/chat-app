@@ -16,6 +16,7 @@ import { GoogleAuthGuard } from './google/google.guard';
 import { IUserCreated } from './repository/auth.repository';
 import { GitHubAuthGuard } from './github/github.guard';
 import { JwtService } from '../jwt/jwt.service';
+import { Ok } from 'src/ultils/response';
 
 @Controller('auth')
 export class AuthController {
@@ -34,18 +35,15 @@ export class AuthController {
     }
   }
 
-  @Post('active/:token')
+  @Get('active/:token')
   async activeAccount(@Param('token') token: string, @Res() res: Response) {
     try {
-      const { refreshToken, response } = await this.authService.activeAccount(
-        token,
-      );
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        maxAge: 129600000,
-        // secure: true,
-      });
-      return response.sender(res);
+      const isValid = await this.authService.activeAccount(token);
+      if (isValid) {
+        return res.redirect('http://localhost:5173/login');
+      } else {
+        return res.redirect('http://localhost:5173/error');
+      }
     } catch (err) {
       console.log(err);
       throw err;
@@ -59,7 +57,7 @@ export class AuthController {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         maxAge: 129600000,
-        // secure: true,
+        secure: true,
       });
       return response.sender(res);
     } catch (err) {
@@ -82,8 +80,7 @@ export class AuthController {
   @Get('login/google/redirect')
   @UseGuards(GoogleAuthGuard)
   async loginWithGoogleRedirect(@Res() res: Response) {
-    return res.status(HttpStatus.OK).json('Ok');
-    // return res.redirect("")
+    return res.redirect('http://localhost:5173/login/success');
   }
 
   @Get('login/github')
@@ -100,8 +97,7 @@ export class AuthController {
   @Get('login/github/redirect')
   @UseGuards(GitHubAuthGuard)
   async loginWithGithubRedirect(@Res() res: Response) {
-    return res.status(HttpStatus.OK).json('Ok');
-    // return res.redirect("")
+    return res.redirect('http://localhost:5173/login/success');
   }
 
   @Get('status')

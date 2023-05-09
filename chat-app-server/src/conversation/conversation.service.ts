@@ -15,10 +15,7 @@ import {
   PayloadDeletePaticipant,
   RenameGroup,
 } from './conversation.dto';
-import {
-  IMessagePagination,
-  MessageRepository,
-} from '../message/message.repository';
+import { Pagination, MessageRepository } from '../message/message.repository';
 import { DelelteMessageData } from 'src/message/message.dto';
 
 @Injectable()
@@ -63,7 +60,7 @@ export class ConversationService {
   async getMessageOfConversation(
     user: IUserCreated,
     data: GetDeleteMessageOfConversation,
-    pagination: IMessagePagination,
+    pagination: Pagination,
   ) {
     const dataUpdate = {
       ...data,

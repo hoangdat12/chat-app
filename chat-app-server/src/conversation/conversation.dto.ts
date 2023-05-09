@@ -16,7 +16,8 @@ export class PayloadCreateConversation {
   lastMessage: string | null;
   lastMessageSendAt: Date | null;
   creators: UserJoinChat[] | null;
-  name: string | null;
+  name?: string | null;
+  avatarUrl?: string;
 }
 
 export class GetDeleteMessageOfConversation {

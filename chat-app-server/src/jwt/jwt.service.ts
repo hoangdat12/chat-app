@@ -61,7 +61,6 @@ export class JwtService {
       const keyToken = await this.keyTokenRepository.findByUserId(clientId);
       if (!keyToken)
         throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
-
       const token = header.substring(7);
       const decoded = this.decodeToken(token, keyToken.publicKey);
       if (!decoded || clientId != decoded.id)
@@ -115,7 +114,6 @@ export class JwtService {
       const keyToken = await this.keyTokenRepository.findByRefreshToken(token);
       if (!keyToken)
         throw new HttpException('Un Authorization', HttpStatus.FORBIDDEN);
-
       decoded = this.decodeToken(token, keyToken.publicKey);
       if (decoded.id !== clientId)
         throw new HttpException('Un Authorization', HttpStatus.FORBIDDEN);
@@ -133,7 +131,7 @@ export class JwtService {
     }
   }
 
-  decodeToken(token: string, publicKey: string) {
+  decodeToken(token: string, publicKey: any) {
     return jwt.verify(token, publicKey, {
       algorithms: ['RS256'], // fix the typo here
     });

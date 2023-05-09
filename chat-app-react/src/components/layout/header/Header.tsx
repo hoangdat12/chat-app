@@ -13,6 +13,7 @@ import { FC, useState } from "react";
 import Avatar from "../../avatars/Avatar";
 import useInnerWidth from "../../../hooks/useInnterWidth";
 import Search from "../../search/Search";
+import CreateNewGroup from "../../message/CreateNewGroup";
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -28,6 +29,7 @@ const Header: FC<IPropHeader> = ({
   showMobile,
 }) => {
   const [isSearch, setIsSearch] = useState(false);
+  const [isShowModelCreate, setIsShowModelCreate] = useState(false);
   const innerWidth = useInnerWidth();
 
   useEffect(() => {
@@ -52,11 +54,19 @@ const Header: FC<IPropHeader> = ({
     }
   };
 
+  const handleClickCreateNewGroup = () => {
+    const pathName = window.location.pathname;
+    const path = pathName.split("/").pop();
+    if (path === "conversation") {
+      setIsShowModelCreate(true);
+    }
+  };
+
   return (
     <div
       className={`${
         isOpen ? "lg:pl-[250px] md:pl-[65px]" : "md:pl-[65px]"
-      } fixed top-0 w-full h-[76px] shadow-header duration-300`}
+      } fixed top-0 w-full h-[76px] shadow-header duration-300 z-[1000]`}
     >
       <div className='py-4 w-full px-4 sm:px-6 flex items-center justify-between h-full sm:grid grid-cols-12 '>
         <div className='col-span-2 sm:w-auto w-[10%] flex items-center gap-3 text-2xl font-medium text-black'>
@@ -83,7 +93,10 @@ const Header: FC<IPropHeader> = ({
           className={`sm:col-span-7 sm:pl-6 flex items-center gap-4 justify-end w-[15%] sm:w-auto`}
         >
           <div className='hidden sm:flex items-center justify-center gap-[10px] xl:gap-3'>
-            <div className='px-3 py-2 cursor-pointer flex items-center gap-2 bg-green-500 rounded-full'>
+            <div
+              className='px-3 py-2 cursor-pointer flex items-center gap-2 bg-green-500 rounded-full'
+              onClick={handleClickCreateNewGroup}
+            >
               <span className='w-[20px] h-[20px] flex items-center justify-center text-green-500 bg-white rounded-full overflow-hidden'>
                 <AiOutlinePlus />
               </span>
@@ -129,6 +142,10 @@ const Header: FC<IPropHeader> = ({
           </div>
         </div>
       </div>
+      <CreateNewGroup
+        isShowCreateNewGroup={isShowModelCreate}
+        setShowCreateNewGroup={setIsShowModelCreate}
+      />
     </div>
   );
 };

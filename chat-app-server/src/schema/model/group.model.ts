@@ -22,6 +22,9 @@ export class Group {
   @Prop()
   nameGroup: string;
 
+  @Prop()
+  avatarUrl: string;
+
   @Prop({ default: 'default' })
   topic: string;
 }

@@ -14,5 +14,7 @@ export class GroupDTO {
 
   topic: string | null;
 
-  nameGroup: string | null;
+  nameGroup?: string | null;
+
+  avatarUrl?: string;
 }

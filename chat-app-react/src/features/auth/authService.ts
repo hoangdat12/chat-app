@@ -21,12 +21,8 @@ const login = async (data: ILoginData) => {
   )) as IInformationUser;
   if (response.data.status === 200) {
     localStorage.setItem("user", JSON.stringify(response.data.metaData.user));
-    localStorage.setItem(
-      "accessToken",
-      JSON.stringify(response.data.metaData.token)
-    );
+    localStorage.setItem("token", JSON.stringify(response.data.metaData.token));
   }
-  console.log(response);
   return response.data.metaData;
 };
 

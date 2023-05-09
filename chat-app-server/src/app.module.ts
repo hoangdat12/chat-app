@@ -16,11 +16,14 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtMiddleWare } from './jwt/jwt.middleware';
 import { MailSenderModule } from './mail-sender/mail-sender.module';
 import { ConversationModule } from './conversation/conversation.module';
+import { GatewayModule } from './gateway/gateway.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
+    EventEmitterModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveStaticOptions: {
@@ -28,6 +31,7 @@ import { ConversationModule } from './conversation/conversation.module';
         index: false,
       },
     }),
+
     PassportModule.register({ session: true }),
     AuthModule,
     UserModule,
@@ -35,6 +39,7 @@ import { ConversationModule } from './conversation/conversation.module';
     JwtModule,
     MailSenderModule,
     ConversationModule,
+    GatewayModule,
   ],
   controllers: [],
   providers: [],

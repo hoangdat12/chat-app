@@ -1,7 +1,17 @@
 import axios from "axios";
+import { IUser } from "../features/auth/authSlice";
+
+const userJson = localStorage.getItem("user");
+const tokenJson = localStorage.getItem("token");
+const user = userJson ? (JSON.parse(userJson) as IUser) : null;
+const token = tokenJson ? JSON.parse(tokenJson) : null;
 
 const myAxios = axios.create({
   baseURL: "http://localhost:8080/api/v1",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "x-client-id": user?._id,
+  },
 });
 
 // myAxios.interceptors.request.use(

@@ -4,6 +4,7 @@ import { authService } from "./authService";
 import { RootState } from "../../app/store";
 
 export interface IUser {
+  _id: string;
   email: string;
   firstName: string;
   lastName: string;

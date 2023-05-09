@@ -4,7 +4,7 @@ import {
   Get,
   Param,
   Patch,
-  Post,
+  Query,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -16,10 +16,21 @@ import { extname } from 'path';
 import { Request } from 'express';
 import { IUserCreated } from '../auth/repository/auth.repository';
 import { ChangeUsername } from '../auth/auth.dto';
+import { Ok } from 'src/ultils/response';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get()
+  async getAllUser() {
+    try {
+      return await this.userService.getAllUser();
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
 
   @Get('/:userId')
   async getUserDetail(@Param('userId') userId: string) {
@@ -69,5 +80,32 @@ export class UserController {
     } catch (err) {
       console.log(err);
     }
+  }
+
+  @Get('/conversation/:userId')
+  async getonversationOfUser(
+    @Req() req: Request,
+    @Param('userId') userId: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Query('sortBy') sortBy: string,
+  ) {
+    const user = req.user as IUserCreated;
+    const pagination = {
+      page: page || 1,
+      limit: limit || 50,
+      sortBy: sortBy || 'ctime',
+    };
+    const conversations = await this.userService.getConversation(
+      user,
+      pagination,
+    );
+    const data = {
+      conversations,
+      page,
+      limit,
+      sortBy,
+    };
+    return new Ok<any>(data, 'success!');
   }
 }

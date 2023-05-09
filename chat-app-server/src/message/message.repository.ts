@@ -17,10 +17,10 @@ export interface IDateUpdateMessage extends IDataDeleteMessage {
   messageContent: string;
 }
 
-export interface IMessagePagination {
-  page: number | 1;
-  limit: number | 50;
-  sortBy: string | 'ctime';
+export interface Pagination {
+  page: number;
+  limit: number;
+  sortBy: string;
 }
 
 @Injectable()
@@ -144,7 +144,7 @@ export class MessageRepository {
     type: string,
     userId: string,
     conversationId: string,
-    pagination: IMessagePagination,
+    pagination: Pagination,
   ) {
     const { page, limit, sortBy } = pagination;
     const offset = (page - 1) * limit;

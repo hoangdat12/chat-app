@@ -103,7 +103,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
     <div
       className={
         showMobile
-          ? "w-full h-screen fixed top-0 left-0 bg-blackOverlay  text-white"
+          ? "w-full h-screen fixed top-0 left-0 bg-blackOverlay text-white"
           : `navbar ${
               isOpen ? "w-[250px] " : "w-[65px] overflow-visible"
             }  fixed h-screen duration-300 text-white bg-blue-500 pt-[18px] pb-2 md:block hidden z-[100]`

@@ -3,7 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Conversation, IParticipant } from '../schema/model/conversation.model';
 import { Group } from '../schema/model/group.model';
-import { UserJoinChat } from 'src/message/message.dto';
+import { UserJoinChat } from '../message/message.dto';
+import { Pagination } from '../message/message.repository';
 
 export interface IPayloadCreateConversation {
   conversation_type: string;
@@ -80,6 +81,56 @@ export class ConversationRepository {
     return await this.conversationModel.findOne({ _id: conversationId }).lean();
   }
 
+  async findALl(userId: string, pagination: Pagination) {
+    const { page, limit } = pagination;
+    const offset = (page - 1) * limit;
+    return await this.conversationModel.aggregate([
+      {
+        $match: {
+          'participants.userId': userId,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          conversation_type: 1,
+          creators: 1,
+          participants: 1,
+          lastMessage: 1,
+          lastMessageSendAt: 1,
+          updatedAt: 1,
+          userId: '$participants.userId',
+          collection: { $literal: 'Conversation' },
+        },
+      },
+      {
+        $unionWith: {
+          coll: 'Group',
+          pipeline: [
+            { $match: { 'participants.userId': '6449431c19452727493740ce' } },
+            {
+              $project: {
+                _id: 1,
+                conversation_type: 1,
+                creators: 1,
+                nameGroup: 1,
+                participants: 1,
+                lastMessage: 1,
+                lastMessageSendAt: 1,
+                updatedAt: 1,
+                userId: '$participants.userId',
+                collection: { $literal: 'Group' },
+              },
+            },
+          ],
+        },
+      },
+      { $sort: { updatedAt: -1 } },
+      { $skip: offset },
+      { $limit: limit },
+    ]);
+  }
+
   async createConversation(
     userId: string,
     payload: IPayloadCreateConversation,
@@ -89,6 +140,16 @@ export class ConversationRepository {
       userId,
     );
     return await this.conversationModel.create(payload);
+  }
+
+  async findConversationOfUser(userId: string) {
+    return await this.conversationModel
+      .find({
+        $elemMatch: {
+          'participants.userId': userId,
+        },
+      })
+      .lean();
   }
 
   async updateLastConversationMessage(conversationId: string, content: string) {
@@ -109,12 +170,27 @@ export class ConversationRepository {
   }
 
   async createGroup(payload: IPayloadCreateGroup) {
-    const { name, ...data } = payload;
-    data.participants = this.modifyDataPaticipants(
-      data.participants,
-      data.creators[0].userId,
+    payload.participants = this.modifyDataPaticipants(
+      payload.participants,
+      payload.creators[0].userId,
     );
-    return await this.groupModel.create({ ...data, nameGroup: name });
+    const { name, ...data } = payload;
+    let avatarUrl = null;
+    return await this.groupModel.create({
+      ...data,
+      nameGroup: name,
+      avatarUrl,
+    });
+  }
+
+  async findGroupOfUser(userId: string) {
+    return await this.groupModel
+      .find({
+        $elemMatch: {
+          'participants.userId': userId,
+        },
+      })
+      .lean();
   }
 
   async updateLastGroupMessage(conversationId: string, content: string) {

@@ -5,9 +5,9 @@ export const activeAccountTemplate = (userName: string, link: string) => `
 
     To complete your registration, please click on the verification link this to activate your account: ${link}
 
-    Once your email is verified, you'll be able to log in to your account and start exploring all of the amazing features that [App Name] has to offer.
+    Once your email is verified, you'll be able to log in to your account and start exploring all of the amazing features that Fasty has to offer.
 
-    If you have any questions or need assistance with anything, please don't hesitate to reach out to our support team at [Support Email Address].
+    If you have any questions or need assistance with anything, please don't hesitate to reach out to our support team at datttp113@gmail.com.
 
     Thank you again for choosing Chatapp. We look forward to seeing you inside!
 

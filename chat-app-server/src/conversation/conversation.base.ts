@@ -5,10 +5,7 @@ import {
   IInforUserChangeNickname,
   PayloadCreateConversation,
 } from './conversation.dto';
-import {
-  IMessagePagination,
-  MessageRepository,
-} from '../message/message.repository';
+import { Pagination, MessageRepository } from '../message/message.repository';
 import { Ok } from '../ultils/response';
 import { IUserCreated } from '../auth/repository/auth.repository';
 import { IParticipant } from '../schema/model/conversation.model';
@@ -36,7 +33,7 @@ export class ConversationFactory {
     type: string,
     user: IUserCreated,
     payload: IConstructorConversation,
-    pagination: IMessagePagination,
+    pagination: Pagination,
   ) {
     const classRef = this.getClassRef(type);
     return new classRef(payload).getMessageOfConversation(user, pagination);
@@ -63,12 +60,11 @@ export class ConversationFactory {
     user: IUserCreated,
     payload: IConstructorConversation,
   ) {
-    if (!ConversationFactory.typeConversation[type])
-      throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
-    else
-      return new ConversationFactory.typeConversation[type](
-        payload,
-      ).deleteMessageOnlyOfUser(user, payload.conversationId);
+    const classRef = this.getClassRef(type);
+    return new classRef(payload).deleteMessageOnlyOfUser(
+      user,
+      payload.conversationId,
+    );
   }
   async addPaticipantOfConversation(
     user: IUserCreated,
@@ -137,10 +133,7 @@ export abstract class BaseConversation {
 
   abstract create(userId: string): Promise<any>;
 
-  async getMessageOfConversation(
-    user: IUserCreated,
-    pagination: IMessagePagination,
-  ) {
+  async getMessageOfConversation(user: IUserCreated, pagination: Pagination) {
     const conversation = await this.checkConversationExist(
       this.conversation_type,
     );
@@ -303,10 +296,7 @@ export class Conversation extends BaseConversation {
     );
   }
 
-  async getMessageOfConversation(
-    user: IUserCreated,
-    pagination: IMessagePagination,
-  ) {
+  async getMessageOfConversation(user: IUserCreated, pagination: Pagination) {
     return await super.getMessageOfConversation(user, pagination);
   }
 }
@@ -334,10 +324,7 @@ export class Group extends BaseConversation {
     return await this.conversationRepository.createGroup(payload);
   }
 
-  async getMessageOfConversation(
-    user: IUserCreated,
-    pagination: IMessagePagination,
-  ) {
+  async getMessageOfConversation(user: IUserCreated, pagination: Pagination) {
     return await super.getMessageOfConversation(user, pagination);
   }
 

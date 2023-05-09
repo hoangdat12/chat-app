@@ -53,13 +53,17 @@ export class AuthService {
 
     const otpToken = await this.otpTokenRepository.createOtpToken(email);
     // Send mail
-    const link = `http://localhost:8080/api/v1/auth/active/${otpToken.token}`;
+    const link = `http://localhost:8080/api/v1/auth/active/${otpToken?.token}`;
     const userName = `${newUser.firstName} ${newUser.lastName}`;
     const content = activeAccountTemplate(userName, link);
-    await this.mailSender.sendEmailWithText(email, 'Change Password', content);
+    await this.mailSender.sendEmailWithText(
+      email,
+      'Active your Account',
+      content,
+    );
 
-    return new Ok<string>(
-      `We send email ${email} an account activation link, please follow the instructions to activate your account`,
+    return new Created<string>(
+      `We send a email for account ${email}, please follow the guide to activate your account`,
       'Register success!',
     );
   }
@@ -76,36 +80,37 @@ export class AuthService {
 
     await this.otpTokenRepository.deleteByToken(tokenActive);
 
-    const { privateKey, publicKey } = await this.generateKeyPair();
+    return true;
+    // const { privateKey, publicKey } = await this.generateKeyPair();
 
-    const payload = {
-      id: userUpdate._id as unknown as string,
-      email: userUpdate.email,
-    };
-    const { accessToken, refreshToken } = this.jwtService.createTokenPair(
-      payload,
-      privateKey,
-    );
+    // const payload = {
+    //   id: userUpdate._id as unknown as string,
+    //   email: userUpdate.email,
+    // };
+    // const { accessToken, refreshToken } = this.jwtService.createTokenPair(
+    //   payload,
+    //   privateKey,
+    // );
 
-    const dataKeyToken = {
-      user: userUpdate,
-      refreshToken,
-      publicKey,
-      privateKey,
-    };
+    // const dataKeyToken = {
+    //   user: userUpdate,
+    //   refreshToken,
+    //   publicKey,
+    //   privateKey,
+    // };
 
-    await this.keyTokenRepository.createKeyToken(dataKeyToken);
+    // await this.keyTokenRepository.createKeyToken(dataKeyToken);
 
-    delete userUpdate.password;
+    // delete userUpdate.password;
 
-    const metaData = {
-      user: userUpdate,
-      token: accessToken,
-    };
-    return {
-      response: new Created<any>(metaData, 'Register success!'),
-      refreshToken,
-    };
+    // const metaData = {
+    //   user: userUpdate,
+    //   token: accessToken,
+    // };
+    // return {
+    //   response: new Created<any>(metaData, 'Register success!'),
+    //   refreshToken,
+    // };
   }
 
   async login(data: UserLogin) {
@@ -123,6 +128,11 @@ export class AuthService {
     if (!isValidPassword)
       throw new HttpException('Wrong password!', HttpStatus.NOT_FOUND);
 
+    if (!user.isActive)
+      throw new HttpException(
+        'Accoutn is not active, please check email to active you account!',
+        HttpStatus.BAD_REQUEST,
+      );
     delete user.password;
 
     const { publicKey, privateKey } = this.generateKeyPair();

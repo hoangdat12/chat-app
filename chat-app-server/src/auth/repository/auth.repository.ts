@@ -19,6 +19,10 @@ export interface IUserCreated extends User {
 export class AuthRepository {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
+  async findAll() {
+    return await this.userModel.find().lean();
+  }
+
   async findById(userId: string): Promise<IUserCreated | null> {
     return await this.userModel.findOne({ _id: userId }).lean();
   }

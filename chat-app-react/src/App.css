@@ -31,6 +31,14 @@
   --animate-duration: 0.5s;
 }
 
+.animate__animated {
+  --animate-duration: 0.5s;
+}
+
 .w-user-conversation {
   width: calc(100% - 4rem);
+}
+
+.max-h-create-conversation {
+  max-height: calc(100% - 10% - 7rem);
 }

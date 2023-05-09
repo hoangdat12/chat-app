@@ -12,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // MIDDLEWARE
-  app.use(helmet());
+  app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
   app.use(compression());
   app.setGlobalPrefix('api/v1');
   app.useGlobalFilters(new ErrorHandler());

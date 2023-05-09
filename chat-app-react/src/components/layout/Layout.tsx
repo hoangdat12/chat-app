@@ -12,12 +12,6 @@ const Layout = ({ children }: LayoutProps) => {
   const [showMobile, setShowMobile] = useState(false);
   return (
     <>
-      <Header
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        setShowMobile={setShowMobile}
-        showMobile={showMobile}
-      />
       <div
         className={`${
           isOpen ? "md:pl-[250px]" : "md:pl-[65px]"
@@ -27,6 +21,12 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
       <SiderBar
         isOpen={isOpen}
+        setShowMobile={setShowMobile}
+        showMobile={showMobile}
+      />
+      <Header
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
         setShowMobile={setShowMobile}
         showMobile={showMobile}
       />

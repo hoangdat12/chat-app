@@ -63,7 +63,6 @@ const Login = () => {
   const navigate = useNavigate();
   const { user, status, isLoading } = useAppSelector(selectAuth);
   const [showPassword, setShowPassword] = useState(false);
-
   const loginSchema = yup.object().shape({
     email: yup
       .string()
@@ -88,7 +87,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user && status === "idle") {
-      navigate("/");
+      navigate(-1);
     }
   }, [user, status, navigate]);
 
@@ -135,7 +134,6 @@ const Login = () => {
                 type='text'
                 onChange={handleChange}
                 onBlur={handleBlur}
-                autoComplete='username'
                 placeholder='Email'
               />
               {errors.email && touched.email && (

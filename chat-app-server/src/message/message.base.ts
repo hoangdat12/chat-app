@@ -118,7 +118,10 @@ export abstract class BaseMessage {
   ) {
     let exist = false;
     for (let participant of participants) {
-      if (participant.userId === userId && participant.enable === true) {
+      if (
+        participant.userId === userId.toString() &&
+        participant.enable === true
+      ) {
         exist = true;
       }
     }

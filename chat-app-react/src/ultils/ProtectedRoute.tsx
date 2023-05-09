@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { IUser } from "../features/auth/authSlice";
+// import { useAppSelector } from "../app/hook";
 
 const ProtectedRoutes = () => {
   const userJson = localStorage.getItem("user");

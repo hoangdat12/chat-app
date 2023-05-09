@@ -5,10 +5,20 @@ import {
 } from '../auth/repository/auth.repository';
 import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from 'src/ultils/response';
+import { Pagination } from '../message/message.repository';
+import { ConversationRepository } from '../conversation/conversation.repository';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly authRepository: AuthRepository) {}
+  constructor(
+    private readonly authRepository: AuthRepository,
+    private readonly conversationRepository: ConversationRepository,
+  ) {}
+
+  async getAllUser() {
+    const users = await this.authRepository.findAll();
+    return new Ok<any>(users, 'success');
+  }
 
   async getUserDetail(userId: string) {
     const userExist = await this.authRepository.findById(userId);
@@ -29,8 +39,21 @@ export class UserService {
     return new Ok<string>('Change username success!', 'Success');
   }
 
+  async getConversation(user: IUserCreated, pagination: Pagination) {
+    // const conversations = this.conversationRepository.findConversationOfUser(user._id);
+    // const groups = this.conversationRepository.findGroupOfUser(user._id);
+    // const [conversations, groups] = await Promise.all([
+    //   this.conversationRepository.findConversationOfUser(user._id),
+    //   this.conversationRepository.findGroupOfUser(user._id),
+    // ]);
+    return await this.conversationRepository.findALl(
+      user._id.toString(),
+      pagination,
+    );
+    // return new Ok<any>({ conversations, groups }, 'success!');
+  }
+
   async changeUserAvatar(email: string, avatarUrl: string) {
-    await this.checkUserExist(email);
     const userUpdate = await this.authRepository.changeUserAvatar(
       email,
       avatarUrl,

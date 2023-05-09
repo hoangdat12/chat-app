@@ -15,6 +15,7 @@ import MyMessage, {
   OtherMessageMobile,
 } from "./Message";
 import useInnerWidth from "../../hooks/useInnterWidth";
+import { io } from "socket.io-client";
 
 export interface IPropConversationContent {
   setShowMoreConversation?: (value: boolean) => void;
@@ -60,6 +61,17 @@ const ConversationContent: FC<IPropConversationContent> = ({
       };
     }
   }, [messageValue]);
+
+  // useEffect(() => {
+  //   const socket = io("http://localhost:8080", {
+  //     withCredentials: true,
+  //   });
+  //   socket.on("connection", (data) => console.log(data));
+
+  //   return () => {
+  //     socket.off("UnConnected!");
+  //   };
+  // }, []);
 
   return (
     <div className='block xl:col-span-6 md:col-span-8 w-full h-full'>
