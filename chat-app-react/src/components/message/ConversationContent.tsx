@@ -16,6 +16,7 @@ import myAxios from "../../ultils/myAxios";
 import {
   IConversation,
   IParticipant,
+  createNewMessageOfConversation,
 } from "../../features/conversation/conversationSlice";
 import { IUser } from "../../features/auth/authSlice";
 import {
@@ -28,7 +29,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hook";
 
 export interface IPropConversationContent {
   user: IUser | null;
-  conversation: IConversation;
+  conversation: IConversation | null;
   setShowMoreConversation?: (value: boolean) => void;
   showMoreConversation?: boolean;
 }
@@ -52,16 +53,24 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const { messages, isLoading } = useAppSelector(selectMessage);
 
   const handleSendMessage = async () => {
-    const body = {
-      message_type: conversation.conversation_type,
-      message_content: messageValue,
-      conversationId: conversation._id,
-    };
-    const res = await myAxios.post("/message", body);
-    if (res.data.status === 200) {
-      dispatch(createNewMessage(res.data.metaData));
-      setMessageValue("");
-      inputRef.current?.focus();
+    if (conversation) {
+      const body = {
+        message_type: conversation?.conversation_type,
+        message_content: messageValue,
+        conversationId: conversation?._id,
+      };
+      const res = await myAxios.post("/message", body);
+      if (res.data.status === 200) {
+        dispatch(createNewMessage(res.data.metaData));
+        const dataUpdate = {
+          lastMessage: res.data.metaData.message_content,
+          lastMessageSendAt: res.data.metaData.createdAt,
+          conversation,
+        };
+        dispatch(createNewMessageOfConversation(dataUpdate));
+        setMessageValue("");
+        inputRef.current?.focus();
+      }
     }
   };
 
@@ -160,7 +169,13 @@ const ConversationContent: FC<IPropConversationContent> = ({
       </div>
 
       <div className='max-h-[calc(100vh-13rem)] sm:max-h-[calc(100vh-15rem)] w-full mt-1 flex flex-col-reverse h-full px-4 sm:px-6 py-4 overflow-y-scroll'>
-        <Content user={user} messages={messages} />
+        {isLoading ? (
+          <div>
+            <span className='loading-spinner'></span>
+          </div>
+        ) : (
+          <Content user={user} messages={messages} />
+        )}
       </div>
 
       <div className='flex items-center gap-3 sm:gap-4 h-16 sm:h-20 px-2 sm:px-6 '>

@@ -56,8 +56,8 @@ const Header: FC<IPropHeader> = ({
 
   const handleClickCreateNewGroup = () => {
     const pathName = window.location.pathname;
-    const path = pathName.split("/").pop();
-    if (path === "conversation") {
+    const path = pathName.split("/");
+    if (path[1] === "conversation") {
       setIsShowModelCreate(true);
     }
   };

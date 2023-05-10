@@ -1,14 +1,19 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import { enableMapSet } from "immer";
+
 import authReducer from "../features/auth/authSlice";
 import conversationReducer from "../features/conversation/conversationSlice";
 import messageReducer from "../features/message/messageSlice";
 
+enableMapSet();
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     conversation: conversationReducer,
     message: messageReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({ serializableCheck: false }),
 });
 
 export type AppDispatch = typeof store.dispatch;

@@ -24,27 +24,25 @@ export interface IPropButtonRounded {
 
 const Conversation = () => {
   const ditpatch = useAppDispatch();
-  const { conversations, isLoading } = useAppSelector(selectConversation);
-
+  const { conversations } = useAppSelector(selectConversation);
   const [showMoreConversation, setShowMoreConversation] = useState(false);
   const [conversationSelected, setConversationSelected] =
-    useState<IConversation>(conversations?.[0]);
+    useState<IConversation | null>(null);
   const innerWitdh = useInnerWidth();
 
   const userJson = localStorage.getItem("user");
   const user = userJson ? (JSON.parse(userJson) as IUser) : null;
-
   useEffect(() => {
     const fetchListConversationOfUser = async () => {
       await ditpatch(fetchConversationOfUser(user?._id ? user?._id : " "));
     };
 
-    if (!conversations?.length) {
+    if (!conversations?.size) {
       fetchListConversationOfUser();
     }
 
-    if (conversations?.length && !conversationSelected) {
-      setConversationSelected(conversations[0]);
+    if (conversations?.size && !conversationSelected) {
+      setConversationSelected(conversations.values().next().value);
     }
   }, [conversations]);
 
@@ -65,7 +63,7 @@ const Conversation = () => {
               }
             />
             <Route
-              path='/1'
+              path='/:conversationId'
               element={
                 <ConversationContent
                   user={user}

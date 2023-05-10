@@ -25,13 +25,19 @@ export interface IConversation {
 }
 
 export interface IInitialStateConversation {
-  conversations: IConversation[];
+  conversations: Map<string, IConversation>;
   isLoading: boolean;
   status: "idle" | "pending" | "succeeded" | "failed";
 }
 
+export interface IDataUpdateLastMessage {
+  conversation: IConversation;
+  lastMessage: string;
+  lastMessageSendAt: string;
+}
+
 const initialState: IInitialStateConversation = {
-  conversations: [],
+  conversations: new Map<string, IConversation>(),
   isLoading: false,
   status: "idle",
 };
@@ -48,7 +54,36 @@ const conversationSlice = createSlice({
   initialState,
   reducers: {
     createConversation: (state, action: PayloadAction<IConversation>) => {
-      state.conversations = [action.payload, ...state.conversations];
+      const newConversationMap = new Map([
+        [action.payload._id, action.payload],
+      ]);
+      state.conversations = new Map([
+        ...newConversationMap,
+        ...state.conversations,
+      ]);
+    },
+    createNewMessageOfConversation: (
+      state,
+      action: PayloadAction<IDataUpdateLastMessage>
+    ) => {
+      const firstKey = state.conversations.keys().next().value;
+      const conversationId = action.payload.conversation._id;
+
+      if (firstKey === conversationId) return;
+      const conversation = state.conversations.get(conversationId);
+
+      if (!conversation) return;
+
+      // Update lastMessage up conversation
+      conversation.lastMessage = action.payload.lastMessage;
+      conversation.lastMessageSendAt = action.payload.lastMessageSendAt;
+      // Save with conversation is first
+      const conversationUpdate = new Map([[conversationId, conversation]]);
+      state.conversations.delete(conversationId);
+      state.conversations = new Map([
+        ...conversationUpdate,
+        ...state.conversations,
+      ]);
     },
   },
   extraReducers: (builder) => {
@@ -60,7 +95,9 @@ const conversationSlice = createSlice({
       .addCase(fetchConversationOfUser.fulfilled, (state, action) => {
         state.status = "idle";
         state.isLoading = false;
-        state.conversations = action.payload.conversations;
+        action.payload.conversations.map((conversation) =>
+          state.conversations.set(conversation._id, conversation)
+        );
       })
       .addCase(fetchConversationOfUser.rejected, (state) => {
         state.status = "failed";
@@ -69,6 +106,7 @@ const conversationSlice = createSlice({
   },
 });
 
-export const { createConversation } = conversationSlice.actions;
+export const { createConversation, createNewMessageOfConversation } =
+  conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import Avatar, { AvatarSquare } from "../avatars/Avatar";
 import Search from "../search/Search";
@@ -11,7 +11,7 @@ import { IUser } from "../../features/auth/authSlice";
 import { IConversation } from "../../features/conversation/conversationSlice";
 
 export interface IPropConversationList {
-  conversations: IConversation[];
+  conversations: Map<string, IConversation>;
   user: IUser | null;
   setConversationSelected: (data: any) => void;
   // Active Link or not
@@ -19,15 +19,18 @@ export interface IPropConversationList {
 }
 
 const ConversationList: FC<IPropConversationList> = ({
-  to,
   conversations,
   user,
   setConversationSelected,
 }) => {
+  // For first
   const [active, setActive] = useState(0);
+  // For after send message
+  const [activeAfterSendMessage, setActiveAfterSendMessage] = useState("");
 
   const handleActive = (idx: number, conversation: IConversation) => {
     setActive(idx);
+    setActiveAfterSendMessage(conversation._id);
     setConversationSelected(conversation);
   };
 
@@ -59,18 +62,22 @@ const ConversationList: FC<IPropConversationList> = ({
       </div>
 
       <div className='max-h-[calc(100vh-14rem)] sm:max-h-[calc(100vh-10.5rem)] scrollbar-hide mt-4 border-t border-[#e8ebed] overflow-y-scroll'>
-        {conversations.map((conversation, idx) => {
+        {Array.from(conversations.values()).map((conversation, idx) => {
           const { name, avatarUrl } = getNameAndAvatarOfConversation(
             conversation,
             user
           );
           return (
             <div key={idx}>
+              {/* Mobile */}
               <Link
-                to={to ? "/conversation/1" : "#"}
+                to={`/conversation/${conversation._id}`}
                 key={`${conversation._id}1`}
                 className={`block sm:hidden md:block cursor-pointer ${
-                  idx === active && "bg-white"
+                  activeAfterSendMessage === conversation._id ||
+                  (idx === active && activeAfterSendMessage === "")
+                    ? "bg-white"
+                    : ""
                 }`}
                 onClick={() => handleActive(idx, conversation)}
               >
@@ -85,10 +92,14 @@ const ConversationList: FC<IPropConversationList> = ({
                   lastMessage={conversation.lastMessage}
                 />
               </Link>
+              {/* Destop, Tablet */}
               <div
                 key={`${conversation._id}10`}
                 className={`hidden sm:block md:hidden cursor-pointer ${
-                  idx === active && "bg-white"
+                  activeAfterSendMessage === conversation._id ||
+                  (idx === active && activeAfterSendMessage === "")
+                    ? "bg-white"
+                    : ""
                 } w-full border-b-[2px] border-[#e8ebed]`}
                 onClick={() => handleActive(idx, conversation)}
               >
@@ -122,7 +133,7 @@ export const getNameAndAvatarOfConversation = (
     result.name = conversation.nameGroup ?? "Name Group";
     result.avatarUrl = conversation.participants[0].avatarUrl;
   } else {
-    conversation.participants.some((participant) => {
+    conversation.participants.map((participant) => {
       if (participant.userId !== user?._id) {
         result.name = participant.userName;
         result.avatarUrl = participant.avatarUrl;
