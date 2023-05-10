@@ -6,8 +6,7 @@ export interface IParticipant {
   userId: string;
   email: string;
   avatarUrl: string;
-  firstName: string;
-  lastName: string;
+  userName: string;
   enable: boolean;
   isReadLastMessage: boolean;
 }

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Avatar, { AvatarSquare } from "../avatars/Avatar";
@@ -8,39 +8,28 @@ import ConversationInfor, {
 } from "./ConversationInfor";
 import LogoPage from "../../assets/Logo2.png";
 import { IUser } from "../../features/auth/authSlice";
-import {
-  fetchConversationOfUser,
-  selectConversation,
-} from "../../features/conversation/conversationSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hook";
+import { IConversation } from "../../features/conversation/conversationSlice";
 
 export interface IPropConversationList {
+  conversations: IConversation[];
+  user: IUser | null;
+  setConversationSelected: (data: any) => void;
   // Active Link or not
   to?: boolean;
 }
 
-const userJson = localStorage.getItem("user");
-const user = userJson ? (JSON.parse(userJson) as IUser) : null;
-
-const ConversationList: FC<IPropConversationList> = ({ to }) => {
+const ConversationList: FC<IPropConversationList> = ({
+  to,
+  conversations,
+  user,
+  setConversationSelected,
+}) => {
   const [active, setActive] = useState(0);
 
-  const ditpatch = useAppDispatch();
-  const { conversations } = useAppSelector(selectConversation);
-
-  console.log(conversations);
-
-  const handleActive = (idx: number) => {
+  const handleActive = (idx: number, conversation: IConversation) => {
     setActive(idx);
+    setConversationSelected(conversation);
   };
-
-  useEffect(() => {
-    const fetchListConversationOfUser = async () => {
-      ditpatch(fetchConversationOfUser(user?._id ? user?._id : " "));
-    };
-
-    fetchListConversationOfUser();
-  }, []);
 
   return (
     <div className='xl:col-span-3 md:col-span-4 w-full sm:w-[80px] md:w-auto bg-[#f2f3f4] h-full py-6 sm:py-8 overflow-hidden'>
@@ -71,30 +60,19 @@ const ConversationList: FC<IPropConversationList> = ({ to }) => {
 
       <div className='max-h-[calc(100vh-14rem)] sm:max-h-[calc(100vh-10.5rem)] scrollbar-hide mt-4 border-t border-[#e8ebed] overflow-y-scroll'>
         {conversations.map((conversation, idx) => {
-          let name = null;
-          let avatarUrl = null;
-
-          let lastMessage = conversation.lastMessage;
-          if (conversation.conversation_type === "group") {
-            name = conversation.nameGroup ?? "Name Group";
-            avatarUrl = conversation.participants[0].avatarUrl;
-          } else {
-            conversation.participants.map((participant) => {
-              if (participant.userId !== user?._id) {
-                name = participant.firstName + " " + participant.lastName;
-                avatarUrl = participant.avatarUrl;
-              }
-            });
-          }
+          const { name, avatarUrl } = getNameAndAvatarOfConversation(
+            conversation,
+            user
+          );
           return (
-            <>
+            <div key={idx}>
               <Link
                 to={to ? "/conversation/1" : "#"}
                 key={`${conversation._id}1`}
                 className={`block sm:hidden md:block cursor-pointer ${
                   idx === active && "bg-white"
                 }`}
-                onClick={() => handleActive(idx)}
+                onClick={() => handleActive(idx, conversation)}
               >
                 <ConversationInfor
                   active={idx === active}
@@ -104,7 +82,7 @@ const ConversationList: FC<IPropConversationList> = ({ to }) => {
                   }
                   nickName={name ?? "undifined"}
                   status={"Active"}
-                  lastMessage={lastMessage}
+                  lastMessage={conversation.lastMessage}
                 />
               </Link>
               <div
@@ -112,7 +90,7 @@ const ConversationList: FC<IPropConversationList> = ({ to }) => {
                 className={`hidden sm:block md:hidden cursor-pointer ${
                   idx === active && "bg-white"
                 } w-full border-b-[2px] border-[#e8ebed]`}
-                onClick={() => handleActive(idx)}
+                onClick={() => handleActive(idx, conversation)}
               >
                 <div className='flex justify-center'>
                   <ConversationInforMobile
@@ -123,12 +101,38 @@ const ConversationList: FC<IPropConversationList> = ({ to }) => {
                   />
                 </div>
               </div>
-            </>
+            </div>
           );
         })}
       </div>
     </div>
   );
+};
+
+export const getNameAndAvatarOfConversation = (
+  conversation: IConversation,
+  user: IUser | null
+) => {
+  const result = {
+    name: null as string | null,
+    avatarUrl: null as string | null,
+  };
+
+  if (conversation.conversation_type === "group") {
+    result.name = conversation.nameGroup ?? "Name Group";
+    result.avatarUrl = conversation.participants[0].avatarUrl;
+  } else {
+    conversation.participants.some((participant) => {
+      if (participant.userId !== user?._id) {
+        result.name = participant.userName;
+        result.avatarUrl = participant.avatarUrl;
+        return true; // stop iterating
+      }
+      return false;
+    });
+  }
+
+  return result;
 };
 
 export default ConversationList;

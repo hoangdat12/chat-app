@@ -3,22 +3,24 @@ import { IRegisterData } from "../../pages/authPage/Register";
 import myAxios from "../../ultils/myAxios";
 import { IUser } from "./authSlice";
 
-export interface IInformationUser {
+export interface IDataReceived<T> {
   data: {
-    metaData: {
-      user: IUser;
-      token: string;
-    };
+    metaData: T;
     message: string;
     status: number;
   };
+}
+
+export interface IDataLoginSuccess {
+  user: IUser;
+  token: string;
 }
 
 const login = async (data: ILoginData) => {
   const response = (await myAxios.post(
     "/auth/login",
     data
-  )) as IInformationUser;
+  )) as IDataReceived<IDataLoginSuccess>;
   if (response.data.status === 200) {
     localStorage.setItem("user", JSON.stringify(response.data.metaData.user));
     localStorage.setItem("token", JSON.stringify(response.data.metaData.token));
@@ -29,7 +31,7 @@ const login = async (data: ILoginData) => {
 const getInforUserWithOauth2 = async () => {
   const response = (await myAxios.get("/auth/status", {
     withCredentials: true,
-  })) as IInformationUser;
+  })) as IDataReceived<IDataLoginSuccess>;
 
   if (response.data.status === 200) {
     localStorage.setItem("user", JSON.stringify(response.data.metaData.user));

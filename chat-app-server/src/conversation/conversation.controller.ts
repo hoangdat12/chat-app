@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -38,14 +39,14 @@ export class ConversationController {
     }
   }
 
-  @Post('/:conversationId')
+  @Get('/:conversationType/:conversationId')
   async getMessageOfConversation(
+    @Req() req: Request,
     @Param('conversationId') conversationId: string,
+    @Param('conversationType') conversationType: string,
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('sortBy') sortBy: string,
-    @Req() req: Request,
-    @Body('conversationType') conversationType: string,
   ) {
     try {
       const user = req.user as IUserCreated;

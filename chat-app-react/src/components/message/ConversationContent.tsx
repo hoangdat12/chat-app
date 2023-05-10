@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { FC, useEffect, useRef, useState } from "react";
 
 import { IoIosInformationCircleOutline } from "react-icons/io";
@@ -9,20 +9,38 @@ import { AiOutlineFileImage, AiOutlinePlusCircle } from "react-icons/Ai";
 
 import Avatar from "../avatars/Avatar";
 import { ButtonRounded } from "../../pages/conversation/Conversation";
-import MyMessage, {
-  MyMessageMobile,
-  OtherMessage,
-  OtherMessageMobile,
-} from "./Message";
+import MyMessage, { OtherMessage } from "./Message";
 import useInnerWidth from "../../hooks/useInnterWidth";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
+import myAxios from "../../ultils/myAxios";
+import {
+  IConversation,
+  IParticipant,
+} from "../../features/conversation/conversationSlice";
+import { IUser } from "../../features/auth/authSlice";
+import {
+  IMessage,
+  selectMessage,
+  fetchMessageOfConversation as fetchMessage,
+  createNewMessage,
+} from "../../features/message/messageSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hook";
 
 export interface IPropConversationContent {
+  user: IUser | null;
+  conversation: IConversation;
   setShowMoreConversation?: (value: boolean) => void;
   showMoreConversation?: boolean;
 }
 
+export interface IPropContent {
+  user: IUser | null;
+  messages: IMessage[];
+}
+
 const ConversationContent: FC<IPropConversationContent> = ({
+  conversation,
+  user,
   setShowMoreConversation,
   showMoreConversation,
 }) => {
@@ -30,10 +48,21 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const innterWidth = useInnerWidth();
 
-  const handleSendMessage = () => {
-    console.log(messageValue);
-    setMessageValue("");
-    inputRef.current?.focus();
+  const dispatch = useAppDispatch();
+  const { messages, isLoading } = useAppSelector(selectMessage);
+
+  const handleSendMessage = async () => {
+    const body = {
+      message_type: conversation.conversation_type,
+      message_content: messageValue,
+      conversationId: conversation._id,
+    };
+    const res = await myAxios.post("/message", body);
+    if (res.data.status === 200) {
+      dispatch(createNewMessage(res.data.metaData));
+      setMessageValue("");
+      inputRef.current?.focus();
+    }
   };
 
   const handleChangeMessageValue = (e: any) => {
@@ -61,6 +90,16 @@ const ConversationContent: FC<IPropConversationContent> = ({
       };
     }
   }, [messageValue]);
+
+  useEffect(() => {
+    if (conversation) {
+      const data = {
+        conversation_type: conversation.conversation_type,
+        conversationId: conversation._id,
+      };
+      dispatch(fetchMessage(data));
+    }
+  }, [conversation]);
 
   // useEffect(() => {
   //   const socket = io("http://localhost:8080", {
@@ -120,35 +159,8 @@ const ConversationContent: FC<IPropConversationContent> = ({
         </div>
       </div>
 
-      <div className='max-h-[calc(100vh-13rem)] sm:max-h-[calc(100vh-15rem)] mt-1 flex flex-col-reverse h-full px-4 sm:px-6 py-4 overflow-y-scroll'>
-        {/* > Tablet */}
-        <MyMessage
-          className={"hidden sm:flex"}
-          contents={["Unformately not"]}
-        />
-        <OtherMessage
-          className={"hidden sm:flex"}
-          avatarUrl={
-            "https://freenice.net/wp-content/uploads/2021/08/hinh-anh-avatar-dep.jpg"
-          }
-          contents={["Hi", "How about your Interview?", "Have you pass it!"]}
-        />
-        {/* // Mobile */}
-        <div className='mt-3'>
-          <MyMessageMobile
-            className={"flex sm:hidden"}
-            contents={["Unformately not"]}
-          />
-        </div>
-        <div className='mt-3'>
-          <OtherMessageMobile
-            className={"flex sm:hidden"}
-            avatarUrl={
-              "https://freenice.net/wp-content/uploads/2021/08/hinh-anh-avatar-dep.jpg"
-            }
-            contents={["Hi", "How about your Interview?", "Have you pass it!"]}
-          />
-        </div>
+      <div className='max-h-[calc(100vh-13rem)] sm:max-h-[calc(100vh-15rem)] w-full mt-1 flex flex-col-reverse h-full px-4 sm:px-6 py-4 overflow-y-scroll'>
+        <Content user={user} messages={messages} />
       </div>
 
       <div className='flex items-center gap-3 sm:gap-4 h-16 sm:h-20 px-2 sm:px-6 '>
@@ -184,6 +196,73 @@ const ConversationContent: FC<IPropConversationContent> = ({
         </div>
       </div>
     </div>
+  );
+};
+
+export interface IDataFormatMessage {
+  user: IParticipant;
+  messages: IMessage[];
+  myMessage: boolean;
+}
+
+export const Content: FC<IPropContent> = ({ messages, user }) => {
+  const formatMessage: IDataFormatMessage[] = [];
+  if (messages?.length) {
+    let currentUser = messages[0].message_sender_by;
+    let messageOfUser: IMessage[] = [messages[0]];
+
+    for (let i = 1; i < messages.length; i++) {
+      const lastUser = messages[i]?.message_sender_by;
+      const { userId } = currentUser || {};
+
+      if (userId === lastUser?.userId) {
+        messageOfUser.push(messages[i]);
+      } else {
+        const data: IDataFormatMessage = {
+          user: currentUser,
+          messages: messageOfUser,
+          myMessage: user?._id === userId,
+        };
+        formatMessage.push(data);
+        currentUser = messages[i]?.message_sender_by;
+        messageOfUser = [messages[i]];
+      }
+    }
+    const { userId } = currentUser || {};
+    const data: IDataFormatMessage = {
+      user: currentUser,
+      messages: messageOfUser,
+      myMessage: user?._id === userId,
+    };
+    formatMessage.push(data);
+  }
+  return (
+    <>
+      {formatMessage?.map((message, idx) => {
+        return (
+          <div key={idx}>
+            {message.myMessage ? (
+              <>
+                <MyMessage
+                  // className={"hidden sm:flex"}
+                  contents={message.messages}
+                />
+              </>
+            ) : (
+              <>
+                <OtherMessage
+                  // className={"hidden sm:flex"}
+                  avatarUrl={
+                    "https://freenice.net/wp-content/uploads/2021/08/hinh-anh-avatar-dep.jpg"
+                  }
+                  contents={message.messages}
+                />
+              </>
+            )}
+          </div>
+        );
+      })}
+    </>
   );
 };
 

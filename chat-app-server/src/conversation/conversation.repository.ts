@@ -107,7 +107,7 @@ export class ConversationRepository {
         $unionWith: {
           coll: 'Group',
           pipeline: [
-            { $match: { 'participants.userId': '6449431c19452727493740ce' } },
+            { $match: { 'participants.userId': userId } },
             {
               $project: {
                 _id: 1,

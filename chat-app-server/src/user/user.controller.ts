@@ -83,7 +83,7 @@ export class UserController {
   }
 
   @Get('/conversation/:userId')
-  async getonversationOfUser(
+  async getConversationOfUser(
     @Req() req: Request,
     @Param('userId') userId: string,
     @Query('page') page: number,
