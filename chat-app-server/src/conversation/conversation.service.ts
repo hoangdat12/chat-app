@@ -1,9 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConversationFactory } from './conversation.base';
-import {
-  AuthRepository,
-  IUserCreated,
-} from '../auth/repository/auth.repository';
+import { AuthRepository } from '../auth/repository/auth.repository';
 import { ConversationRepository } from './conversation.repository';
 import { Ok } from '../ultils/response';
 import {
@@ -15,8 +12,9 @@ import {
   PayloadDeletePaticipant,
   RenameGroup,
 } from './conversation.dto';
-import { Pagination, MessageRepository } from '../message/message.repository';
+import { MessageRepository } from '../message/message.repository';
 import { DelelteMessageData } from 'src/message/message.dto';
+import { IUserCreated, Pagination } from '../ultils/interface';
 
 @Injectable()
 export class ConversationService {

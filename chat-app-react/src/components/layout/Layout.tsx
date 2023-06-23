@@ -1,6 +1,6 @@
-import { useState } from "react";
-import Header from "./header/Header";
-import SiderBar from "./siderBar/SiderBar";
+import { useState } from 'react';
+import Header from './header/Header';
+import SiderBar from './siderBar/SiderBar';
 // import SiderBarMobile from "./siderBar/SiderBarMobile";
 
 interface LayoutProps {
@@ -14,19 +14,19 @@ const Layout = ({ children }: LayoutProps) => {
     <>
       <div
         className={`${
-          isOpen ? "md:pl-[250px]" : "md:pl-[65px]"
+          isOpen ? 'md:pl-[250px]' : 'md:pl-[65px]'
         } duration-300 h-screen pt-[76px]`}
       >
         {children}
       </div>
-      <SiderBar
-        isOpen={isOpen}
-        setShowMobile={setShowMobile}
-        showMobile={showMobile}
-      />
       <Header
         isOpen={isOpen}
         setIsOpen={setIsOpen}
+        setShowMobile={setShowMobile}
+        showMobile={showMobile}
+      />
+      <SiderBar
+        isOpen={isOpen}
         setShowMobile={setShowMobile}
         showMobile={showMobile}
       />

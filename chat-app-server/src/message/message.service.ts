@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Constructor, MessageFactory } from './message.base';
+import { MessageFactory } from './message.base';
 import { MessageRepository } from './message.repository';
-import { IUserCreated } from '../auth/repository/auth.repository';
+import { Constructor, IUserCreated } from '../ultils/interface';
 import {
   CreateMessageData,
   DelelteMessageData,
@@ -28,10 +28,15 @@ export class MessageService {
         HttpStatus.BAD_REQUEST,
       );
     const payload = this.getPayload(user, data) as unknown as Constructor;
-    return await this.messageFactory.createNewMessage(payload.message_type, {
-      ...payload,
-      message_received: conversation.participants,
-    });
+
+    const newMessage = await this.messageFactory.createNewMessage(
+      payload.message_type,
+      {
+        ...payload,
+        message_received: conversation.participants,
+      },
+    );
+    return newMessage;
   }
   // Go Tin nhat
   async delete(

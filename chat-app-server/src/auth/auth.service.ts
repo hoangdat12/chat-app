@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { AuthRepository, IUserCreated } from './repository/auth.repository';
+import { AuthRepository } from './repository/auth.repository';
 import { ChangePassword, UserLogin, UserRegister } from './auth.dto';
 import * as bcrypt from 'bcrypt';
 import { Created, Ok } from '../ultils/response';
@@ -13,14 +13,8 @@ import {
   activeAccountTemplate,
   confirmEmail,
 } from '../mail-sender/mail-sender.template';
-
-export interface ILoginWithGoogleData {
-  email: string;
-  firstName: string | null;
-  lastName: string;
-  avatarUrl: string;
-  loginWith: string;
-}
+import { ILoginWithGoogleData } from '../ultils/interface';
+import { IUserCreated } from '../ultils/interface';
 
 @Injectable()
 export class AuthService {

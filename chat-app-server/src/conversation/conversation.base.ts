@@ -1,20 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserJoinChat } from '../message/message.dto';
 import { ConversationRepository } from './conversation.repository';
-import {
-  IInforUserChangeNickname,
-  PayloadCreateConversation,
-} from './conversation.dto';
-import { Pagination, MessageRepository } from '../message/message.repository';
+import { IInforUserChangeNickname } from './conversation.dto';
+import { MessageRepository } from '../message/message.repository';
 import { Ok } from '../ultils/response';
-import { IUserCreated } from '../auth/repository/auth.repository';
-import { IParticipant } from '../schema/model/conversation.model';
-
-export interface IConstructorConversation extends PayloadCreateConversation {
-  conversationId: string | null;
-  conversationRepository: ConversationRepository;
-  messageRepository: MessageRepository;
-}
+import {
+  IConstructorConversation,
+  IParticipant,
+  IUserCreated,
+  Pagination,
+} from '../ultils/interface';
 
 @Injectable()
 export class ConversationFactory {

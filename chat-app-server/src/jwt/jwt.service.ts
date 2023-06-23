@@ -86,7 +86,6 @@ export class JwtService {
         'Missing request header!',
         HttpStatus.BAD_REQUEST,
       );
-
     const token = req.cookies[headers.COOKIE_REFRESH_TOKEN];
     if (!token)
       throw new HttpException('Un Authorization', HttpStatus.NOT_FOUND);

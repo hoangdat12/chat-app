@@ -142,7 +142,7 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
           <h1 className='text-2xl font-medium text-center font-poppins'>
             Hoang Dat
           </h1>
-          <div className='flex gap-10 text-xl'>
+          <div className='flex gap-10 text-lg text-black'>
             <div className='relative'>
               <ButtonRounded icon={<CgProfile />} />
               <div className='absolute -bottom-6 left-[50%] -translate-x-1/2 text-sm'>
@@ -168,11 +168,11 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
           {ListDetail.map((element, idx) => (
             <li
               onClick={() => handleShow(idx)}
-              className={`${idx === 0 ? "" : "mt-5"} px-6`}
+              className={`${idx === 0 ? "" : "mt-5"} px-8`}
               key={idx}
             >
               <div className='flex items-center justify-between cursor-pointer'>
-                <a href='#' className='text-base xl:text-lg'>
+                <a href='#' className='text-base'>
                   {element.SubMenu.title}
                 </a>
                 <span
@@ -188,7 +188,7 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
               <ul
                 className={`${
                   show.includes(idx) ? "block" : " hidden"
-                } px-4 text-base`}
+                } px-2 text-base font-light`}
               >
                 {element.List.map((item, index) => (
                   <li

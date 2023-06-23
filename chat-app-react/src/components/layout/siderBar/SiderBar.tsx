@@ -1,32 +1,32 @@
-import { Link } from "react-router-dom";
-import { FC, useEffect, useRef } from "react";
-import { AiOutlineClose, AiOutlineHome, AiOutlinePlus } from "react-icons/Ai";
-import { FiSend, FiSettings } from "react-icons/fi";
-import { BsPerson } from "react-icons/bs";
-import { AvatarSquare } from "../../avatars/Avatar";
+import { Link } from 'react-router-dom';
+import { FC, useEffect, useRef } from 'react';
+import { AiOutlineClose, AiOutlineHome, AiOutlinePlus } from 'react-icons/Ai';
+import { FiSend, FiSettings } from 'react-icons/fi';
+import { BsPerson } from 'react-icons/bs';
+import { AvatarSquare } from '../../avatars/Avatar';
 
-import LogoPage from "../../../assets/Logo2.png";
-import "./siderBar.scss";
+import LogoPage from '../../../assets/Logo2.png';
+import './siderBar.scss';
 import {
   IoGameControllerOutline,
   IoHelpBuoyOutline,
   IoMusicalNotesOutline,
-} from "react-icons/io5";
+} from 'react-icons/io5';
 
 export const selectNav1 = [
   {
-    display: "NewsFeed",
-    path: "/home",
+    display: 'NewsFeed',
+    path: '/home',
     icons: <AiOutlineHome />,
   },
   {
-    display: "Messenges",
-    path: "/messenges/3/5",
+    display: 'Messenges',
+    path: '/messenges/3/5',
     icons: <FiSend />,
   },
   {
-    display: "Profile",
-    path: "/profile",
+    display: 'Profile',
+    path: '/profile',
     icons: <BsPerson />,
   },
   // {
@@ -38,26 +38,26 @@ export const selectNav1 = [
 
 export const selectNavUtils = [
   {
-    display: "Games",
-    path: "/setting/general",
+    display: 'Games',
+    path: '/setting/general',
     icons: <IoGameControllerOutline />,
   },
   {
-    display: "Music",
-    path: "/page/login",
+    display: 'Music',
+    path: '/page/login',
     icons: <IoMusicalNotesOutline />,
   },
 ];
 
 const selectNav2 = [
   {
-    display: "Setting",
-    path: "/setting/general",
+    display: 'Setting',
+    path: '/setting/general',
     icons: <FiSettings />,
   },
   {
-    display: "Help",
-    path: "/page/login",
+    display: 'Help',
+    path: '/page/login',
     icons: <IoHelpBuoyOutline />,
   },
   // {
@@ -91,10 +91,10 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
         }
       };
 
-      window.addEventListener("mousedown", handleClickOutside);
+      window.addEventListener('mousedown', handleClickOutside);
 
       return () => {
-        window.removeEventListener("mousedown", handleClickOutside);
+        window.removeEventListener('mousedown', handleClickOutside);
       };
     }
   }, [showMobile]);
@@ -103,37 +103,37 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
     <div
       className={
         showMobile
-          ? "w-full h-screen fixed top-0 left-0 bg-blackOverlay text-white"
+          ? 'w-full h-screen fixed top-0 left-0 bg-blackOverlay text-white  z-[1000]'
           : `navbar ${
-              isOpen ? "w-[250px] " : "w-[65px] overflow-visible"
-            }  fixed h-screen duration-300 text-white bg-blue-500 pt-[18px] pb-2 md:block hidden z-[100]`
+              isOpen ? 'w-[250px] ' : 'w-[65px] overflow-visible'
+            }  fixed h-screen duration-300 text-white bg-blue-500 pt-[18px] pb-2 md:block hidden z-[1000]`
       }
     >
       <div
         className={`navbar__menu relative flex flex-col justify-between h-full ${
           showMobile
-            ? "w-[80%] bg-[#1a1451] animate__animated animate__fadeInLeft"
-            : "animate__fadeOutLeft"
-        } ${!isOpen && "close"} ${showMobile && "py-4"}`}
+            ? 'w-[80%] bg-[#1a1451] animate__animated animate__fadeInLeft'
+            : 'animate__fadeOutLeft'
+        } ${!isOpen && 'close'} ${showMobile && 'py-4'}`}
         ref={siderBarMobileRef}
       >
         <div>
           <div
             className={`flex gap-3 items-center mb-6 duration-300 whitespace-nowrap px-2 ${
-              isOpen && "pl-4"
-            } ${showMobile && "hidden"}`}
+              isOpen && 'pl-4'
+            } ${showMobile && 'hidden'}`}
           >
             <span>
               <AvatarSquare
                 avatarUrl={LogoPage}
                 className={`w-[49px] h-[49px] duration-300 whitespace-nowrap animate__bounceIn ${
-                  !isOpen && "border-2 border-[#cac6f0]"
+                  !isOpen && 'border-2 border-[#cac6f0]'
                 } `}
               />
             </span>
             <div
               className={`${
-                isOpen ? "block" : "hidden"
+                isOpen ? 'block' : 'hidden'
               } whitespace-nowrap duration-300`}
             >
               <h1 className='text-xl'>Fasty</h1>
@@ -141,7 +141,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
             </div>
           </div>
 
-          <div className={`${!showMobile && "hidden"} flex mb-4`}>
+          <div className={`${!showMobile && 'hidden'} flex mb-4`}>
             <h1 className='text-2xl pl-8'>Fasty</h1>
             <span
               className='absolute top-4 right-4 font-bold text-2xl'
@@ -156,12 +156,12 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
               <li
                 key={index}
                 className={`selectorNav show_element flex items-center w-full ${
-                  showMobile ? "h-[50px]" : "md:h-[44px]"
+                  showMobile ? 'h-[50px]' : 'md:h-[44px]'
                 } relative hover:bg-blue-700`}
               >
                 <Link
                   className={`link whitespace-nowrap overflow-hidden ${
-                    showMobile ? "text-base sm:text-lg" : "text-base"
+                    showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
                   to='/'
                 >
@@ -174,7 +174,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 </Link>
                 <span
                   className={`absolute ${
-                    !showMobile && "element"
+                    !showMobile && 'element'
                   } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
                 >
                   {select.display}
@@ -187,8 +187,8 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
           <div
             className={`${
               isOpen
-                ? "opacity-100 overflow-auto h-auto"
-                : "opacity-0 overflow-hidden h-0"
+                ? 'opacity-100 overflow-auto h-auto'
+                : 'opacity-0 overflow-hidden h-0'
             } justify-between flex px-4 text-base duration-300`}
           >
             <h2 className='text-[#ebe4e4]'>Relax</h2>
@@ -201,12 +201,12 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
               <li
                 key={index}
                 className={`relative selectorNav show_element flex items-center w-full ${
-                  showMobile ? "h-[50px]" : "md:h-[44px]"
+                  showMobile ? 'h-[50px]' : 'md:h-[44px]'
                 } relative hover:bg-blue-700`}
               >
                 <Link
                   className={`link whitespace-nowrap overflow-hidden ${
-                    showMobile ? "text-base sm:text-lg" : "text-base"
+                    showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
                   to='/'
                 >
@@ -219,7 +219,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 </Link>
                 <span
                   className={`absolute ${
-                    !showMobile && "element"
+                    !showMobile && 'element'
                   } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4 min-h-[44px] min-w-[120px] bg-blue-700`}
                 >
                   {select.display}
@@ -232,8 +232,8 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
           <div
             className={`${
               isOpen
-                ? "opacity-100 overflow-auto h-auto"
-                : "opacity-0 overflow-hidden h-0"
+                ? 'opacity-100 overflow-auto h-auto'
+                : 'opacity-0 overflow-hidden h-0'
             } justify-between flex px-4 text-base duration-300`}
           >
             <h2 className='text-[#ebe4e4]'>Utils</h2>
@@ -246,12 +246,12 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
               <li
                 key={index}
                 className={`selectorNav show_element flex items-center w-full ${
-                  showMobile ? "h-[50px]" : "md:h-[44px]"
+                  showMobile ? 'h-[50px]' : 'md:h-[44px]'
                 } relative hover:bg-blue-700`}
               >
                 <Link
                   className={`link whitespace-nowrap overflow-hidden ${
-                    showMobile ? "text-base sm:text-lg" : "text-base"
+                    showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
                   to='/'
                 >
@@ -264,7 +264,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 </Link>
                 <span
                   className={`absolute ${
-                    !showMobile && "element"
+                    !showMobile && 'element'
                   } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
                 >
                   {select.display}
@@ -278,12 +278,12 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
             <li
               key={index}
               className={`selectorNav show_element flex items-center w-full ${
-                showMobile ? "h-[50px]" : "md:h-[44px]"
+                showMobile ? 'h-[50px]' : 'md:h-[44px]'
               } relative hover:bg-blue-700`}
             >
               <Link
                 className={`link whitespace-nowrap overflow-hidden ${
-                  showMobile ? "text-base sm:text-lg" : "text-base"
+                  showMobile ? 'text-base sm:text-lg' : 'text-base'
                 }`}
                 to='/'
               >
@@ -296,7 +296,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
               </Link>
               <span
                 className={`absolute ${
-                  !showMobile && "element"
+                  !showMobile && 'element'
                 } hidden opacity-0 items-center justify-center rounded-tr-md rounded-br-md cursor-pointer left-[100%] top-0 z-[1000] px-4  min-h-[44px] min-w-[120px] bg-blue-700`}
               >
                 {select.display}

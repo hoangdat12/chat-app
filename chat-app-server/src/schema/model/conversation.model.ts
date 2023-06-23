@@ -1,9 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { UserJoinChat } from '../../message/message.dto';
-
-export interface IParticipant extends UserJoinChat {
-  isReadLastMessage?: boolean;
-}
+import { IParticipant } from '../../ultils/interface';
 
 @Schema({ collection: 'Conversation', timestamps: true })
 export class Conversation {

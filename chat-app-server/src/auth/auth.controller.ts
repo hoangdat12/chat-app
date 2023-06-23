@@ -13,10 +13,9 @@ import { AuthService } from './auth.service';
 import { ChangePassword, UserLogin, UserRegister } from './auth.dto';
 import { Response, Request } from 'express';
 import { GoogleAuthGuard } from './google/google.guard';
-import { IUserCreated } from './repository/auth.repository';
 import { GitHubAuthGuard } from './github/github.guard';
 import { JwtService } from '../jwt/jwt.service';
-import { Ok } from 'src/ultils/response';
+import { IUserCreated } from '../ultils/interface';
 
 @Controller('auth')
 export class AuthController {
@@ -56,8 +55,7 @@ export class AuthController {
       const { refreshToken, response } = await this.authService.login(body);
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        maxAge: 129600000,
-        secure: true,
+        maxAge: 1000 * 60 * 15,
       });
       return response.sender(res);
     } catch (err) {
@@ -110,7 +108,6 @@ export class AuthController {
         res.cookie('refreshToken', refreshToken, {
           httpOnly: true,
           maxAge: 129600000,
-          secure: true,
         });
         return response.sender(res);
       } else {
@@ -131,9 +128,7 @@ export class AuthController {
         req,
       );
       res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
         maxAge: 129600000,
-        secure: true,
       });
       return response.sender(res);
     } catch (err) {

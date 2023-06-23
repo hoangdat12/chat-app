@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserJoinChat } from '../../message/message.dto';
-import { IParticipant } from './conversation.model';
+import { IParticipant } from '../../ultils/interface';
 
 @Schema({ collection: 'Group', timestamps: true })
 export class Group {

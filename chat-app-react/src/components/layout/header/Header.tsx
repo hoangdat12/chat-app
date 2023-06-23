@@ -1,19 +1,19 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 import {
   IoGameControllerOutline,
   IoSearch,
   IoNotificationsOutline,
-} from "react-icons/io5";
+} from 'react-icons/io5';
 
-import { AiOutlineMenu, AiOutlinePlus } from "react-icons/Ai";
-import { BsBook } from "react-icons/bs";
-import { FC, useState } from "react";
+import { AiOutlineMenu, AiOutlinePlus } from 'react-icons/Ai';
+import { BsBook } from 'react-icons/bs';
+import { FC, useState } from 'react';
 
-import Avatar from "../../avatars/Avatar";
-import useInnerWidth from "../../../hooks/useInnterWidth";
-import Search from "../../search/Search";
-import CreateNewGroup from "../../message/CreateNewGroup";
+import Avatar from '../../avatars/Avatar';
+import useInnerWidth from '../../../hooks/useInnterWidth';
+import Search from '../../search/Search';
+import CreateNewGroup from '../../message/CreateNewGroup';
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -56,8 +56,8 @@ const Header: FC<IPropHeader> = ({
 
   const handleClickCreateNewGroup = () => {
     const pathName = window.location.pathname;
-    const path = pathName.split("/");
-    if (path[1] === "conversation") {
+    const path = pathName.split('/');
+    if (path[1] === 'conversation') {
       setIsShowModelCreate(true);
     }
   };
@@ -65,8 +65,8 @@ const Header: FC<IPropHeader> = ({
   return (
     <div
       className={`${
-        isOpen ? "lg:pl-[250px] md:pl-[65px]" : "md:pl-[65px]"
-      } fixed top-0 w-full h-[76px] shadow-header duration-300 z-[1000]`}
+        isOpen ? 'lg:pl-[250px] md:pl-[65px]' : 'md:pl-[65px]'
+      } fixed top-0 w-full h-[76px] shadow-header duration-300 z-[100]`}
     >
       <div className='py-4 w-full px-4 sm:px-6 flex items-center justify-between h-full sm:grid grid-cols-12 '>
         <div className='col-span-2 sm:w-auto w-[10%] flex items-center gap-3 text-2xl font-medium text-black'>
@@ -75,7 +75,7 @@ const Header: FC<IPropHeader> = ({
           </span>
           <h1
             className={`${
-              isOpen ? "lg:hidden xl:block" : "hidden sm:block"
+              isOpen ? 'lg:hidden xl:block' : 'hidden sm:block'
             } duration-300`}
           >
             Conversation
@@ -84,8 +84,8 @@ const Header: FC<IPropHeader> = ({
 
         <div className='sm:col-span-3 w-[70%]'>
           <Search
-            className={"sm:hidden text-sm sm:text-base"}
-            width={"w-full"}
+            className={'sm:hidden text-sm sm:text-base'}
+            width={'w-full'}
           />
         </div>
 
@@ -104,7 +104,7 @@ const Header: FC<IPropHeader> = ({
             </div>
             <div
               className={`${
-                isSearch ? "flex" : "hidden"
+                isSearch ? 'flex' : 'hidden'
               } bg-[#f5f7f9] flex w-[320px] xl:w-[400px] rounded-xl h-10`}
             >
               <input
@@ -134,9 +134,9 @@ const Header: FC<IPropHeader> = ({
 
           <div className='float-right'>
             <Avatar
-              className={" w-[42px] h-[42px]"}
+              className={' w-[42px] h-[42px]'}
               avatarUrl={
-                "https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg"
+                'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
               }
             />
           </div>

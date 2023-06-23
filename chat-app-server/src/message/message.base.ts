@@ -1,20 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ConstructorMessage, UserJoinChat } from './message.dto';
+import { UserJoinChat } from './message.dto';
 import { MessageRepository } from './message.repository';
 import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { Group } from 'src/schema/model/group.model';
-import {
-  Conversation,
-  IParticipant,
-} from 'src/schema/model/conversation.model';
-import { IUserCreated } from 'src/auth/repository/auth.repository';
-
-export interface Constructor extends ConstructorMessage {
-  message_sender_by: UserJoinChat | null;
-  messageRepository: MessageRepository | null;
-  conversationRepository: ConversationRepository | null;
-}
+import { Conversation } from 'src/schema/model/conversation.model';
+import { Constructor, IParticipant } from '../ultils/interface';
 
 @Injectable()
 export class MessageFactory {
@@ -66,10 +57,12 @@ export abstract class BaseMessage {
 
   abstract create(): Promise<any>;
 
-  // abstract update(): Promise<any>;
-
-  async update(messageId: string, conversationId: string) {
-    await this.checkConversationExist(this.message_type, conversationId);
+  async update(messageId: string, conversationId: string, userId: string) {
+    await this.checkConversationExist(
+      this.message_type,
+      conversationId,
+      userId,
+    );
     await this.checkOwnerMessage(messageId, conversationId);
 
     const data = {
@@ -86,8 +79,16 @@ export abstract class BaseMessage {
   }
 
   // Go tin nhan
-  async delete(messageId: string, conversationId: string): Promise<any> {
-    await this.checkConversationExist(this.message_type, conversationId);
+  async delete(
+    messageId: string,
+    conversationId: string,
+    userId: string,
+  ): Promise<any> {
+    await this.checkConversationExist(
+      this.message_type,
+      conversationId,
+      userId,
+    );
     await this.checkOwnerMessage(messageId, conversationId);
 
     const data = {
@@ -99,10 +100,15 @@ export abstract class BaseMessage {
     return new Ok(await this.messageRepository.delete(data), 'success');
   }
 
-  async checkConversationExist(type: string, conversationId: string) {
-    const conversation = await this.conversationRepository.findById(
+  async checkConversationExist(
+    type: string,
+    conversationId: string,
+    userId: string,
+  ) {
+    const conversation = await this.conversationRepository.findUserExist(
       type,
       conversationId,
+      userId,
     );
     if (!conversation)
       throw new HttpException(
@@ -199,12 +205,9 @@ export class ConversationMessage extends BaseMessage {
 
   async create() {
     const { messageRepository, ...payload } = this;
-    const conversationExist = await super.checkConversationExist(
+    await super.checkConversationExist(
       this.message_type,
       this.conversationId,
-    );
-    await super.userPermissionSendMessage(
-      conversationExist.participants,
       this.message_sender_by.userId,
     );
     const message = await this.messageRepository.createMessageConversation({
@@ -229,15 +232,23 @@ export class ConversationMessage extends BaseMessage {
     if (!conversation)
       throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
 
-    return new Ok<any>(message, 'Success!');
+    return message;
   }
 
   async update(messageId: string): Promise<any> {
-    return await super.update(messageId, this.conversationId);
+    return await super.update(
+      messageId,
+      this.conversationId,
+      this.message_sender_by.userId,
+    );
   }
 
   async delete(messageId: string) {
-    return await super.delete(messageId, this.conversationId);
+    return await super.delete(
+      messageId,
+      this.conversationId,
+      this.message_sender_by.userId,
+    );
   }
 }
 
@@ -260,14 +271,12 @@ export class GroupMessage extends BaseMessage {
 
   async create() {
     const { messageRepository, ...payload } = this;
-    const conversationExist = await super.checkConversationExist(
+    await super.checkConversationExist(
       this.message_type,
       this.conversationId,
-    );
-    await super.userPermissionSendMessage(
-      conversationExist.participants,
       this.message_sender_by.userId,
     );
+
     const message = await this.messageRepository.createMessageGroup({
       message_type_model: (await super.getMessageTypeModel(
         this.conversationId,
@@ -289,15 +298,23 @@ export class GroupMessage extends BaseMessage {
     if (!group)
       throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
 
-    return new Ok<any>(message, 'Success!');
+    return message;
   }
 
   async update(messageId: string): Promise<any> {
-    return await super.update(messageId, this.conversationId);
+    return await super.update(
+      messageId,
+      this.conversationId,
+      this.message_sender_by.userId,
+    );
   }
 
   async delete(messageId: string) {
-    return await super.delete(messageId, this.conversationId);
+    return await super.delete(
+      messageId,
+      this.conversationId,
+      this.message_sender_by.userId,
+    );
   }
 }
 

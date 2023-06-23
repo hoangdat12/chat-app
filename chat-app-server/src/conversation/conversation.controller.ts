@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { Request } from 'express';
-import { IUserCreated } from 'src/auth/repository/auth.repository';
+import { IUserCreated } from '../ultils/interface';
 import {
   ChangeNickNameOfParticipant,
   ChangeTopic,

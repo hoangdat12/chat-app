@@ -1,12 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import {
-  AuthRepository,
-  IUserCreated,
-} from '../auth/repository/auth.repository';
+import { AuthRepository } from '../auth/repository/auth.repository';
 import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from 'src/ultils/response';
-import { Pagination } from '../message/message.repository';
 import { ConversationRepository } from '../conversation/conversation.repository';
+import { IUserCreated, Pagination } from '../ultils/interface';
 
 @Injectable()
 export class UserService {

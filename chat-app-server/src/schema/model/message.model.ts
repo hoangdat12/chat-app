@@ -22,7 +22,7 @@ export class MessageConversation {
   message_conversation: Conversation;
 
   @Prop({ required: true })
-  message_received: UserJoinChat;
+  message_received: UserJoinChat[];
 }
 
 @Schema({ collection: 'MessageGroup', timestamps: true })

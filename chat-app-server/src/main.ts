@@ -5,27 +5,26 @@ import helmet from 'helmet';
 import * as compression from 'compression';
 import * as session from 'express-session';
 import * as passport from 'passport';
-import { ErrorHandler } from './handler/error.handler';
 import * as cookieParser from 'cookie-parser';
+import { ErrorHandler } from './handler/error.handler';
+import { WebsocketAdapter } from './gateway/gateway.adapter';
+import { KeyTokenRepository } from './auth/repository/keyToken.repository';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   // MIDDLEWARE
   app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
   app.use(compression());
   app.setGlobalPrefix('api/v1');
   app.useGlobalFilters(new ErrorHandler());
+  const adapter = new WebsocketAdapter(app, app.get(KeyTokenRepository));
+  app.useWebSocketAdapter(adapter);
   app.use(cookieParser());
   app.use(
     session({
       secret: process.env.SESSION_SECRET_KEY,
       resave: false,
       saveUninitialized: false,
-      cookie: {
-        maxAge: 60000,
-        secure: false,
-      },
     }),
   );
   app.enableCors({

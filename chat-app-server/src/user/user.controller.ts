@@ -14,9 +14,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Request } from 'express';
-import { IUserCreated } from '../auth/repository/auth.repository';
 import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from 'src/ultils/response';
+import { IUserCreated } from '../ultils/interface';
 
 @Controller('user')
 export class UserController {

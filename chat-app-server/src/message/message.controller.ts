@@ -13,17 +13,25 @@ import {
   UpdateMessageData,
 } from './message.dto';
 import { MessageService } from './message.service';
-import { IUserCreated } from '../auth/repository/auth.repository';
 import { Request } from 'express';
+import { Ok } from 'src/ultils/response';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { IUserCreated } from '../ultils/interface';
 
 @Controller('message')
 export class MessageController {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly evenEmiter: EventEmitter2,
+  ) {}
   @Post()
   async createMessage(@Req() req: Request, @Body() body: CreateMessageData) {
     try {
       const user = req.user as IUserCreated;
-      return await this.messageService.createMessage(user, body);
+      user._id = user._id.toString();
+      const newMessage = await this.messageService.createMessage(user, body);
+      this.evenEmiter.emit('message.create', newMessage);
+      return new Ok<any>(newMessage);
     } catch (err) {
       console.log(err);
       throw err;

@@ -3,12 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { OtpToken } from '../../schema/model/otpToken.model';
 import { Model } from 'mongoose';
 import * as crypto from 'crypto';
-
-export interface IOtpTokenCreate {
-  email: string;
-  token: string;
-  secret: string;
-}
+import { IOtpTokenCreate } from 'src/ultils/interface';
 
 @Injectable()
 export class OtpTokenRepository {

@@ -1,14 +1,14 @@
-import { FC, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { FC, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-import Avatar, { AvatarSquare } from "../avatars/Avatar";
-import Search from "../search/Search";
+import Avatar, { AvatarSquare } from '../avatars/Avatar';
+import Search from '../search/Search';
 import ConversationInfor, {
   ConversationInforMobile,
-} from "./ConversationInfor";
-import LogoPage from "../../assets/Logo2.png";
-import { IUser } from "../../features/auth/authSlice";
-import { IConversation } from "../../features/conversation/conversationSlice";
+} from './ConversationInfor';
+import LogoPage from '../../assets/Logo2.png';
+import { IUser } from '../../features/auth/authSlice';
+import { IConversation } from '../../ultils/interface';
 
 export interface IPropConversationList {
   conversations: Map<string, IConversation>;
@@ -26,7 +26,7 @@ const ConversationList: FC<IPropConversationList> = ({
   // For first
   const [active, setActive] = useState(0);
   // For after send message
-  const [activeAfterSendMessage, setActiveAfterSendMessage] = useState("");
+  const [activeAfterSendMessage, setActiveAfterSendMessage] = useState('');
 
   const handleActive = (idx: number, conversation: IConversation) => {
     setActive(idx);
@@ -38,8 +38,8 @@ const ConversationList: FC<IPropConversationList> = ({
     <div className='xl:col-span-3 md:col-span-4 w-full sm:w-[80px] md:w-auto bg-[#f2f3f4] h-full py-6 sm:py-8 overflow-hidden'>
       <div className='flex justify-center px-4'>
         <Search
-          className={"bg-white flex sm:hidden md:flex"}
-          width={"w-full"}
+          className={'bg-white flex sm:hidden md:flex'}
+          width={'w-full'}
         />
         <AvatarSquare
           avatarUrl={LogoPage}
@@ -51,9 +51,9 @@ const ConversationList: FC<IPropConversationList> = ({
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ele) => (
           <div className='relative' key={ele}>
             <Avatar
-              className={"h-12 w-12"}
+              className={'h-12 w-12'}
               avatarUrl={
-                "https://i.pinimg.com/originals/2b/0f/7a/2b0f7a9533237b7e9b49f62ba73b95dc.jpg"
+                'https://i.pinimg.com/originals/2b/0f/7a/2b0f7a9533237b7e9b49f62ba73b95dc.jpg'
               }
             />
             <span className='absolute bottom-[2px] right-0 p-[6px] bg-green-500 rounded-full'></span>
@@ -75,9 +75,9 @@ const ConversationList: FC<IPropConversationList> = ({
                 key={`${conversation._id}1`}
                 className={`block sm:hidden md:block cursor-pointer ${
                   activeAfterSendMessage === conversation._id ||
-                  (idx === active && activeAfterSendMessage === "")
-                    ? "bg-white"
-                    : ""
+                  (idx === active && activeAfterSendMessage === '')
+                    ? 'bg-white'
+                    : ''
                 }`}
                 onClick={() => handleActive(idx, conversation)}
               >
@@ -85,10 +85,10 @@ const ConversationList: FC<IPropConversationList> = ({
                   active={idx === active}
                   avatarUrl={
                     avatarUrl ??
-                    "https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1"
+                    'https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1'
                   }
-                  nickName={name ?? "undifined"}
-                  status={"Active"}
+                  nickName={name ?? 'undifined'}
+                  status={'Active'}
                   lastMessage={conversation.lastMessage}
                 />
               </Link>
@@ -97,9 +97,9 @@ const ConversationList: FC<IPropConversationList> = ({
                 key={`${conversation._id}10`}
                 className={`hidden sm:block md:hidden cursor-pointer ${
                   activeAfterSendMessage === conversation._id ||
-                  (idx === active && activeAfterSendMessage === "")
-                    ? "bg-white"
-                    : ""
+                  (idx === active && activeAfterSendMessage === '')
+                    ? 'bg-white'
+                    : ''
                 } w-full border-b-[2px] border-[#e8ebed]`}
                 onClick={() => handleActive(idx, conversation)}
               >
@@ -107,7 +107,7 @@ const ConversationList: FC<IPropConversationList> = ({
                   <ConversationInforMobile
                     avatarUrl={
                       avatarUrl ??
-                      "https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1"
+                      'https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1'
                     }
                   />
                 </div>
@@ -129,8 +129,8 @@ export const getNameAndAvatarOfConversation = (
     avatarUrl: null as string | null,
   };
 
-  if (conversation.conversation_type === "group") {
-    result.name = conversation.nameGroup ?? "Name Group";
+  if (conversation.conversation_type === 'group') {
+    result.name = conversation.nameGroup ?? 'Name Group';
     result.avatarUrl = conversation.participants[0].avatarUrl;
   } else {
     conversation.participants.map((participant) => {

@@ -1,19 +1,19 @@
-import { FC, MouseEventHandler, ReactNode, useEffect, useState } from "react";
+import { FC, MouseEventHandler, ReactNode, useEffect, useState } from 'react';
 
-import Layout from "../../components/layout/Layout";
-import "./conversation.scss";
-import ConversationContent from "../../components/message/ConversationContent";
-import { Link, Route, Routes } from "react-router-dom";
-import useInnerWidth from "../../hooks/useInnterWidth";
-import ConversationList from "../../components/message/ConversationList";
-import ConversationSetting from "../../components/message/ConversationSetting";
-import { useAppDispatch, useAppSelector } from "../../app/hook";
+import Layout from '../../components/layout/Layout';
+import './conversation.scss';
+import ConversationContent from '../../components/message/ConversationContent';
+import { Link, Route, Routes } from 'react-router-dom';
+import useInnerWidth from '../../hooks/useInnterWidth';
+import ConversationList from '../../components/message/ConversationList';
+import ConversationSetting from '../../components/message/ConversationSetting';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
   IConversation,
   fetchConversationOfUser,
   selectConversation,
-} from "../../features/conversation/conversationSlice";
-import { IUser } from "../../features/auth/authSlice";
+} from '../../features/conversation/conversationSlice';
+import { IUser } from '../../features/auth/authSlice';
 
 export interface IPropButtonRounded {
   icon: ReactNode;
@@ -30,11 +30,11 @@ const Conversation = () => {
     useState<IConversation | null>(null);
   const innerWitdh = useInnerWidth();
 
-  const userJson = localStorage.getItem("user");
+  const userJson = localStorage.getItem('user');
   const user = userJson ? (JSON.parse(userJson) as IUser) : null;
   useEffect(() => {
     const fetchListConversationOfUser = async () => {
-      await ditpatch(fetchConversationOfUser(user?._id ? user?._id : " "));
+      await ditpatch(fetchConversationOfUser(user?._id ? user?._id : ' '));
     };
 
     if (!conversations?.size) {
@@ -105,7 +105,7 @@ export const ButtonRounded: FC<IPropButtonRounded> = ({
 }) => {
   return (
     <Link
-      to={to ? to : "#"}
+      to={to ? to : '#'}
       className={`${className} flex items-center justify-center text-[22px] p-2 bg-[#f1f3f4] rounded-full cursor-pointer`}
       onClick={onClick ? onClick : undefined}
     >

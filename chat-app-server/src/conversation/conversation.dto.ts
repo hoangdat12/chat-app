@@ -1,9 +1,11 @@
 import { IsNotEmpty } from 'class-validator';
 import { UserJoinChat } from '../message/message.dto';
-import { IParticipant } from '../schema/model/conversation.model';
+import { IParticipant } from '../ultils/interface';
 
-export interface IInforUserChangeNickname {
+export class IInforUserChangeNickname {
+  @IsNotEmpty()
   userId: string;
+  @IsNotEmpty()
   userName: string;
 }
 

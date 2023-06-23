@@ -1,26 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Conversation, IParticipant } from '../schema/model/conversation.model';
+import { Conversation } from '../schema/model/conversation.model';
 import { Group } from '../schema/model/group.model';
 import { UserJoinChat } from '../message/message.dto';
-import { Pagination } from '../message/message.repository';
-
-export interface IPayloadCreateConversation {
-  conversation_type: string;
-  participants: IParticipant[];
-  lastMessage: string | null;
-  lastMessageSendAt: Date | null;
-}
-
-export interface IPayloadCreateGroup {
-  conversation_type: string;
-  participants: IParticipant[];
-  lastMessage: string | null;
-  lastMessageSendAt: Date | null;
-  creators: UserJoinChat[] | null;
-  name: string | null;
-}
+import {
+  IParticipant,
+  IPayloadCreateConversation,
+  IPayloadCreateGroup,
+  Pagination,
+} from '../ultils/interface';
 
 @Injectable()
 export class ConversationRepository {
@@ -37,6 +26,29 @@ export class ConversationRepository {
         return await this.findConversationById(conversationId);
       case 'group':
         return await this.findGroupById(conversationId);
+      default:
+        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async findUserExist(type: string, conversationId: string, userId: string) {
+    switch (type) {
+      case 'conversation':
+        return await this.conversationModel
+          .findOne({
+            _id: conversationId,
+            'participants.userId': userId,
+            'participants.enable': true,
+          })
+          .lean();
+      case 'group':
+        return await this.groupModel
+          .findOne({
+            _id: conversationId,
+            'participants.userId': userId,
+            'participants.enable': true,
+          })
+          .lean();
       default:
         throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
     }

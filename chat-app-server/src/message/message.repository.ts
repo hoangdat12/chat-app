@@ -6,6 +6,7 @@ import {
 } from '../schema/model/message.model';
 import { Model } from 'mongoose';
 import { PayloadCreateMessage } from './message.dto';
+import { Pagination } from '../ultils/interface';
 
 export interface IDataDeleteMessage {
   messageType: string;
@@ -15,12 +16,6 @@ export interface IDataDeleteMessage {
 
 export interface IDateUpdateMessage extends IDataDeleteMessage {
   messageContent: string;
-}
-
-export interface Pagination {
-  page: number;
-  limit: number;
-  sortBy: string;
 }
 
 @Injectable()
