@@ -7,8 +7,7 @@ import ConversationInfor, {
   ConversationInforMobile,
 } from './ConversationInfor';
 import LogoPage from '../../assets/Logo2.png';
-import { IUser } from '../../features/auth/authSlice';
-import { IConversation } from '../../ultils/interface';
+import { IConversation, IUser } from '../../ultils/interface';
 
 export interface IPropConversationList {
   conversations: Map<string, IConversation>;

@@ -1,8 +1,8 @@
 import { createContext } from 'react';
 import { io } from 'socket.io-client';
+import { getUserLocalStorageItem } from '..';
 
-const userJson = localStorage.getItem('user');
-const user = userJson ? (JSON.parse(userJson) as string) : null;
+const user = getUserLocalStorageItem();
 export const socket = io('http://localhost:8080', {
   withCredentials: true,
   transportOptions: {

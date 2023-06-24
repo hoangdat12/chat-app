@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { TimeExpires, headers } from '../ultils/constant';
+import { TimeExpires, Headers } from '../ultils/constant';
 import { NextFunction, Request } from 'express';
 import { AuthRepository } from 'src/auth/repository/auth.repository';
 import { KeyTokenRepository } from 'src/auth/repository/keyToken.repository';
@@ -46,8 +46,8 @@ export class JwtService {
 
   async verifyAccessToken(req: Request, next: NextFunction) {
     try {
-      const clientId = req.headers[headers.CLIENT_ID] as string;
-      const header = req.headers[headers.AUTHORIZATION] as string;
+      const clientId = req.headers[Headers.CLIENT_ID] as string;
+      const header = req.headers[Headers.AUTHORIZATION] as string;
       if (!clientId || !header)
         throw new HttpException(
           'Missing request header!',
@@ -79,14 +79,14 @@ export class JwtService {
   }
 
   async refreshToken(req: Request) {
-    const clientId = req.headers[headers.CLIENT_ID] as string;
-
+    const clientId = req.headers[Headers.CLIENT_ID] as string;
     if (!clientId)
       throw new HttpException(
         'Missing request header!',
         HttpStatus.BAD_REQUEST,
       );
-    const token = req.cookies[headers.COOKIE_REFRESH_TOKEN];
+    const token = req.headers[Headers.REFRESH_TOKEN] as string;
+    // const token = req.cookies[Headers.COOKIE_REFRESH_TOKEN];
     if (!token)
       throw new HttpException('Un Authorization', HttpStatus.NOT_FOUND);
     const user = await this.authRepository.findById(clientId);

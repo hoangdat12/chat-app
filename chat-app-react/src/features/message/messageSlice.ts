@@ -28,7 +28,7 @@ const messageSlice = createSlice({
   initialState,
   reducers: {
     createNewMessage: (state, action: PayloadAction<IMessage>) => {
-      state.messages = [action.payload, ...state.messages];
+      // state.messages = [action.payload, ...state.messages];
     },
     deleteMessage: (state, action: PayloadAction<string>) => {
       console.log(action);
@@ -41,7 +41,7 @@ const messageSlice = createSlice({
         state.status = 'pending';
       })
       .addCase(fetchMessageOfConversation.fulfilled, (state, action) => {
-        state.messages = action.payload.messages;
+        state.messages = action.payload;
         state.isLoading = false;
         state.status = 'idle';
       })

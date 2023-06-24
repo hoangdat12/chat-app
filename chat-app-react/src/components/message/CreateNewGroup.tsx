@@ -5,14 +5,15 @@ import {
   useEffect,
   useRef,
   useState,
-} from "react";
-import { AiOutlineClose, AiOutlinePlus } from "react-icons/Ai";
-import Search from "../search/Search";
-import { AvatarOnline } from "../avatars/Avatar";
-import myAxios from "../../ultils/myAxios";
-import { IUser, selectAuth } from "../../features/auth/authSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hook";
-import { createConversation } from "../../features/conversation/conversationSlice";
+} from 'react';
+import { AiOutlineClose, AiOutlinePlus } from 'react-icons/Ai';
+import Search from '../search/Search';
+import { AvatarOnline } from '../avatars/Avatar';
+import myAxios from '../../ultils/myAxios';
+import { useAppDispatch } from '../../app/hook';
+import { createConversation } from '../../features/conversation/conversationSlice';
+import { getUserLocalStorageItem } from '../../ultils';
+import { IUser } from '../../ultils/interface';
 
 export interface IPropCreateNewGroup {
   isShowCreateNewGroup: boolean;
@@ -45,13 +46,12 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
   );
   const [listFriend, setListFriend] = useState<IPropUserSearch[]>([]);
   const [member, setMember] = useState(listUserAddGroup.length + 1);
-  const [groupName, setGroupName] = useState("");
+  const [groupName, setGroupName] = useState('');
   const modelRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useAppDispatch();
 
-  const userJson = localStorage.getItem("user");
-  const user = userJson ? (JSON.parse(userJson) as IUser) : null;
+  const user = getUserLocalStorageItem();
 
   const handleShowListFriend = () => {
     setShowListFriend(true);
@@ -62,35 +62,35 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
   };
 
   const handleCreateNewGroupConversation = async () => {
-    if (member < 3 || groupName === "") {
+    if (member < 3 || groupName === '') {
       return;
     }
     const creator = {
       userId: user?._id,
       email: user?.email,
-      userName: user?.firstName + " " + user?.lastName,
+      userName: user?.firstName + ' ' + user?.lastName,
       avatarUrl: user?.avatarUrl,
     };
 
     const participantsGroup = listUserAddGroup.map((user) => ({
       userId: user?._id,
       email: user?.email,
-      userName: user?.firstName + " " + user?.lastName,
+      userName: user?.firstName + ' ' + user?.lastName,
       avatarUrl: user?.avatarUrl,
     }));
 
     const data = {
       name: groupName,
-      conversation_type: "group",
+      conversation_type: 'group',
       participants: [creator, ...participantsGroup],
     };
-    const res = await myAxios.post("/conversation", data);
+    const res = await myAxios.post('/conversation', data);
     if (res.data.status === 200) {
       dispatch(createConversation(res.data.metaData));
 
       setShowListFriend(false);
       setListUserAddGroup([]);
-      setGroupName("");
+      setGroupName('');
       setMember(listUserAddGroup.length + 1);
       setShowCreateNewGroup(false);
     }
@@ -104,17 +104,17 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
         }
       };
 
-      document.addEventListener("mousedown", clickOutSide);
+      document.addEventListener('mousedown', clickOutSide);
 
       return () => {
-        document.removeEventListener("mousedown", clickOutSide);
+        document.removeEventListener('mousedown', clickOutSide);
       };
     }
   }, [isShowCreateNewGroup]);
 
   useEffect(() => {
     const getAllUser = async () => {
-      const res = await myAxios.get("/user");
+      const res = await myAxios.get('/user');
       if (res.data.status === 200) {
         setListFriend(res.data.metaData);
       }
@@ -125,20 +125,20 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
   return (
     <div
       className={`fixed top-0 left-0 bottom-0 right-0 ${
-        isShowCreateNewGroup ? "flex" : "hidden"
+        isShowCreateNewGroup ? 'flex' : 'hidden'
       } items-center justify-center w-screen h-screen bg-blackOverlay z-[1000]`}
     >
       <div
         className={`grid grid-cols-5 animate__animated animate__fadeInDown ${
           showListFriend
-            ? "sm:w-[80%] lg:w-[70%]"
-            : "sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%]"
+            ? 'sm:w-[80%] lg:w-[70%]'
+            : 'sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%]'
         } h-[90%] bg-white rounded-lg overflow-hidden`}
         ref={modelRef}
       >
         <div
           className={`${
-            showListFriend ? "col-span-3" : "col-span-5"
+            showListFriend ? 'col-span-3' : 'col-span-5'
           } relative px-10 py-6`}
         >
           <h1 className='text-xl pb-2 border-b border-slate-500'>
@@ -184,9 +184,9 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
               <button
                 onClick={handleCreateNewGroupConversation}
                 className={`px-4 py-1 rounded-lg bg-blue-500 text-white ${
-                  member < 3 || groupName === ""
-                    ? "opacity-60 cursor-not-allowed"
-                    : "cursor-pointer"
+                  member < 3 || groupName === ''
+                    ? 'opacity-60 cursor-not-allowed'
+                    : 'cursor-pointer'
                 }`}
               >
                 Done
@@ -196,10 +196,10 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
         </div>
         <div
           className={`${
-            showListFriend ? "col-span-2" : "hidden"
+            showListFriend ? 'col-span-2' : 'hidden'
           } px-4 xl:px-6 bg-[#f2f3f4] py-6`}
         >
-          <Search className={"w-full bg-white"} />
+          <Search className={'w-full bg-white'} />
           <hr className='my-4' />
           <div className='max-h-create-conversation scrollbar-hide overflow-y-scroll'>
             {listFriend.map((friend, idx) => (
@@ -222,11 +222,11 @@ export const AvatarUserAdd: FC<IPropUserAdd> = ({ user }) => {
   return (
     <div className='flex gap-2 items-center '>
       <AvatarOnline
-        className={"w-10 h-10"}
+        className={'w-10 h-10'}
         avatarUrl={user.avatarUrl}
-        status={"online"}
+        status={'online'}
       />
-      <h1 className=''>{user.firstName + " " + user.lastName}</h1>
+      <h1 className=''>{user.firstName + ' ' + user.lastName}</h1>
     </div>
   );
 };
@@ -257,30 +257,30 @@ export const AvatarSearch: FC<IPropAvatarSearch> = ({
     <div className='flex items-center justify-between mt-4 cursor-pointer'>
       <div className='flex gap-2 items-center '>
         <AvatarOnline
-          className={"w-10 h-10"}
+          className={'w-10 h-10'}
           avatarUrl={user.avatarUrl}
-          status={"online"}
+          status={'online'}
         />
         <h1 className='text-sm md:text-base'>
-          {user.firstName + " " + user.lastName}
+          {user.firstName + ' ' + user.lastName}
         </h1>
       </div>
 
       <div
         className={`hidden md:flex px-3 mr-2 py-1 rounded-md bg-white ${
-          add ? "text-blue-500 " : "text-black"
+          add ? 'text-blue-500 ' : 'text-black'
         }`}
       >
         <button
           onClick={() => handleAddUser(user)}
           className={`text-[12px] lg:text-sm `}
         >
-          {add ? "Remove" : "Add"}
+          {add ? 'Remove' : 'Add'}
         </button>
       </div>
       <div
         className={`flex md:hidden px-2 md:px-3 mr-2 py-1 rounded-md ${
-          add ? "bg-blue-500 text-white" : "bg-white "
+          add ? 'bg-blue-500 text-white' : 'bg-white '
         }`}
       >
         <button

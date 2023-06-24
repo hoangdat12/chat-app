@@ -22,7 +22,7 @@ export interface IAllMessageData {
 }
 
 export interface IMessageInitialState {
-  messages: IMessage[];
+  messages: IDataFormatMessage[];
   isLoading: boolean;
   status: 'idle' | 'pending' | 'succeeded' | 'failed';
 }
@@ -67,4 +67,11 @@ export interface IDataUpdateLastMessage {
   conversation: IConversation;
   lastMessage: string;
   lastMessageSendAt: string;
+}
+
+export interface IDataFormatMessage {
+  user: IParticipant;
+  messages: IMessage[];
+  myMessage: boolean;
+  timeSendMessage: string | null;
 }

@@ -1,6 +1,5 @@
-import myAxios from "../../ultils/myAxios";
-import { IDataReceived } from "../auth/authService";
-import { IConversation } from "./conversationSlice";
+import { IDataReceived, IConversation } from '../../ultils/interface';
+import myAxios from '../../ultils/myAxios';
 
 export interface IDataConversations {
   conversations: IConversation[];

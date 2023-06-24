@@ -14,6 +14,7 @@ import {
   selectConversation,
 } from '../../features/conversation/conversationSlice';
 import { IUser } from '../../features/auth/authSlice';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface IPropButtonRounded {
   icon: ReactNode;
@@ -30,8 +31,7 @@ const Conversation = () => {
     useState<IConversation | null>(null);
   const innerWitdh = useInnerWidth();
 
-  const userJson = localStorage.getItem('user');
-  const user = userJson ? (JSON.parse(userJson) as IUser) : null;
+  const user = getUserLocalStorageItem();
   useEffect(() => {
     const fetchListConversationOfUser = async () => {
       await ditpatch(fetchConversationOfUser(user?._id ? user?._id : ' '));

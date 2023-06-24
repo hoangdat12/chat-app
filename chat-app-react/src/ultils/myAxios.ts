@@ -1,58 +1,74 @@
-import axios from "axios";
-import { IUser } from "../features/auth/authSlice";
+import axios from 'axios';
+import { getTokenLocalStorageItem, getUserLocalStorageItem } from '.';
 
-const userJson = localStorage.getItem("user");
-const tokenJson = localStorage.getItem("token");
-const user = userJson ? (JSON.parse(userJson) as IUser) : null;
-const token = tokenJson ? JSON.parse(tokenJson) : null;
+const user = getUserLocalStorageItem();
+const token = getTokenLocalStorageItem();
 
 const myAxios = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: 'http://localhost:8080/api/v1',
   headers: {
-    Authorization: `Bearer ${token}`,
-    "x-client-id": user?._id,
+    // Authorization: `Bearer ${token}`,
+    'x-client-id': user?._id,
   },
+  withCredentials: true,
 });
 
-// myAxios.interceptors.request.use(
-//   function (config) {
-//     const condition =
-//       config.url?.includes('/auth/login') ||
-//       config.url?.includes('/auth/register') ||
-//       config.url?.includes('/auth/refreshToken');
-//     if (condition) return config;
+myAxios.interceptors.request.use(
+  function (config) {
+    const condition =
+      config.url?.includes('/auth/login') ||
+      config.url?.includes('/auth/register') ||
+      config.url?.includes('/auth/refreshToken');
+    if (condition) return config;
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${token}`,
+    } as any;
+    return config;
+  },
+  function (err) {
+    console.log(err);
+    return Promise.reject(err);
+  }
+);
 
-//     const token = getTokenLocalStorageItem('token');
-//     config.headers = {
-//       ...config.headers,
-//       Authorization: `Bearer ${token}`,
-//     } as any;
-//     return config;
-//   },
-//   function (err) {
-//     console.log(err);
-//     return Promise.reject(err);
-//   }
-// );
+myAxios.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    console.log(
+      originalRequest,
+      (error.response.status === 401 || error?.response?.status === 403) &&
+        !originalRequest._retry
+    );
+    if (
+      (error.response.status === 401 || error?.response?.status === 403) &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
 
-// myAxios.interceptors.response.use(
-//   function (response) {
-//     // Any status code that lie within the range of 2xx cause this function to trigger
-//     // Do something with response data
-//     return response;
-//   },
-//   function (err) {
-//     console.log(err);
-//     const prevRequest = err?.response;
-//     if (err?.response?.status === 403 && !err?.sent) {
-//       prevRequest.sent = true;
-//       const newAccessToken = await  ();
-//       prevRequest.headers = {
-//         ...prevRequest,
-//         Authorization: `Bearer ${newAccessToken}`,
-//       } as any;
-//       return myAxios(prevRequest);
-//     }}
-// );
+      try {
+        const refreshResponse = await myAxios.post(
+          'http://localhost:8080/api/v1/auth/refresh-token'
+        );
+
+        const { token: newToken } = refreshResponse.data;
+
+        // Update the token and retry the original request
+        localStorage.setItem('token', JSON.stringify(newToken));
+
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return axios(originalRequest);
+      } catch (refreshError) {
+        console.log('Token refresh failed:', refreshError);
+        console.log('Logout!!!!');
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default myAxios;

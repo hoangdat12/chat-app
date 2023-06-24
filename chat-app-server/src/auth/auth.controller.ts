@@ -105,10 +105,10 @@ export class AuthController {
         const user = req.user as IUserCreated;
         const { refreshToken, response } =
           await this.authService.loginWithOauth2(user.email);
-        res.cookie('refreshToken', refreshToken, {
-          httpOnly: true,
-          maxAge: 129600000,
-        });
+        // res.cookie('refreshToken', refreshToken, {
+        //   httpOnly: true,
+        //   maxAge: 129600000,
+        // });
         return response.sender(res);
       } else {
         return res
@@ -127,9 +127,10 @@ export class AuthController {
       const { refreshToken, response } = await this.jwtService.refreshToken(
         req,
       );
-      res.cookie('refreshToken', refreshToken, {
-        maxAge: 129600000,
-      });
+      // res.cookie('refreshToken', refreshToken, {
+      //   httpOnly: true,
+      //   maxAge: 129600000,
+      // });
       return response.sender(res);
     } catch (err) {
       console.log(err);

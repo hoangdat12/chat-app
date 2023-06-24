@@ -150,6 +150,7 @@ export class AuthService {
     const metaData = {
       user: user,
       token: accessToken,
+      refreshToken,
     };
 
     return {
@@ -198,6 +199,7 @@ export class AuthService {
     const metaData = {
       user: userExist,
       token: accessToken,
+      refreshToken,
     };
 
     return {
