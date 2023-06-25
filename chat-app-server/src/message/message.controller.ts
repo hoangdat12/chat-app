@@ -17,6 +17,7 @@ import { Request } from 'express';
 import { Ok } from 'src/ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IUserCreated } from '../ultils/interface';
+import { validate } from 'class-validator';
 
 @Controller('message')
 export class MessageController {
@@ -27,6 +28,10 @@ export class MessageController {
   @Post()
   async createMessage(@Req() req: Request, @Body() body: CreateMessageData) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       user._id = user._id.toString();
       const newMessage = await this.messageService.createMessage(user, body);
@@ -45,6 +50,10 @@ export class MessageController {
     @Body() body: UpdateMessageData,
   ) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.messageService.update(user, messageId, body);
     } catch (err) {
@@ -60,6 +69,10 @@ export class MessageController {
     @Body() body: DelelteMessageData,
   ) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.messageService.delete(user, messageId, body);
     } catch (err) {

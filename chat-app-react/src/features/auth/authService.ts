@@ -40,6 +40,18 @@ export const register = async (data: IRegisterData) => {
   return response.data;
 };
 
+export const logout = async () => {
+  const res = await myAxios.post('/auth/logout');
+  console.log('Res::: ', res);
+  if (res.status === 200) {
+    console.log('logout!!!!');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+  }
+  return res.data;
+};
+
 export const authService = {
   login,
   getInforUserWithOauth2,

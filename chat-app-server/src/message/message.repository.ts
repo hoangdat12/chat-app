@@ -1,9 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  MessageConversation,
-  MessageGroup,
-} from '../schema/model/message.model';
+import { Messages } from '../schema/model/message.model';
 import { Model } from 'mongoose';
 import { PayloadCreateMessage } from './message.dto';
 import { Pagination } from '../ultils/interface';
@@ -21,228 +18,97 @@ export interface IDateUpdateMessage extends IDataDeleteMessage {
 @Injectable()
 export class MessageRepository {
   constructor(
-    @InjectModel(MessageConversation.name)
-    private readonly messageConversationModel: Model<MessageConversation>,
-    @InjectModel(MessageGroup.name)
-    private readonly messageGroupModel: Model<MessageGroup>,
+    @InjectModel(Messages.name)
+    private readonly messageModel: Model<Messages>,
   ) {}
 
   // COMMON
-  async get(type: string, messageId: string) {
-    switch (type) {
-      case 'conversation':
-        return await this.messageConversationModel
-          .findOne({ _id: messageId })
-          .lean();
-      case 'group':
-        return await this.messageGroupModel.findOne({ _id: messageId }).lean();
-      default:
-        throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
-    }
+  async findById(messageId: string) {
+    return await this.messageModel.findById(messageId).lean();
   }
   // Xoa tam thoi
-  async deleteConversation(
-    type: string,
-    conversationId: string,
-    participantId: string,
-  ) {
-    switch (type) {
-      case 'conversation':
-        return await this.messageConversationModel.updateMany(
-          {
-            message_conversation: conversationId,
-            message_received: {
-              $elemMatch: {
-                enable: true,
-                userId: participantId.toString(),
-              },
-            },
+  async deleteConversation(conversationId: string, participantId: string) {
+    return await this.messageModel.updateMany(
+      {
+        message_conversation: conversationId,
+        message_received: {
+          $elemMatch: {
+            enable: true,
+            userId: participantId.toString(),
           },
-          { $set: { 'message_received.$[elem].enable': false } },
-          {
-            multi: true,
-            arrayFilters: [{ 'elem.userId': participantId.toString() }],
-          },
-        );
-      case 'group':
-        return await this.messageGroupModel.updateMany(
-          {
-            message_group: conversationId,
-            message_received: {
-              $elemMatch: {
-                enable: true,
-                userId: participantId.toString(),
-              },
-            },
-          },
-          { $set: { 'message_received.$[elem].enable': false } },
-          {
-            multi: true,
-            arrayFilters: [{ 'elem.userId': participantId.toString() }],
-          },
-        );
-      default:
-        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
-    }
+        },
+      },
+      { $set: { 'message_received.$[elem].enable': false } },
+      {
+        multi: true,
+        arrayFilters: [{ 'elem.userId': participantId.toString() }],
+      },
+    );
   }
   // Xoa han
-  async deleteConversationOfUser(
-    type: string,
-    userId: string,
-    conversationId: string,
-  ) {
-    switch (type) {
-      case 'conversation':
-        return await this.messageConversationModel.updateMany(
-          {
-            message_conversation: conversationId,
-            message_received: {
-              $elemMatch: {
-                enable: true,
-                userId: userId.toString(),
-              },
-            },
+  async deleteConversationOfUser(userId: string, conversationId: string) {
+    return await this.messageModel.updateMany(
+      {
+        message_conversation: conversationId,
+        message_received: {
+          $elemMatch: {
+            enable: true,
+            userId: userId.toString(),
           },
-          {
-            $pull: {
-              message_received: {
-                userId,
-              },
-            },
-          },
-          {
-            multi: true,
-          },
-        );
-      case 'group':
-        return await this.messageGroupModel.updateMany(
-          {
-            message_group: conversationId,
-            message_received: {
-              $elemMatch: {
-                enable: true,
-                userId: userId.toString(),
-              },
-            },
-          },
-          { $set: { 'message_received.$[elem].enable': false } },
-          {
-            multi: true,
-            arrayFilters: [{ 'elem.userId': userId.toString() }],
-          },
-        );
-      default:
-        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
-    }
+        },
+      },
+      { $set: { 'message_received.$[elem].enable': false } },
+      {
+        multi: true,
+        arrayFilters: [{ 'elem.userId': userId.toString() }],
+      },
+    );
   }
+
   async findMessageOfConversation(
-    type: string,
     userId: string,
     conversationId: string,
     pagination: Pagination,
   ) {
     const { page, limit, sortBy } = pagination;
     const offset = (page - 1) * limit;
-    switch (type) {
-      case 'conversation':
-        return await this.messageConversationModel
-          .find({
-            message_conversation: conversationId,
-            message_received: {
-              $elemMatch: {
-                enable: true,
-                userId: userId.toString(),
-              },
-            },
-          })
-          .limit(limit)
-          .skip(offset)
-          .sort(sortBy === 'ctime' ? { createdAt: -1 } : { id: 1 })
-          .lean()
-          .exec();
-      case 'group':
-        return await this.messageGroupModel
-          .find({
-            message_group: conversationId,
-            message_received: {
-              $elemMatch: {
-                enable: true,
-                userId: userId.toString(),
-              },
-            },
-          })
-          .limit(limit)
-          .skip(offset)
-          .sort(sortBy === 'ctime' ? { createdAt: -1 } : { id: 1 })
-          .lean()
-          .exec();
-      default:
-        throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
-    }
+    return await this.messageModel
+      .find({
+        message_conversation: conversationId,
+        message_received: {
+          $elemMatch: {
+            enable: true,
+            userId: userId.toString(),
+          },
+        },
+      })
+      .limit(limit)
+      .skip(offset)
+      .sort(sortBy === 'ctime' ? { createdAt: -1 } : { id: 1 })
+      .lean()
+      .exec();
   }
 
   async updateMessage(data: IDateUpdateMessage) {
-    switch (data.messageType) {
-      case 'conversation':
-        return await this.messageConversationModel.findOneAndUpdate(
-          { _id: data.messageId },
-          { message_content: data.messageContent },
-          { new: true },
-        );
-      case 'group':
-        return await this.messageGroupModel.findOneAndUpdate(
-          { _id: data.messageId },
-          { message_content: data.messageContent },
-          { new: true },
-        );
-      default:
-        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
-    }
+    return await this.messageModel.findOneAndUpdate(
+      { _id: data.messageId },
+      { message_content: data.messageContent },
+      { new: true },
+    );
   }
 
   async delete(data: IDataDeleteMessage) {
-    switch (data.messageType) {
-      case 'conversation':
-        return await this.messageConversationModel.deleteOne({
-          _id: data.messageId,
-          message_conversation: data.conversationId,
-        });
-      case 'group':
-        return await this.messageGroupModel.deleteOne({
-          _id: data.messageId,
-          message_group: data.conversationId,
-        });
-      default:
-        throw new HttpException('Type not found!', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  // CONVERSATION MESSAGE
-
-  async getConversationMessage(messageId: string) {
-    return await this.messageConversationModel
-      .findOne({ _id: messageId })
-      .lean();
-  }
-
-  async createMessageConversation(data: PayloadCreateMessage) {
-    const { message_type_model, ...payload } = data;
-    return await this.messageConversationModel.create({
-      ...payload,
-      message_conversation: message_type_model,
+    return await this.messageModel.deleteOne({
+      _id: data.messageId,
+      message_conversation: data.conversationId,
     });
   }
 
-  // GROUP MESSAGE
-  async getGroupMessage(messageId: string) {
-    return await this.messageGroupModel.findOne({ _id: messageId }).lean();
-  }
-
-  async createMessageGroup(data: PayloadCreateMessage) {
-    const { message_type_model, ...payload } = data;
-    return await this.messageGroupModel.create({
+  async createMessageConversation(data: PayloadCreateMessage) {
+    const { conversationId, ...payload } = data;
+    return await this.messageModel.create({
       ...payload,
-      message_group: message_type_model,
+      message_conversation: conversationId,
     });
   }
 }

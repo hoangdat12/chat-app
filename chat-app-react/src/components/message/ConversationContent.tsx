@@ -96,7 +96,6 @@ const ConversationContent: FC<IPropConversationContent> = memo(
         };
       }
     }, [messageValue]);
-
     useEffect(() => {
       if (conversation) {
         const data = {
@@ -113,8 +112,11 @@ const ConversationContent: FC<IPropConversationContent> = memo(
         console.log(data);
       });
       socket.on('onMessage', (payload: any) => {
-        const { message_sender_by } = payload;
+        const { message_sender_by, message_conversation } = payload;
         if (message_sender_by.userId === user?._id) {
+          return;
+        }
+        if (message_conversation !== conversation?._id) {
           return;
         }
         dispatch(createNewMessage(payload));

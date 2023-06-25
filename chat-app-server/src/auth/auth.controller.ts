@@ -16,6 +16,7 @@ import { GoogleAuthGuard } from './google/google.guard';
 import { GitHubAuthGuard } from './github/github.guard';
 import { JwtService } from '../jwt/jwt.service';
 import { IUserCreated } from '../ultils/interface';
+import { validate } from 'class-validator';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +28,10 @@ export class AuthController {
   @Post('register')
   async register(@Body() body: UserRegister, @Res() res: Response) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       return (await this.authService.register(body)).sender(res);
     } catch (err) {
       console.log(err);
@@ -52,6 +57,10 @@ export class AuthController {
   @Post('login')
   async login(@Body() body: UserLogin, @Res() res: Response) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const { refreshToken, response } = await this.authService.login(body);
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -173,6 +182,10 @@ export class AuthController {
     @Param('secret') secret: string,
   ) {
     try {
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       return await this.authService.changePassword(data, secret);
     } catch (err) {
       console.log(err);

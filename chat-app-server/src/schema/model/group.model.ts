@@ -1,35 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserJoinChat } from '../../message/message.dto';
 import { IParticipant } from '../../ultils/interface';
+import { Conversation } from './conversation.model';
 
 @Schema({ collection: 'Group', timestamps: true })
-export class Group {
-  @Prop({ required: true })
-  conversation_type: string;
-
+export class Group extends Conversation {
   @Prop({ required: true })
   creators: UserJoinChat[];
-
-  @Prop({ required: true })
-  participants: IParticipant[];
-
-  @Prop()
-  lastMessage: string;
-
-  @Prop()
-  lastMessageSendAt: Date;
 
   @Prop()
   nameGroup: string;
 
   @Prop()
   avatarUrl: string;
-
-  @Prop({ default: 'default' })
-  topic: string;
 }
 
 const GroupSchema = SchemaFactory.createForClass(Group);
+GroupSchema.index({ 'participants.userId': 1, 'participants.enable': 1 });
 export const GroupModel = {
   name: Group.name,
   schema: GroupSchema,

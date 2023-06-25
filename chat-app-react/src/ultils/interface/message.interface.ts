@@ -21,12 +21,6 @@ export interface IAllMessageData {
   sortedBy: string;
 }
 
-export interface IMessageInitialState {
-  messages: IDataFormatMessage[];
-  isLoading: boolean;
-  status: 'idle' | 'pending' | 'succeeded' | 'failed';
-}
-
 export interface IDeleteMessage {
   messageId: string;
 }
@@ -53,10 +47,6 @@ export interface IConversation {
   collection: string;
 }
 
-export interface IMyConversation extends IConversation {
-  messages: IMessage;
-}
-
 export interface IInitialStateConversation {
   conversations: Map<string, IConversation>;
   isLoading: boolean;
@@ -70,7 +60,7 @@ export interface IDataUpdateLastMessage {
 }
 
 export interface IDataFormatMessage {
-  user: IParticipant;
+  user?: IParticipant;
   messages: IMessage[];
   myMessage: boolean;
   timeSendMessage: string | null;

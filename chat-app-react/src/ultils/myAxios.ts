@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { getTokenLocalStorageItem, getUserLocalStorageItem } from '.';
+import {
+  getRefreshTokenLocalStorageItem,
+  getTokenLocalStorageItem,
+  getUserLocalStorageItem,
+} from '.';
+import { logout } from '../features/auth/authService';
 
 const user = getUserLocalStorageItem();
 const token = getTokenLocalStorageItem();
@@ -38,20 +43,27 @@ myAxios.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    console.log(
-      originalRequest,
-      (error.response.status === 401 || error?.response?.status === 403) &&
-        !originalRequest._retry
-    );
     if (
       (error.response.status === 401 || error?.response?.status === 403) &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      token
     ) {
       originalRequest._retry = true;
 
       try {
+        const refreshToken = getRefreshTokenLocalStorageItem();
+        if (!refreshToken) {
+          await logout();
+          return;
+        }
         const refreshResponse = await myAxios.post(
-          'http://localhost:8080/api/v1/auth/refresh-token'
+          'http://localhost:8080/api/v1/auth/refresh-token',
+          {},
+          {
+            headers: {
+              'x-refresh-token': refreshToken,
+            },
+          }
         );
 
         const { token: newToken } = refreshResponse.data;
@@ -60,10 +72,12 @@ myAxios.interceptors.response.use(
         localStorage.setItem('token', JSON.stringify(newToken));
 
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        console.log('refresh Token successfully!');
         return axios(originalRequest);
       } catch (refreshError) {
         console.log('Token refresh failed:', refreshError);
-        console.log('Logout!!!!');
+        await logout();
+        return;
       }
     }
 

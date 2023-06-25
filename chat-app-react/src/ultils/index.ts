@@ -1,3 +1,5 @@
+import { IConversation, IUser } from './interface';
+
 export const calculatorTime = (timeStamp: string) => {
   const date = new Date(timeStamp);
   const now = new Date();
@@ -87,12 +89,47 @@ export const getTimeSendMessage = (time: string | undefined) => {
     : `${date} ${lastMessageFormattedTime}`;
 };
 
+export const getNameAndAvatarOfConversation = (
+  conversation: IConversation,
+  user: IUser | null
+) => {
+  const result = {
+    name: null as string | null,
+    avatarUrl: null as string | null,
+  };
+  if (conversation.conversation_type === 'group') {
+    result.name = conversation.nameGroup ?? 'Name Group';
+    result.avatarUrl = conversation.participants[0].avatarUrl;
+  } else {
+    conversation.participants.map((participant) => {
+      if (participant.userId !== user?._id) {
+        result.name = participant.userName;
+        result.avatarUrl = participant.avatarUrl;
+        return true; // stop iterating
+      }
+      return false;
+    });
+  }
+  return result;
+};
+
 export const getTokenLocalStorageItem = () => {
   const tokenJson = localStorage.getItem('token');
-  return tokenJson ? JSON.parse(tokenJson) : null;
+  return tokenJson !== 'undefined' && tokenJson !== null
+    ? JSON.parse(tokenJson)
+    : null;
 };
 
 export const getUserLocalStorageItem = () => {
   const userJson = localStorage.getItem('user');
-  return userJson ? JSON.parse(userJson) : null;
+  return userJson !== 'undefined' && userJson !== null
+    ? JSON.parse(userJson)
+    : null;
+};
+
+export const getRefreshTokenLocalStorageItem = () => {
+  const refreshTokenJson = localStorage.getItem('refreshToken');
+  return refreshTokenJson !== 'undefined' && refreshTokenJson !== null
+    ? JSON.parse(refreshTokenJson)
+    : null;
 };

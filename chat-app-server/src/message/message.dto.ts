@@ -1,6 +1,4 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { Conversation } from '../schema/model/conversation.model';
-import { Group } from 'src/schema/model/group.model';
 
 export class UserJoinChat {
   @IsNotEmpty()
@@ -18,7 +16,7 @@ export class UserJoinChat {
 export class PayloadCreateMessage {
   message_type: string;
   message_content: string;
-  message_type_model: Group | Conversation;
+  conversationId: string;
   message_received: UserJoinChat | UserJoinChat[] | null;
 }
 

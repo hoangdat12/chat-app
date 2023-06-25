@@ -8,6 +8,7 @@ import ConversationInfor, {
 } from './ConversationInfor';
 import LogoPage from '../../assets/Logo2.png';
 import { IConversation, IUser } from '../../ultils/interface';
+import { getNameAndAvatarOfConversation } from '../../ultils';
 
 export interface IPropConversationList {
   conversations: Map<string, IConversation>;
@@ -28,6 +29,7 @@ const ConversationList: FC<IPropConversationList> = ({
   const [activeAfterSendMessage, setActiveAfterSendMessage] = useState('');
 
   const handleActive = (idx: number, conversation: IConversation) => {
+    console.log('conversation::: ', conversation);
     setActive(idx);
     setActiveAfterSendMessage(conversation._id);
     setConversationSelected(conversation);
@@ -46,6 +48,7 @@ const ConversationList: FC<IPropConversationList> = ({
         />
       </div>
 
+      {/* Mobile online */}
       <div className='flex sm:hidden gap-3 my-4 mx-6 overflow-x-scroll scrollbar-hide'>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ele) => (
           <div className='relative' key={ele}>
@@ -61,88 +64,63 @@ const ConversationList: FC<IPropConversationList> = ({
       </div>
 
       <div className='max-h-[calc(100vh-14rem)] sm:max-h-[calc(100vh-10.5rem)] scrollbar-hide mt-4 border-t border-[#e8ebed] overflow-y-scroll'>
-        {Array.from(conversations.values()).map((conversation, idx) => {
-          const { name, avatarUrl } = getNameAndAvatarOfConversation(
-            conversation,
-            user
-          );
-          return (
-            <div key={idx}>
-              {/* Mobile */}
-              <Link
-                to={`/conversation/${conversation._id}`}
-                key={`${conversation._id}1`}
-                className={`block sm:hidden md:block cursor-pointer ${
-                  activeAfterSendMessage === conversation._id ||
-                  (idx === active && activeAfterSendMessage === '')
-                    ? 'bg-white'
-                    : ''
-                }`}
-                onClick={() => handleActive(idx, conversation)}
-              >
-                <ConversationInfor
-                  active={idx === active}
-                  avatarUrl={
-                    avatarUrl ??
-                    'https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1'
-                  }
-                  nickName={name ?? 'undifined'}
-                  status={'Active'}
-                  lastMessage={conversation.lastMessage}
-                />
-              </Link>
-              {/* Destop, Tablet */}
-              <div
-                key={`${conversation._id}10`}
-                className={`hidden sm:block md:hidden cursor-pointer ${
-                  activeAfterSendMessage === conversation._id ||
-                  (idx === active && activeAfterSendMessage === '')
-                    ? 'bg-white'
-                    : ''
-                } w-full border-b-[2px] border-[#e8ebed]`}
-                onClick={() => handleActive(idx, conversation)}
-              >
-                <div className='flex justify-center'>
-                  <ConversationInforMobile
+        {Array.from(conversations.values()).map(
+          (conversation: IConversation, idx) => {
+            const { name, avatarUrl } = getNameAndAvatarOfConversation(
+              conversation,
+              user
+            );
+            return (
+              <div key={idx}>
+                {/* Mobile */}
+                <Link
+                  to={`/conversation/${conversation._id}`}
+                  key={`${conversation._id}`}
+                  className={`block sm:hidden md:block cursor-pointer ${
+                    activeAfterSendMessage === conversation._id ||
+                    (idx === active && activeAfterSendMessage === '')
+                      ? 'bg-white'
+                      : ''
+                  }`}
+                  onClick={() => handleActive(idx, conversation)}
+                >
+                  <ConversationInfor
+                    active={idx === active}
                     avatarUrl={
                       avatarUrl ??
                       'https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1'
                     }
+                    nickName={name ?? 'undifined'}
+                    status={'Active'}
+                    conversation={conversation}
                   />
+                </Link>
+                <div
+                  key={`${conversation._id}10`}
+                  className={`hidden sm:block md:hidden cursor-pointer ${
+                    activeAfterSendMessage === conversation._id ||
+                    (idx === active && activeAfterSendMessage === '')
+                      ? 'bg-white'
+                      : ''
+                  } w-full border-b-[2px] border-[#e8ebed]`}
+                  onClick={() => handleActive(idx, conversation)}
+                >
+                  <div className='flex justify-center'>
+                    <ConversationInforMobile
+                      avatarUrl={
+                        avatarUrl ??
+                        'https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1'
+                      }
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          }
+        )}
       </div>
     </div>
   );
-};
-
-export const getNameAndAvatarOfConversation = (
-  conversation: IConversation,
-  user: IUser | null
-) => {
-  const result = {
-    name: null as string | null,
-    avatarUrl: null as string | null,
-  };
-
-  if (conversation.conversation_type === 'group') {
-    result.name = conversation.nameGroup ?? 'Name Group';
-    result.avatarUrl = conversation.participants[0].avatarUrl;
-  } else {
-    conversation.participants.map((participant) => {
-      if (participant.userId !== user?._id) {
-        result.name = participant.userName;
-        result.avatarUrl = participant.avatarUrl;
-        return true; // stop iterating
-      }
-      return false;
-    });
-  }
-
-  return result;
 };
 
 export default ConversationList;

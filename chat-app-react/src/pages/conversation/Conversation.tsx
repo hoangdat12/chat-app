@@ -9,12 +9,11 @@ import ConversationList from '../../components/message/ConversationList';
 import ConversationSetting from '../../components/message/ConversationSetting';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
-  IConversation,
   fetchConversationOfUser,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
-import { IUser } from '../../features/auth/authSlice';
 import { getUserLocalStorageItem } from '../../ultils';
+import { IConversation } from '../../ultils/interface';
 
 export interface IPropButtonRounded {
   icon: ReactNode;
@@ -45,7 +44,6 @@ const Conversation = () => {
       setConversationSelected(conversations.values().next().value);
     }
   }, [conversations]);
-
   return (
     <Layout>
       <div className='relative md:grid md:grid-cols-12 flex w-full h-full overflow-hidden'>

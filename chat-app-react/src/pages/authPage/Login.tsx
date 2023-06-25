@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import * as yup from "yup";
-import { Link, useNavigate } from "react-router-dom";
-import { useFormik } from "formik";
+import { useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { Link, useNavigate } from 'react-router-dom';
+import { useFormik } from 'formik';
 
-import { VscGithub } from "react-icons/vsc";
-import { FcGoogle } from "react-icons/fc";
-import { AiOutlineEyeInvisible, AiOutlineEye } from "react-icons/Ai";
+import { VscGithub } from 'react-icons/vsc';
+import { FcGoogle } from 'react-icons/fc';
+import { AiOutlineEyeInvisible, AiOutlineEye } from 'react-icons/Ai';
 
-import BannerLogin from "../../assets/banner.mp4";
-import { useAppDispatch, useAppSelector } from "../../app/hook";
-import { login, selectAuth } from "../../features/auth/authSlice";
-import { getInforUserWithOauth2 } from "../../features/auth/authSlice";
+import BannerLogin from '../../assets/banner.mp4';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
+import { login, selectAuth } from '../../features/auth/authSlice';
+import { getInforUserWithOauth2 } from '../../features/auth/authSlice';
 
 export interface IProp {
   className?: string;
@@ -30,8 +30,8 @@ export const LoginWith: React.FC<IProp> = ({ className, name, Icon }) => {
     const loginOauth2Api = `http://localhost:8080/api/v1/auth/login/${nameUrl}`;
     const newWindow = window.open(
       loginOauth2Api,
-      "_blank",
-      "width=500,height=600"
+      '_blank',
+      'width=500,height=600'
     );
 
     if (newWindow) {
@@ -49,7 +49,7 @@ export const LoginWith: React.FC<IProp> = ({ className, name, Icon }) => {
       onClick={handleLoginWithOauth2}
       className={`relative flex items-center justify-between w-full p-1 text-white rounded-md ${className}`}
     >
-      <span className={`${name === "Google" ? "bg-white" : ""} p-1 rounded-md`}>
+      <span className={`${name === 'Google' ? 'bg-white' : ''} p-1 rounded-md`}>
         <Icon className='text-3xl' />
       </span>
       <span className='text-lg text-center font-semibold mr-6'>{`Join with ${name}`}</span>
@@ -66,19 +66,19 @@ const Login = () => {
   const loginSchema = yup.object().shape({
     email: yup
       .string()
-      .email("Please enter a valid email")
-      .required("Email is required field"),
-    password: yup.string().min(5).required("Password is required field"),
+      .email('Please enter a valid email')
+      .required('Email is required field'),
+    password: yup.string().min(5).required('Password is required field'),
   });
   const handleLogin = async (data: ILoginData) => {
-    dispatch(login(data));
+    await dispatch(login(data));
   };
 
   const { errors, touched, handleBlur, handleChange, handleSubmit } = useFormik(
     {
       initialValues: {
-        email: "",
-        password: "",
+        email: '',
+        password: '',
       },
       validationSchema: loginSchema,
       onSubmit: handleLogin,
@@ -86,7 +86,7 @@ const Login = () => {
   );
 
   useEffect(() => {
-    if (user && status === "idle") {
+    if (user && status === 'idle') {
       navigate(-1);
     }
   }, [user, status, navigate]);
@@ -112,13 +112,13 @@ const Login = () => {
             </h1>
             <div className='sm:mt-12 mt-6'>
               <LoginWith
-                className={"bg-btn-github"}
-                name={"Github"}
+                className={'bg-btn-github'}
+                name={'Github'}
                 Icon={VscGithub}
               />
               <LoginWith
-                className={"bg-btn-google mt-6"}
-                name={"Google"}
+                className={'bg-btn-google mt-6'}
+                name={'Google'}
                 Icon={FcGoogle}
               />
             </div>
@@ -129,7 +129,7 @@ const Login = () => {
               <input
                 name='email'
                 className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
-                  errors.email && touched.email ? "border-2 border-red-500" : ""
+                  errors.email && touched.email ? 'border-2 border-red-500' : ''
                 }`}
                 type='text'
                 onChange={handleChange}
@@ -144,10 +144,10 @@ const Login = () => {
                   name='password'
                   className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
                     errors.password && touched.password
-                      ? "border-2 border-red-500"
-                      : ""
+                      ? 'border-2 border-red-500'
+                      : ''
                   }`}
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   autoComplete='current-password'
@@ -191,7 +191,7 @@ const Login = () => {
         </div>
         <div
           className={`absolute ${
-            isLoading ? "flex" : "hidden"
+            isLoading ? 'flex' : 'hidden'
           } items-center justify-center w-full h-full top-0 left-0 bottom-0 right-0 bg-blackOverlay`}
         >
           <span className='loading-spinner'></span>

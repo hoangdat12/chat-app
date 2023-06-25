@@ -12,10 +12,7 @@ import {
   IGatewaySessionManager,
 } from './gateway.sesstion';
 import { Services } from '../ultils/constant';
-import {
-  MessageConversation,
-  MessageGroup,
-} from 'src/schema/model/message.model';
+import { Messages } from '../schema/model/message.model';
 
 @WebSocketGateway({
   cors: {
@@ -46,7 +43,7 @@ export class MessagingGateway implements OnModuleInit {
   }
 
   @OnEvent('message.create')
-  handleMessageCreateEvent(payload: MessageConversation | MessageGroup) {
+  handleMessageCreateEvent(payload: Messages) {
     const { message_sender_by, message_received } = payload;
     const senderSocket = this.sessions.getUserSocket(message_sender_by.userId);
     if (senderSocket) senderSocket.emit('onMessage', payload);

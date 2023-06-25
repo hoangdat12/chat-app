@@ -157,10 +157,7 @@ export abstract class BaseMessage {
 
   async checkOwnerMessage(messageId: string, conversationId: string) {
     await this.getMessageTypeModel(conversationId);
-    const message = await this.messageRepository.get(
-      this.message_type,
-      messageId,
-    );
+    const message = await this.messageRepository.findById(messageId);
 
     if (!message)
       throw new HttpException('Message not found', HttpStatus.BAD_REQUEST);
@@ -277,10 +274,8 @@ export class GroupMessage extends BaseMessage {
       this.message_sender_by.userId,
     );
 
-    const message = await this.messageRepository.createMessageGroup({
-      message_type_model: (await super.getMessageTypeModel(
-        this.conversationId,
-      )) as unknown as Group,
+    const message = await this.messageRepository.createMessageConversation({
+      message_type_model: this.conversationId,
       ...payload,
     });
 

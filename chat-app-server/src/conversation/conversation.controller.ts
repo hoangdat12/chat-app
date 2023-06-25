@@ -20,6 +20,7 @@ import {
   PayloadDeletePaticipant,
   RenameGroup,
 } from './conversation.dto';
+import { validate } from 'class-validator';
 
 @Controller('conversation')
 export class ConversationController {
@@ -31,6 +32,10 @@ export class ConversationController {
     @Body() body: PayloadCreateConversation,
   ) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.conversationService.createConversation(user, body);
     } catch (err) {
@@ -93,6 +98,10 @@ export class ConversationController {
     @Body() body: PayloadDeletePaticipant,
   ) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.conversationService.deletePaticipantOfConversation(
         user,
@@ -110,6 +119,10 @@ export class ConversationController {
     @Body() body: PayloadAddPaticipant,
   ) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.conversationService.addPaticipantOfConversation(
         user,
@@ -127,6 +140,10 @@ export class ConversationController {
     @Body() body: ChangeNickNameOfParticipant,
   ) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.conversationService.setNickNameForParticipant(
         user,
@@ -144,6 +161,10 @@ export class ConversationController {
     @Body() body: ChangeTopic,
   ) {
     try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.conversationService.changeTopicOfConversation(
         user,
@@ -158,6 +179,10 @@ export class ConversationController {
   @Patch('/change-name-group')
   async renameGroup(@Req() req: Request, @Body() data: RenameGroup) {
     try {
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
       return await this.conversationService.renameGroup(user, data);
     } catch (err) {

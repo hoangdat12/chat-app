@@ -135,7 +135,6 @@ export abstract class BaseConversation {
     await this.checkUserIsPermission(user._id, conversation.participants);
 
     const messages = await this.messageRepository.findMessageOfConversation(
-      this.conversation_type,
       user._id,
       this.conversationId,
       pagination,
@@ -160,7 +159,6 @@ export abstract class BaseConversation {
     await this.checkUserIsPermission(user._id, conversation.participants);
 
     const conversationUpdate = this.messageRepository.deleteConversation(
-      this.conversation_type,
       this.conversationId,
       user._id,
     );
@@ -180,7 +178,6 @@ export abstract class BaseConversation {
     await this.checkUserIsPermission(user._id, conversation.participants);
 
     await this.messageRepository.deleteConversationOfUser(
-      this.conversationId,
       user._id,
       conversationId,
     );

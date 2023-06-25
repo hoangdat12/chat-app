@@ -18,8 +18,12 @@ export class Conversation {
   @Prop({ default: 'default' })
   topic: string;
 }
-
 const ConversationSchema = SchemaFactory.createForClass(Conversation);
+ConversationSchema.index({
+  'participants.userId': 1,
+  'participants.enable': 1,
+});
+
 export const ConversationModel = {
   name: Conversation.name,
   schema: ConversationSchema,
