@@ -1,9 +1,11 @@
 import { getTimeSendMessage, getUserLocalStorageItem } from '../../ultils';
 import {
   IAllMessageData,
+  IDataCreateMessage,
   IDataDeleteMessageOfConversation,
   IDataFormatMessage,
   IDataReceived,
+  IDataUpdateMessageOfConversation,
   IMessage,
 } from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
@@ -66,12 +68,12 @@ const formatMessage = (messages: IMessage[]): IDataFormatMessage[] => {
 };
 
 const fetchMessageOfConversation = async (
-  conversation_type: string,
   conversationId: string
 ): Promise<IDataFormatMessage[]> => {
   const res = (await myAxios.get(
-    `conversation/${conversation_type}/${conversationId}`
+    `conversation/${conversationId}`
   )) as IDataReceived<IAllMessageData>;
+  console.log(res);
   if (res.data.status === 200) {
     const formatMessage = messageService.formatMessage(
       res.data.metaData.messages
@@ -82,16 +84,29 @@ const fetchMessageOfConversation = async (
   }
 };
 
+const createNewMessage = async (data: IDataCreateMessage) => {
+  const res = await myAxios.post('/message', data);
+  return res;
+};
+
 const deleteMessageOfConversation = async (
   data: IDataDeleteMessageOfConversation
 ) => {
-  const { messageId, ...payload } = data;
-  const res = await myAxios.delete(`message/${messageId}`, { data: payload });
-  console.log(res);
+  const res = await myAxios.delete(`message`, { data });
+  return res;
+};
+
+const updateMessageOfConversation = async (
+  data: IDataUpdateMessageOfConversation
+) => {
+  const res = await myAxios.patch(`message`, data);
+  return res;
 };
 
 export const messageService = {
   fetchMessageOfConversation,
   formatMessage,
   deleteMessageOfConversation,
+  createNewMessage,
+  updateMessageOfConversation,
 };

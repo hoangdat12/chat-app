@@ -113,6 +113,12 @@ export const getNameAndAvatarOfConversation = (
   return result;
 };
 
+export const clearLocalStorage = () => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+};
+
 export const getTokenLocalStorageItem = () => {
   const tokenJson = localStorage.getItem('token');
   return tokenJson !== 'undefined' && tokenJson !== null
@@ -132,4 +138,26 @@ export const getRefreshTokenLocalStorageItem = () => {
   return refreshTokenJson !== 'undefined' && refreshTokenJson !== null
     ? JSON.parse(refreshTokenJson)
     : null;
+};
+
+export const convertMessageObjectIdToString = (message: any) => {
+  const {
+    _id,
+    message_type: type,
+    message_sender_by,
+    message_content: content,
+    message_conversation,
+    message_received,
+  } = message;
+  console.log(message);
+  return {
+    _id: _id.toString(),
+    message_type: type,
+    message_sender_by,
+    message_content: content,
+    message_conversation,
+    message_received,
+    createdAt: message.createdAt,
+    updatedAt: message.updatedAt,
+  };
 };

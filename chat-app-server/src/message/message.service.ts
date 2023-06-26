@@ -41,7 +41,6 @@ export class MessageService {
       );
     // Not found conversation
     if (message_type === MessageType.CONVERSATION && !conversation) {
-      console.log('Not found conversation!');
       const payload: PayloadCreateConversation = {
         conversation_type: MessageType.CONVERSATION,
         participants,
@@ -126,6 +125,7 @@ export class MessageService {
       // Update last message if update or delete lastMessage
       if (conversation.lastMessage._id === messageUpdate._id.toString()) {
         conversation.lastMessage = this.convertObjectIdToString(messageUpdate);
+        await conversation.save();
       }
       return messageUpdate;
     }
@@ -142,7 +142,6 @@ export class MessageService {
         'Conversation not found!',
         HttpStatus.BAD_REQUEST,
       );
-
     if (conversation.lastMessage._id === data.message_id) {
       // get first message
       // If conversation just created and delete message just send
@@ -156,10 +155,24 @@ export class MessageService {
         conversation.lastMessage = this.convertObjectIdToString(
           firstMessageOfConversation[1],
         );
+        await conversation.save();
+        await this.messageRepository.delete(data);
+        return firstMessageOfConversation[1];
       }
     }
-
-    return await this.messageRepository.delete(data);
+    await this.messageRepository.delete(data);
+    return {
+      _id: data.message_id,
+      message_received: conversation.participants,
+      message_sender_by: {
+        userId: user._id,
+        avatarUrl: user.avatarUrl,
+        userName: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        enable: true,
+        isReadLastMessage: true,
+      },
+    };
   }
 
   convertObjectIdToString(message: any) {
@@ -178,6 +191,8 @@ export class MessageService {
       message_content: content,
       message_conversation,
       message_received,
+      createdAt: message.createdAt,
+      updatedAt: message.updatedAt,
     };
   }
 }

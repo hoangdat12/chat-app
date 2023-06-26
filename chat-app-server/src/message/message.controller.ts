@@ -50,7 +50,9 @@ export class MessageController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.messageService.update(user, body);
+      const messageUpdate = await this.messageService.update(user, body);
+      this.evenEmiter.emit('message.update', messageUpdate);
+      return new Ok(messageUpdate);
     } catch (err) {
       console.log(err);
       throw err;
@@ -60,13 +62,14 @@ export class MessageController {
   @Delete()
   async deleteMessage(@Req() req: Request, @Body() body: DelelteMessageData) {
     try {
-      console.log(body);
       const errors = await validate(body);
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.messageService.delete(user, body);
+      const messageDelete = await this.messageService.delete(user, body);
+      this.evenEmiter.emit('message.delete', messageDelete);
+      return new Ok(messageDelete);
     } catch (err) {
       console.log(err);
       throw err;

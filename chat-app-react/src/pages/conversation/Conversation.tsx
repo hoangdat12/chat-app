@@ -44,6 +44,7 @@ const Conversation = () => {
       setConversationSelected(conversations.values().next().value);
     }
   }, [conversations]);
+
   return (
     <Layout>
       <div className='relative md:grid md:grid-cols-12 flex w-full h-full overflow-hidden'>

@@ -4,6 +4,7 @@ import { MessageRepository } from '../../message/message.repository';
 import { UserJoinChat } from '../../message/message.dto';
 import { Messages } from 'src/schema/model/message.model';
 import { ObjectId } from 'mongoose';
+import { IUserCreated } from './auth.interface';
 
 export interface IConstructorConversation extends PayloadCreateConversation {
   conversationId: string | null;
@@ -31,8 +32,16 @@ export interface IPayloadCreateGroup {
 
 export interface IMessage extends Messages {
   _id: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MessagesDocument
   extends Document,
     Omit<Messages & { _id: ObjectId }, '_id'> {}
+
+export interface IGatewayDeleteMessage {
+  _id: string;
+  participants: IParticipant[];
+  message_sender_by: IUserCreated;
+}

@@ -48,7 +48,13 @@ const ConversationInfor: FC<IPropConversation> = ({
               font-light
             '
               >
-                {format(new Date(conversation?.lastMessageSendAt), 'p')}
+                {format(
+                  new Date(
+                    conversation?.lastMessage?.createdAt ??
+                      conversation?.createdAt
+                  ),
+                  'p'
+                )}
               </p>
             )}
           </div>
@@ -59,7 +65,7 @@ const ConversationInfor: FC<IPropConversation> = ({
 
           ${true ? 'text-gray-500' : 'text-black font-medium'}`}
           >
-            {conversation.lastMessage}
+            {conversation?.lastMessage?.message_content}
           </p>
         </div>
       </div>

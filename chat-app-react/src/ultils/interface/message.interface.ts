@@ -1,12 +1,16 @@
 export interface IDataGetMessageOfConversation {
-  conversation_type: string;
   conversationId: string;
 }
 
 export interface IDataDeleteMessageOfConversation {
   conversationId: string;
   conversation_type: string | undefined;
-  messageId: string;
+  message_id: string;
+}
+
+export interface IDataUpdateMessageOfConversation
+  extends IDataDeleteMessageOfConversation {
+  message_content: string;
 }
 
 export interface IParticipant {
@@ -23,10 +27,10 @@ export interface IConversation {
   _id: string;
   conversation_type: string;
   participants: IParticipant[];
-  lastMessage: string;
-  lastMessageSendAt: string;
+  lastMessage: IMessage;
   nameGroup: string;
   updatedAt: string;
+  createdAt: string;
   userId: string[];
   collection: string;
 }
@@ -49,14 +53,9 @@ export interface IAllMessageData {
   sortedBy: string;
 }
 
-export interface IDeleteMessage {
-  messageId: string;
-}
-
 export interface IDataUpdateLastMessage {
   conversation: IConversation;
-  lastMessage: string;
-  lastMessageSendAt: string;
+  lastMessage: IMessage;
 }
 
 export interface IDataFormatMessage {
@@ -69,4 +68,11 @@ export interface IDataFormatMessage {
 export interface IDataDeleteMessage {
   conversationId: string;
   messageId: string;
+}
+
+export interface IDataCreateMessage {
+  message_type: string;
+  message_content: string;
+  conversationId: string;
+  participants: IParticipant[];
 }

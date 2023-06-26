@@ -64,7 +64,7 @@ export class JwtService {
       const token = header.substring(7);
       const decoded = this.decodeToken(token, keyToken.publicKey);
       if (!decoded || clientId != decoded.id)
-        throw new HttpException('Invalid Token!', HttpStatus.FORBIDDEN);
+        throw new HttpException('Invalid Token!', HttpStatus.UNAUTHORIZED);
 
       delete user.password;
 
@@ -112,10 +112,10 @@ export class JwtService {
     } else {
       const keyToken = await this.keyTokenRepository.findByRefreshToken(token);
       if (!keyToken)
-        throw new HttpException('Un Authorization', HttpStatus.FORBIDDEN);
+        throw new HttpException('Un Authorization', HttpStatus.UNAUTHORIZED);
       decoded = this.decodeToken(token, keyToken.publicKey);
       if (decoded.id !== clientId)
-        throw new HttpException('Un Authorization', HttpStatus.FORBIDDEN);
+        throw new HttpException('Un Authorization', HttpStatus.UNAUTHORIZED);
 
       const { refreshToken, accessToken } = this.createTokenPair(
         decoded,
@@ -125,7 +125,7 @@ export class JwtService {
 
       return {
         refreshToken,
-        accessToken
+        accessToken,
       };
     }
   }

@@ -10,7 +10,6 @@ import Avatar, { AvatarOnline } from '../avatars/Avatar';
 import { ButtonRounded } from '../../pages/conversation/Conversation';
 import Message from '../message/Message';
 import useInnerWidth from '../../hooks/useInnterWidth';
-import myAxios from '../../ultils/myAxios';
 import { createNewMessageOfConversation } from '../../features/conversation/conversationSlice';
 import {
   selectMessage,
@@ -26,6 +25,7 @@ import {
   IUser,
 } from '../../ultils/interface';
 import { calculatorTime } from '../../ultils';
+import { messageService } from '../../features/message/messageService';
 
 export interface IPropConversationContent {
   user: IUser | null;
@@ -47,27 +47,28 @@ const ConversationContent: FC<IPropConversationContent> = memo(
     const socket = useContext(SocketContext);
 
     const dispatch = useAppDispatch();
+
     const { messages, isLoading } = useAppSelector(selectMessage);
+
     const handleSendMessage = async () => {
       if (conversation) {
         const body = {
           message_type: conversation?.conversation_type,
           message_content: messageValue,
           conversationId: conversation?._id,
+          participants: conversation.participants,
         };
-        const res = await myAxios.post('/message', body);
-
-        if (res.data.status === 200) {
+        const res = await messageService.createNewMessage(body);
+        if (res.status === 201) {
           dispatch(createNewMessage(res.data.metaData));
           const dataUpdate = {
-            lastMessage: res.data.metaData.message_content,
-            lastMessageSendAt: res.data.metaData.createdAt,
+            lastMessage: res.data.metaData,
             conversation,
           };
           dispatch(createNewMessageOfConversation(dataUpdate));
-          setMessageValue('');
-          inputRef.current?.focus();
         }
+        setMessageValue('');
+        inputRef.current?.focus();
       }
     };
 
@@ -96,10 +97,10 @@ const ConversationContent: FC<IPropConversationContent> = memo(
         };
       }
     }, [messageValue]);
+
     useEffect(() => {
       if (conversation) {
         const data = {
-          conversation_type: conversation.conversation_type,
           conversationId: conversation._id,
         };
         dispatch(fetchMessage(data));

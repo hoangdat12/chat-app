@@ -1,10 +1,10 @@
 import axios from 'axios';
 import {
+  clearLocalStorage,
   getRefreshTokenLocalStorageItem,
   getTokenLocalStorageItem,
   getUserLocalStorageItem,
 } from '.';
-import { logout } from '../features/auth/authService';
 
 const user = getUserLocalStorageItem();
 const token = getTokenLocalStorageItem();
@@ -42,18 +42,12 @@ myAxios.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    console.log(error);
-    if (
-      (error.response.status === 401 || error?.response?.status === 403) &&
-      !originalRequest._retry &&
-      token
-    ) {
+    if (error?.response?.status === 403 && !originalRequest._retry && token) {
       originalRequest._retry = true;
-
       try {
         const refreshToken = getRefreshTokenLocalStorageItem();
         if (!refreshToken) {
-          await logout();
+          clearLocalStorage();
           window.location.href = '/login';
           return;
         }
@@ -67,11 +61,10 @@ myAxios.interceptors.response.use(
           }
         );
         if (refreshResponse.status !== 200) {
-          await logout();
+          clearLocalStorage();
           window.location.href = '/login';
           return;
         }
-        console.log(refreshResponse);
         // Update the token and retry the original request
         localStorage.setItem(
           'token',
@@ -87,7 +80,7 @@ myAxios.interceptors.response.use(
         return axios(originalRequest);
       } catch (refreshError) {
         console.log('Token refresh failed:', refreshError);
-        await logout();
+        clearLocalStorage();
         window.location.href = '/login';
         return;
       }

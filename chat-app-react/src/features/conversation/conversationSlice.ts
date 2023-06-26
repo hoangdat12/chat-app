@@ -41,15 +41,18 @@ const conversationSlice = createSlice({
     ) => {
       const firstKey = state.conversations.keys().next().value;
       const conversationId = action.payload.conversation._id;
-
-      if (firstKey === conversationId) return;
+      if (firstKey === conversationId) {
+        const firstConversation = state.conversations.get(firstKey);
+        if (firstConversation) {
+          firstConversation.lastMessage = action.payload.lastMessage;
+        }
+        return;
+      }
       const conversation = state.conversations.get(conversationId);
-
       if (!conversation) return;
 
       // Update lastMessage up conversation
       conversation.lastMessage = action.payload.lastMessage;
-      conversation.lastMessageSendAt = action.payload.lastMessageSendAt;
       // Save with conversation is first
       const conversationUpdate = new Map([[conversationId, conversation]]);
       state.conversations.delete(conversationId);
@@ -57,6 +60,17 @@ const conversationSlice = createSlice({
         ...conversationUpdate,
         ...state.conversations,
       ]);
+    },
+    updateLastMessage: (
+      state,
+      action: PayloadAction<IDataUpdateLastMessage>
+    ) => {
+      const conversation = state.conversations.get(
+        action.payload.conversation._id
+      );
+      if (conversation) {
+        conversation.lastMessage = action.payload.lastMessage;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -79,7 +93,10 @@ const conversationSlice = createSlice({
   },
 });
 
-export const { createConversation, createNewMessageOfConversation } =
-  conversationSlice.actions;
+export const {
+  createConversation,
+  createNewMessageOfConversation,
+  updateLastMessage,
+} = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

@@ -24,10 +24,7 @@ const initialState: IMessageInitialState = {
 export const fetchMessageOfConversation = createAsyncThunk(
   'message/get',
   async (data: IDataGetMessageOfConversation) => {
-    return await messageService.fetchMessageOfConversation(
-      data.conversation_type,
-      data.conversationId
-    );
+    return await messageService.fetchMessageOfConversation(data.conversationId);
   }
 );
 
@@ -89,6 +86,24 @@ const messageSlice = createSlice({
         return true;
       });
     },
+    updateMessage: (state, action: PayloadAction<IMessage>) => {
+      const message = action.payload;
+      state.messages.map((msgs) => {
+        if (
+          new Date(msgs.messages[0].createdAt).getTime() -
+            new Date(message.createdAt).getTime() <
+          10 * 1000 * 60
+        ) {
+          msgs.messages.map((msg) => {
+            if (msg._id === message._id) {
+              msg.message_content = message.message_content;
+              msg.updatedAt = message.updatedAt;
+            }
+          });
+        }
+        return true;
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -108,6 +123,7 @@ const messageSlice = createSlice({
   },
 });
 
-export const { createNewMessage, deleteMessage } = messageSlice.actions;
+export const { createNewMessage, deleteMessage, updateMessage } =
+  messageSlice.actions;
 export default messageSlice.reducer;
 export const selectMessage = (state: RootState) => state.message;

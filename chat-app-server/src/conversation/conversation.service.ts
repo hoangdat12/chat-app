@@ -56,11 +56,18 @@ export class ConversationService {
     if (!foundConversation)
       throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
 
-    return await this.messageRepository.findMessageOfConversation(
+    const messages = await this.messageRepository.findMessageOfConversation(
       user._id,
       conversationId,
       pagination,
     );
+
+    return {
+      messages,
+      limit: pagination.limit,
+      page: pagination.page,
+      sortBy: pagination.sortBy,
+    };
   }
 
   // Delete conversation but still join group or conversation
