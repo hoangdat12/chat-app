@@ -125,7 +125,7 @@ export class JwtService {
 
       return {
         refreshToken,
-        response: new Ok<string>(accessToken, 'Refresh Token Success!'),
+        accessToken
       };
     }
   }

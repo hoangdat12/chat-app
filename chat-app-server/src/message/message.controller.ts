@@ -33,7 +33,6 @@ export class MessageController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      user._id = user._id.toString();
       const newMessage = await this.messageService.createMessage(user, body);
       this.evenEmiter.emit('message.create', newMessage);
       return new Ok<any>(newMessage);
@@ -43,38 +42,31 @@ export class MessageController {
     }
   }
 
-  @Patch('/:messageId')
-  async updateMessage(
-    @Param('messageId') messageId: string,
-    @Req() req: Request,
-    @Body() body: UpdateMessageData,
-  ) {
+  @Patch()
+  async updateMessage(@Req() req: Request, @Body() body: UpdateMessageData) {
     try {
       const errors = await validate(body);
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.messageService.update(user, messageId, body);
+      return await this.messageService.update(user, body);
     } catch (err) {
       console.log(err);
       throw err;
     }
   }
 
-  @Delete('/:messageId')
-  async deleteMessage(
-    @Param('messageId') messageId: string,
-    @Req() req: Request,
-    @Body() body: DelelteMessageData,
-  ) {
+  @Delete()
+  async deleteMessage(@Req() req: Request, @Body() body: DelelteMessageData) {
     try {
+      console.log(body);
       const errors = await validate(body);
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.messageService.delete(user, messageId, body);
+      return await this.messageService.delete(user, body);
     } catch (err) {
       console.log(err);
       throw err;

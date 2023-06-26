@@ -17,6 +17,7 @@ import { GitHubAuthGuard } from './github/github.guard';
 import { JwtService } from '../jwt/jwt.service';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
+import { Ok } from 'src/ultils/response';
 
 @Controller('auth')
 export class AuthController {
@@ -133,14 +134,14 @@ export class AuthController {
   @Post('refresh-token')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     try {
-      const { refreshToken, response } = await this.jwtService.refreshToken(
+      const { refreshToken, accessToken } = await this.jwtService.refreshToken(
         req,
       );
       // res.cookie('refreshToken', refreshToken, {
       //   httpOnly: true,
       //   maxAge: 129600000,
       // });
-      return response.sender(res);
+      return new Ok({ refreshToken, token: accessToken }).sender(res);
     } catch (err) {
       console.log(err);
       throw err;

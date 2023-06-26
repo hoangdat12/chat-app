@@ -1,18 +1,14 @@
 import { PayloadCreateConversation } from '../../conversation/conversation.dto';
 import { ConversationRepository } from '../../conversation/conversation.repository';
 import { MessageRepository } from '../../message/message.repository';
-import { ConstructorMessage, UserJoinChat } from '../../message/message.dto';
+import { UserJoinChat } from '../../message/message.dto';
+import { Messages } from 'src/schema/model/message.model';
+import { ObjectId } from 'mongoose';
 
 export interface IConstructorConversation extends PayloadCreateConversation {
   conversationId: string | null;
   conversationRepository: ConversationRepository;
   messageRepository: MessageRepository;
-}
-
-export interface Constructor extends ConstructorMessage {
-  message_sender_by: UserJoinChat | null;
-  messageRepository: MessageRepository | null;
-  conversationRepository: ConversationRepository | null;
 }
 
 export interface IParticipant extends UserJoinChat {
@@ -22,8 +18,6 @@ export interface IParticipant extends UserJoinChat {
 export interface IPayloadCreateConversation {
   conversation_type: string;
   participants: IParticipant[];
-  lastMessage: string | null;
-  lastMessageSendAt: Date | null;
 }
 
 export interface IPayloadCreateGroup {
@@ -34,3 +28,11 @@ export interface IPayloadCreateGroup {
   creators: UserJoinChat[] | null;
   name: string | null;
 }
+
+export interface IMessage extends Messages {
+  _id: string;
+}
+
+export interface MessagesDocument
+  extends Document,
+    Omit<Messages & { _id: ObjectId }, '_id'> {}

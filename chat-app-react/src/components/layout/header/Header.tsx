@@ -13,7 +13,7 @@ import { FC, useState } from 'react';
 import Avatar from '../../avatars/Avatar';
 import useInnerWidth from '../../../hooks/useInnterWidth';
 import Search from '../../search/Search';
-import CreateNewGroup from '../../message/CreateNewGroup';
+import CreateNewGroup from '../../conversation/CreateNewGroup';
 
 export interface IPropHeader {
   isOpen: boolean;

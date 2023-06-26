@@ -1,6 +1,7 @@
 import { getTimeSendMessage, getUserLocalStorageItem } from '../../ultils';
 import {
   IAllMessageData,
+  IDataDeleteMessageOfConversation,
   IDataFormatMessage,
   IDataReceived,
   IMessage,
@@ -81,7 +82,16 @@ const fetchMessageOfConversation = async (
   }
 };
 
+const deleteMessageOfConversation = async (
+  data: IDataDeleteMessageOfConversation
+) => {
+  const { messageId, ...payload } = data;
+  const res = await myAxios.delete(`message/${messageId}`, { data: payload });
+  console.log(res);
+};
+
 export const messageService = {
   fetchMessageOfConversation,
   formatMessage,
+  deleteMessageOfConversation,
 };

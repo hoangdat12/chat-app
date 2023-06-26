@@ -2,8 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Messages } from '../schema/model/message.model';
 import { Model } from 'mongoose';
-import { PayloadCreateMessage } from './message.dto';
-import { Pagination } from '../ultils/interface';
+import {
+  DelelteMessageData,
+  PayloadCreateMessage,
+  UpdateMessageData,
+} from './message.dto';
+import { IUserCreated, Pagination } from '../ultils/interface';
 
 export interface IDataDeleteMessage {
   messageType: string;
@@ -75,12 +79,8 @@ export class MessageRepository {
     return await this.messageModel
       .find({
         message_conversation: conversationId,
-        message_received: {
-          $elemMatch: {
-            enable: true,
-            userId: userId.toString(),
-          },
-        },
+        'message_received.enable': true,
+        'message_received.userId': userId.toString(),
       })
       .limit(limit)
       .skip(offset)
@@ -89,26 +89,46 @@ export class MessageRepository {
       .exec();
   }
 
-  async updateMessage(data: IDateUpdateMessage) {
+  async updateMessage(data: UpdateMessageData) {
     return await this.messageModel.findOneAndUpdate(
-      { _id: data.messageId },
-      { message_content: data.messageContent },
+      { _id: data.message_id },
+      { message_content: data.message_content },
       { new: true },
     );
   }
 
-  async delete(data: IDataDeleteMessage) {
+  async delete(data: DelelteMessageData) {
     return await this.messageModel.deleteOne({
-      _id: data.messageId,
+      _id: data.message_id,
       message_conversation: data.conversationId,
     });
   }
 
-  async createMessageConversation(data: PayloadCreateMessage) {
+  async createMessageConversation(
+    user: IUserCreated,
+    data: PayloadCreateMessage,
+  ) {
+    const message_sender_by = {
+      userId: user._id,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      userName: `${user.firstName} ${user.lastName}`,
+      enable: true,
+    };
     const { conversationId, ...payload } = data;
     return await this.messageModel.create({
       ...payload,
       message_conversation: conversationId,
+      message_sender_by,
     });
+  }
+
+  async findFristMessage(conversationId: string) {
+    return await this.messageModel
+      .find({ message_conversation: conversationId })
+      .sort({ updatedAt: -1 })
+      .limit(2)
+      .lean()
+      .exec();
   }
 }

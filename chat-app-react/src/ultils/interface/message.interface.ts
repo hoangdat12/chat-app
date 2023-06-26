@@ -3,25 +3,9 @@ export interface IDataGetMessageOfConversation {
   conversationId: string;
 }
 
-export interface IMessage {
-  _id: string;
-  message_content: string;
-  message_conversation: string;
-  message_received: IParticipant[];
-  message_sender_by: IParticipant;
-  message_type: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IAllMessageData {
-  messages: IMessage[];
-  limit: number;
-  page: number;
-  sortedBy: string;
-}
-
-export interface IDeleteMessage {
+export interface IDataDeleteMessageOfConversation {
+  conversationId: string;
+  conversation_type: string | undefined;
   messageId: string;
 }
 
@@ -47,10 +31,26 @@ export interface IConversation {
   collection: string;
 }
 
-export interface IInitialStateConversation {
-  conversations: Map<string, IConversation>;
-  isLoading: boolean;
-  status: 'idle' | 'pending' | 'succeeded' | 'failed';
+export interface IMessage {
+  _id: string;
+  message_content: string;
+  message_conversation: string;
+  message_received: IParticipant[];
+  message_sender_by: IParticipant;
+  message_type: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IAllMessageData {
+  messages: IMessage[];
+  limit: number;
+  page: number;
+  sortedBy: string;
+}
+
+export interface IDeleteMessage {
+  messageId: string;
 }
 
 export interface IDataUpdateLastMessage {
@@ -64,4 +64,9 @@ export interface IDataFormatMessage {
   messages: IMessage[];
   myMessage: boolean;
   timeSendMessage: string | null;
+}
+
+export interface IDataDeleteMessage {
+  conversationId: string;
+  messageId: string;
 }

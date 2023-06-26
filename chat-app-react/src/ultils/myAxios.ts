@@ -8,7 +8,6 @@ import { logout } from '../features/auth/authService';
 
 const user = getUserLocalStorageItem();
 const token = getTokenLocalStorageItem();
-
 const myAxios = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
   headers: {
@@ -43,6 +42,7 @@ myAxios.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    console.log(error);
     if (
       (error.response.status === 401 || error?.response?.status === 403) &&
       !originalRequest._retry &&
@@ -54,6 +54,7 @@ myAxios.interceptors.response.use(
         const refreshToken = getRefreshTokenLocalStorageItem();
         if (!refreshToken) {
           await logout();
+          window.location.href = '/login';
           return;
         }
         const refreshResponse = await myAxios.post(
@@ -65,18 +66,29 @@ myAxios.interceptors.response.use(
             },
           }
         );
-
-        const { token: newToken } = refreshResponse.data;
-
+        if (refreshResponse.status !== 200) {
+          await logout();
+          window.location.href = '/login';
+          return;
+        }
+        console.log(refreshResponse);
         // Update the token and retry the original request
-        localStorage.setItem('token', JSON.stringify(newToken));
+        localStorage.setItem(
+          'token',
+          JSON.stringify(refreshResponse.data.metaData.token)
+        );
+        localStorage.setItem(
+          'refreshToken',
+          JSON.stringify(refreshResponse.data.metaData.refreshToken)
+        );
 
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.metaData.token}`;
         console.log('refresh Token successfully!');
         return axios(originalRequest);
       } catch (refreshError) {
         console.log('Token refresh failed:', refreshError);
         await logout();
+        window.location.href = '/login';
         return;
       }
     }

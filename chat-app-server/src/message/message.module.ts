@@ -1,18 +1,16 @@
-import { Global, Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { MessageController } from './message.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessagesModel } from '../schema/model/message.model';
-import { MessageFactory } from './message.base';
 import { MessageRepository } from './message.repository';
 import { ConversationModule } from '../conversation/conversation.module';
-
 @Module({
   imports: [
     MongooseModule.forFeature([MessagesModel]),
-    // ConversationModule,
+    forwardRef(() => ConversationModule),
   ],
-  providers: [MessageService, MessageFactory, MessageRepository],
+  providers: [MessageService, MessageRepository],
   controllers: [MessageController],
   exports: [MessageRepository],
 })

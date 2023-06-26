@@ -2,11 +2,9 @@ import { FC, MouseEventHandler, ReactNode, useEffect, useState } from 'react';
 
 import Layout from '../../components/layout/Layout';
 import './conversation.scss';
-import ConversationContent from '../../components/message/ConversationContent';
 import { Link, Route, Routes } from 'react-router-dom';
 import useInnerWidth from '../../hooks/useInnterWidth';
-import ConversationList from '../../components/message/ConversationList';
-import ConversationSetting from '../../components/message/ConversationSetting';
+import ConversationList from '../../components/conversation/ConversationList';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
   fetchConversationOfUser,
@@ -14,6 +12,8 @@ import {
 } from '../../features/conversation/conversationSlice';
 import { getUserLocalStorageItem } from '../../ultils';
 import { IConversation } from '../../ultils/interface';
+import ConversationContent from '../../components/conversation/ConversationContent';
+import ConversationSetting from '../../components/conversation/ConversationSetting';
 
 export interface IPropButtonRounded {
   icon: ReactNode;

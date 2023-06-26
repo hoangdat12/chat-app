@@ -1,83 +1,183 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { MessageFactory } from './message.base';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
+import { ConversationRepository } from '../conversation/conversation.repository';
 import { MessageRepository } from './message.repository';
-import { Constructor, IUserCreated } from '../ultils/interface';
+import { IUserCreated } from 'src/ultils/interface';
 import {
   CreateMessageData,
   DelelteMessageData,
   UpdateMessageData,
-} from './message.dto';
-import { ConversationRepository } from '../conversation/conversation.repository';
+} from 'src/message/message.dto';
+import { MessageType } from 'src/ultils/constant';
+import { ConversationService } from 'src/conversation/conversation.service';
+import { PayloadCreateConversation } from 'src/conversation/conversation.dto';
 
 @Injectable()
 export class MessageService {
   constructor(
-    private readonly messageFactory: MessageFactory,
     private readonly messageRepository: MessageRepository,
     private readonly conversationRepository: ConversationRepository,
+    @Inject(forwardRef(() => ConversationService))
+    private readonly conversationService: ConversationService,
   ) {}
 
   async createMessage(user: IUserCreated, data: CreateMessageData) {
-    const conversation = await this.conversationRepository.findById(
-      data.message_type,
-      data.conversationId,
+    let { message_type, message_content, conversationId, participants } = data;
+    // Check user is Exist in conversation
+    const conversation = await this.conversationRepository.findUserExist(
+      conversationId,
+      user._id,
+    );
+    // Not found group
+    if (message_type === MessageType.GROUP && !conversation)
+      throw new HttpException(
+        'Conversation not found!',
+        HttpStatus.BAD_REQUEST,
+      );
+    // Not found conversation
+    if (message_type === MessageType.CONVERSATION && !conversation) {
+      console.log('Not found conversation!');
+      const payload: PayloadCreateConversation = {
+        conversation_type: MessageType.CONVERSATION,
+        participants,
+        creators: null,
+        avatarUrl: null,
+        nameGroup: null,
+      };
+      const newConversation = await this.conversationService.createConversation(
+        user,
+        payload,
+      );
+      conversationId = newConversation._id.toString();
+    }
+    const payload = {
+      message_type,
+      message_content,
+      conversationId,
+      message_received: conversation?.participants ?? participants,
+    };
+
+    // Create new Message
+    const message = await this.messageRepository.createMessageConversation(
+      user,
+      payload,
+    );
+    if (!message) {
+      throw new HttpException(
+        'Create message Error!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    // Update last message
+    if (message_type === MessageType.GROUP) {
+      const group =
+        await this.conversationRepository.updateLastConversationMessage(
+          conversationId,
+          this.convertObjectIdToString(message),
+        );
+
+      if (!group)
+        throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
+    } else {
+      const conversation =
+        await this.conversationRepository.updateLastConversationMessage(
+          conversationId,
+          this.convertObjectIdToString(message),
+        );
+
+      if (!conversation)
+        throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return message;
+  }
+
+  async update(user: IUserCreated, data: UpdateMessageData) {
+    const { message_type, message_content, message_id, conversationId } = data;
+    const conversation = await this.conversationRepository.findUserExist(
+      conversationId,
+      user._id,
     );
     if (!conversation)
       throw new HttpException(
         'Conversation not found!',
         HttpStatus.BAD_REQUEST,
       );
-    const payload = this.getPayload(user, data) as unknown as Constructor;
-
-    const newMessage = await this.messageFactory.createNewMessage(
-      payload.message_type,
-      {
-        ...payload,
-        message_received: conversation.participants,
-      },
-    );
-    return newMessage;
-  }
-  // Go Tin nhat
-  async delete(
-    user: IUserCreated,
-    messageId: string,
-    data: DelelteMessageData,
-  ) {
-    const payload = this.getPayload(user, data) as unknown as Constructor;
-    return await this.messageFactory.deleteMessage(
-      payload.message_type,
-      messageId,
-      payload,
-    );
-  }
-
-  async update(user: IUserCreated, messageId: string, data: UpdateMessageData) {
-    const payload = this.getPayload(user, data) as unknown as Constructor;
-    const dataUserJoinChat = await this.messageFactory.updateMessage(
-      payload.message_type,
-      messageId,
-      payload,
-    );
-    console.log(dataUserJoinChat);
-    return dataUserJoinChat;
-  }
-
-  getPayload(user: IUserCreated, data: any) {
-    const userSenderMessage = {
-      userId: user._id,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-      userName: `${user.firstName} ${user.lastName}`,
-    };
 
     const payload = {
-      ...data,
-      message_sender_by: userSenderMessage,
-      messageRepository: this.messageRepository,
-      conversationRepository: this.conversationRepository,
+      message_type,
+      message_id,
+      message_content,
+      conversationId,
+      participants: conversation.participants,
     };
+    const messageUpdate = await this.messageRepository.updateMessage(payload);
 
-    return payload;
+    if (!messageUpdate)
+      throw new HttpException('DB error!', HttpStatus.BAD_REQUEST);
+    else {
+      // if (conversation.lastMessage)
+      // Update last message if update or delete lastMessage
+      if (conversation.lastMessage._id === messageUpdate._id.toString()) {
+        conversation.lastMessage = this.convertObjectIdToString(messageUpdate);
+      }
+      return messageUpdate;
+    }
+  }
+
+  async delete(user: IUserCreated, data: DelelteMessageData): Promise<any> {
+    const { conversationId } = data;
+    const conversation = await this.conversationRepository.findUserExist(
+      conversationId,
+      user._id,
+    );
+    if (!conversation)
+      throw new HttpException(
+        'Conversation not found!',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (conversation.lastMessage._id === data.message_id) {
+      // get first message
+      // If conversation just created and delete message just send
+      const firstMessageOfConversation =
+        await this.messageRepository.findFristMessage(conversationId);
+      if (firstMessageOfConversation.length === 1) {
+        conversation.lastMessage = null;
+      }
+      // Else if had many message in conversation
+      else {
+        conversation.lastMessage = this.convertObjectIdToString(
+          firstMessageOfConversation[1],
+        );
+      }
+    }
+
+    return await this.messageRepository.delete(data);
+  }
+
+  convertObjectIdToString(message: any) {
+    const {
+      _id,
+      message_type: type,
+      message_sender_by,
+      message_content: content,
+      message_conversation,
+      message_received,
+    } = message;
+    return {
+      _id: _id.toString(),
+      message_type: type,
+      message_sender_by,
+      message_content: content,
+      message_conversation,
+      message_received,
+    };
   }
 }

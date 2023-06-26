@@ -1,96 +1,37 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Conversation } from '../schema/model/conversation.model';
-import { Group } from '../schema/model/group.model';
 import { UserJoinChat } from '../message/message.dto';
-import {
-  IParticipant,
-  IPayloadCreateConversation,
-  IPayloadCreateGroup,
-  Pagination,
-} from '../ultils/interface';
+import { IMessage, IParticipant, Pagination } from '../ultils/interface';
+import { PayloadCreateConversation } from './conversation.dto';
 
 @Injectable()
 export class ConversationRepository {
   constructor(
     @InjectModel(Conversation.name)
     private readonly conversationModel: Model<Conversation>,
-    @InjectModel(Group.name) private readonly groupModel: Model<Group>,
   ) {}
 
   // COMMON
-  async findById(type: string, conversationId: string) {
-    switch (type) {
-      case 'conversation':
-        return await this.findConversationById(conversationId);
-      case 'group':
-        return await this.findGroupById(conversationId);
-      default:
-        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
-    }
+  async findById(conversationId: string) {
+    return await this.conversationModel.findById(conversationId);
   }
 
-  async findUserExist(type: string, conversationId: string, userId: string) {
-    switch (type) {
-      case 'conversation':
-        return await this.conversationModel
-          .findOne({
-            _id: conversationId,
-            'participants.userId': userId,
-            'participants.enable': true,
-          })
-          .lean();
-      case 'group':
-        return await this.groupModel
-          .findOne({
-            _id: conversationId,
-            'participants.userId': userId,
-            'participants.enable': true,
-          })
-          .lean();
-      default:
-        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
-    }
+  async findUserExist(conversationId: string, userId: string) {
+    return await this.conversationModel.findOne({
+      _id: conversationId,
+      'participants.userId': userId.toString(),
+      'participants.enable': true,
+    });
   }
 
-  async findByIdWithMethodSave(type: string, conversationId: string) {
-    switch (type) {
-      case 'conversation':
-        return await this.conversationModel.findOne({ _id: conversationId });
-      case 'group':
-        return await this.groupModel.findOne({ _id: conversationId });
-      default:
-        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async changeTopicConversation(
-    type: string,
-    conversationId: string,
-    topic: string,
-  ) {
-    switch (type) {
-      case 'conversation':
-        return await this.conversationModel.findOneAndUpdate(
-          { _id: conversationId },
-          { topic },
-          { new: true },
-        );
-      case 'group':
-        return await this.groupModel.findOneAndUpdate(
-          { _id: conversationId },
-          { topic },
-          { new: true },
-        );
-      default:
-        throw new HttpException('Type not found', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  // CONVERSATION
-  async findConversationById(conversationId: string) {
-    return await this.conversationModel.findOne({ _id: conversationId }).lean();
+  async changeTopicConversation(conversationId: string, topic: string) {
+    return await this.conversationModel.findOneAndUpdate(
+      { _id: conversationId },
+      { topic },
+      { new: true },
+    );
   }
 
   async findALl(userId: string, pagination: Pagination) {
@@ -99,7 +40,7 @@ export class ConversationRepository {
     return await this.conversationModel.aggregate([
       {
         $match: {
-          'participants.userId': userId,
+          'participants.userId': userId.toString(),
         },
       },
       {
@@ -119,7 +60,7 @@ export class ConversationRepository {
         $unionWith: {
           coll: 'Group',
           pipeline: [
-            { $match: { 'participants.userId': userId } },
+            { $match: { 'participants.userId': userId.toString() } },
             {
               $project: {
                 _id: 1,
@@ -143,14 +84,11 @@ export class ConversationRepository {
     ]);
   }
 
-  async createConversation(
-    userId: string,
-    payload: IPayloadCreateConversation,
-  ) {
-    payload.participants = this.modifyDataPaticipants(
-      payload.participants,
-      userId,
-    );
+  async createConversation(payload: PayloadCreateConversation) {
+    for (let participant of payload.participants) {
+      participant.enable = true;
+      participant.isReadLastMessage = false;
+    }
     return await this.conversationModel.create(payload);
   }
 
@@ -158,17 +96,20 @@ export class ConversationRepository {
     return await this.conversationModel
       .find({
         $elemMatch: {
-          'participants.userId': userId,
+          'participants.userId': userId.toString(),
         },
       })
       .lean();
   }
 
-  async updateLastConversationMessage(conversationId: string, content: string) {
+  async updateLastConversationMessage(
+    conversationId: string,
+    message: IMessage,
+  ) {
     return await this.conversationModel.findOneAndUpdate(
       { _id: conversationId },
       {
-        lastMessage: content,
+        lastMessage: message,
         lastMessageSendAt: Date.now(),
         $set: { 'participants.$[].isReadLastMessage': false },
       },
@@ -176,45 +117,8 @@ export class ConversationRepository {
     );
   }
 
-  // GROUP
-  async findGroupById(groupId: string) {
-    return await this.groupModel.findOne({ _id: groupId }).lean();
-  }
-
-  async createGroup(payload: IPayloadCreateGroup) {
-    payload.participants = this.modifyDataPaticipants(
-      payload.participants,
-      payload.creators[0].userId,
-    );
-    const { name, ...data } = payload;
-    let avatarUrl = null;
-    return await this.groupModel.create({
-      ...data,
-      nameGroup: name,
-      avatarUrl,
-    });
-  }
-
-  async findGroupOfUser(userId: string) {
-    return await this.groupModel
-      .find({
-        $elemMatch: {
-          'participants.userId': userId,
-        },
-      })
-      .lean();
-  }
-
-  async updateLastGroupMessage(conversationId: string, content: string) {
-    return await this.groupModel.findOneAndUpdate(
-      { _id: conversationId },
-      { lastMessage: content, lastMessageSendAt: Date.now() },
-      { new: true },
-    );
-  }
-
   async renameGroup(conversationId: string, nameGroup: string) {
-    return await this.groupModel.findOneAndUpdate(
+    return await this.conversationModel.findOneAndUpdate(
       { _id: conversationId },
       { nameGroup },
       { new: true },
@@ -223,7 +127,7 @@ export class ConversationRepository {
 
   // Kik user out of group
   async deletePaticipantOfGroup(conversationId: string, participantId: string) {
-    return await this.groupModel.findOneAndUpdate(
+    return await this.conversationModel.findOneAndUpdate(
       {
         _id: conversationId,
         participants: { $elemMatch: { userId: participantId } },
@@ -242,43 +146,48 @@ export class ConversationRepository {
   // else add new Member
   async addPaticipantOfConversation(
     conversationId: string,
-    paticipant: UserJoinChat,
+    participants: IParticipant[],
   ) {
-    return await this.groupModel.findOneAndUpdate(
-      { _id: conversationId },
+    return await this.conversationModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+      },
       {
         $push: {
-          participants: {
-            paticipant,
-          },
+          participants: { $each: participants },
         },
       },
-      { new: true },
+      {
+        new: true,
+      },
     );
   }
 
   async addPaticipantOfExistInConversation(
     conversationId: string,
-    participantId: string,
+    participantIds: string[],
   ) {
-    return await this.groupModel.findOneAndUpdate(
+    await this.conversationModel.updateMany(
       {
         _id: conversationId,
-        participants: { $elemMatch: { userId: participantId } },
+        'participants.userId': { $in: participantIds },
       },
       {
         $set: {
-          'participants.$.enable': true,
+          'participants.$[elem].enable': true,
         },
       },
-      { new: true },
+      {
+        arrayFilters: [{ 'elem.userId': { $in: participantIds } }],
+        new: true,
+      },
     );
   }
 
   // ULTILS
   modifyDataPaticipants(participants: IParticipant[], userId: string) {
     for (let participant of participants) {
-      if (participant.userId === userId) {
+      if (participant.userId === userId.toString()) {
         participant.isReadLastMessage = true;
       } else {
         participant.isReadLastMessage = false;

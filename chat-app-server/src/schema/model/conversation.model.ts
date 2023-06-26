@@ -1,5 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IParticipant } from '../../ultils/interface';
+import { IMessage, IParticipant } from '../../ultils/interface';
+import { UserJoinChat } from 'src/message/message.dto';
+import { Types } from 'mongoose';
+import { Messages } from './message.model';
 
 @Schema({ collection: 'Conversation', timestamps: true })
 export class Conversation {
@@ -9,14 +12,20 @@ export class Conversation {
   @Prop({ required: true })
   participants: IParticipant[];
 
-  @Prop()
-  lastMessage: string;
-
-  @Prop()
-  lastMessageSendAt: Date;
+  @Prop({ type: Types.ObjectId, ref: Messages.name })
+  lastMessage: IMessage;
 
   @Prop({ default: 'default' })
   topic: string;
+
+  @Prop()
+  creators: UserJoinChat[] | null;
+
+  @Prop()
+  nameGroup: string | null;
+
+  @Prop()
+  avatarUrl: string | null;
 }
 const ConversationSchema = SchemaFactory.createForClass(Conversation);
 ConversationSchema.index({

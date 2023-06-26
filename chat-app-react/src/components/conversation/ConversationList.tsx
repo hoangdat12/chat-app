@@ -29,7 +29,6 @@ const ConversationList: FC<IPropConversationList> = ({
   const [activeAfterSendMessage, setActiveAfterSendMessage] = useState('');
 
   const handleActive = (idx: number, conversation: IConversation) => {
-    console.log('conversation::: ', conversation);
     setActive(idx);
     setActiveAfterSendMessage(conversation._id);
     setConversationSelected(conversation);
@@ -63,7 +62,7 @@ const ConversationList: FC<IPropConversationList> = ({
         ))}
       </div>
 
-      <div className='max-h-[calc(100vh-14rem)] sm:max-h-[calc(100vh-10.5rem)] scrollbar-hide mt-4 border-t border-[#e8ebed] overflow-y-scroll'>
+      <div className='max-h-[calc(100vh-14rem)] sm:max-h-[calc(100vh-10.5rem)] mt-4 border-t border-[#e8ebed] overflow-y-scroll scroll-container overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent'>
         {Array.from(conversations.values()).map(
           (conversation: IConversation, idx) => {
             const { name, avatarUrl } = getNameAndAvatarOfConversation(

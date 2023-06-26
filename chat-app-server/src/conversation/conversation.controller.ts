@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { Request } from 'express';
@@ -21,6 +22,7 @@ import {
   RenameGroup,
 } from './conversation.dto';
 import { validate } from 'class-validator';
+import { Ok } from 'src/ultils/response';
 
 @Controller('conversation')
 export class ConversationController {
@@ -44,11 +46,10 @@ export class ConversationController {
     }
   }
 
-  @Get('/:conversationType/:conversationId')
+  @Get('/:conversationId')
   async getMessageOfConversation(
     @Req() req: Request,
     @Param('conversationId') conversationId: string,
-    @Param('conversationType') conversationType: string,
     @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('sortBy') sortBy: string,
@@ -60,14 +61,12 @@ export class ConversationController {
         limit: limit || 50,
         sortBy: sortBy || 'ctime',
       };
-      return await this.conversationService.getMessageOfConversation(
+      const response = await this.conversationService.getMessageOfConversation(
         user,
-        {
-          conversationType,
-          conversationId,
-        },
+        { conversationId },
         pagination,
       );
+      return new Ok(response);
     } catch (err) {
       console.log(err);
       throw err;
@@ -78,13 +77,11 @@ export class ConversationController {
   async deleteConversation(
     @Param('conversationId') conversationId: string,
     @Req() req: Request,
-    @Body('conversationType') conversationType: string,
   ) {
     try {
       const user = req.user as IUserCreated;
       return await this.conversationService.deleteConversation(user, {
         conversationId,
-        conversationType,
       });
     } catch (err) {
       console.log(err);
@@ -103,10 +100,12 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.conversationService.deletePaticipantOfConversation(
-        user,
-        body,
-      );
+      const response =
+        await this.conversationService.deletePaticipantOfConversation(
+          user,
+          body,
+        );
+      return new Ok(response);
     } catch (err) {
       console.log(err);
       throw err;
@@ -124,10 +123,9 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.conversationService.addPaticipantOfConversation(
-        user,
-        body,
-      );
+      const response =
+        await this.conversationService.addPaticipantOfConversation(user, body);
+      return new Ok(response);
     } catch (err) {
       console.log(err);
       throw err;

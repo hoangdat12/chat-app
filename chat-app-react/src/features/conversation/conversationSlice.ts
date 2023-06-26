@@ -1,11 +1,13 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { conversationService } from './conversationService';
-import {
-  IConversation,
-  IDataUpdateLastMessage,
-  IInitialStateConversation,
-} from '../../ultils/interface';
+import { IConversation, IDataUpdateLastMessage } from '../../ultils/interface';
+
+export interface IInitialStateConversation {
+  conversations: Map<string, IConversation>;
+  isLoading: boolean;
+  status: 'idle' | 'pending' | 'succeeded' | 'failed';
+}
 
 const initialState: IInitialStateConversation = {
   conversations: new Map<string, IConversation>(),

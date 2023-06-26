@@ -8,7 +8,7 @@ import { AiOutlineFileImage, AiOutlinePlusCircle } from 'react-icons/Ai';
 
 import Avatar, { AvatarOnline } from '../avatars/Avatar';
 import { ButtonRounded } from '../../pages/conversation/Conversation';
-import Message from './Message';
+import Message from '../message/Message';
 import useInnerWidth from '../../hooks/useInnterWidth';
 import myAxios from '../../ultils/myAxios';
 import { createNewMessageOfConversation } from '../../features/conversation/conversationSlice';
@@ -36,6 +36,7 @@ export interface IPropConversationContent {
 
 export interface IPropContent {
   messages: IDataFormatMessage[];
+  messageType: string | undefined;
 }
 
 const ConversationContent: FC<IPropConversationContent> = memo(
@@ -47,7 +48,6 @@ const ConversationContent: FC<IPropConversationContent> = memo(
 
     const dispatch = useAppDispatch();
     const { messages, isLoading } = useAppSelector(selectMessage);
-
     const handleSendMessage = async () => {
       if (conversation) {
         const body = {
@@ -180,9 +180,15 @@ const ConversationContent: FC<IPropConversationContent> = memo(
               <span className='loading-spinner'></span>
             </div>
           ) : conversation?.conversation_type === 'group' ? (
-            <ContentGroup messages={messages} />
+            <ContentGroup
+              messages={messages}
+              messageType={conversation?.conversation_type}
+            />
           ) : (
-            <Content messages={messages} />
+            <Content
+              messages={messages}
+              messageType={conversation?.conversation_type}
+            />
           )}
         </div>
 
@@ -223,7 +229,7 @@ const ConversationContent: FC<IPropConversationContent> = memo(
   }
 );
 
-export const Content: FC<IPropContent> = memo(({ messages }) => {
+export const Content: FC<IPropContent> = memo(({ messages, messageType }) => {
   return (
     <>
       {messages?.map((fmt, idx) => {
@@ -233,6 +239,7 @@ export const Content: FC<IPropContent> = memo(({ messages }) => {
               messages={fmt.messages}
               myMessage={fmt.myMessage}
               timeSendMessage={fmt.timeSendMessage}
+              messageType={messageType}
             />
           </div>
         );

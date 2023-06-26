@@ -15,17 +15,12 @@ export class PayloadCreateConversation {
 
   @IsNotEmpty()
   participants: IParticipant[];
-  lastMessage: string | null;
-  lastMessageSendAt: Date | null;
   creators: UserJoinChat[] | null;
-  name?: string | null;
+  nameGroup?: string | null;
   avatarUrl?: string;
 }
 
 export class GetDeleteMessageOfConversation {
-  @IsNotEmpty()
-  conversationType: string;
-
   @IsNotEmpty()
   conversationId: string;
 }
@@ -35,28 +30,40 @@ export class PayloadDeletePaticipant {
   conversationId: string;
 
   @IsNotEmpty()
-  paticipantId: string;
+  participantId: string;
 }
 
 export class PayloadAddPaticipant {
   @IsNotEmpty()
+  conversation_type: string;
+
+  @IsNotEmpty()
   conversationId: string;
 
   @IsNotEmpty()
-  paticipant: UserJoinChat;
+  participant: UserJoinChat;
 }
 
-export class ChangeTopic extends GetDeleteMessageOfConversation {
+export class ChangeTopic {
   @IsNotEmpty()
   topic: string;
+
+  @IsNotEmpty()
+  conversationId: string;
 }
 
-export class ChangeNickNameOfParticipant extends GetDeleteMessageOfConversation {
+export class ChangeNickNameOfParticipant {
   @IsNotEmpty()
   newNicknameOfUser: IInforUserChangeNickname[];
+
+  @IsNotEmpty()
+  conversationId: string;
 }
 
-export class RenameGroup extends GetDeleteMessageOfConversation {
+export class RenameGroup {
   @IsNotEmpty()
   nameGroup: string;
+
+  @IsNotEmpty()
+  conversationId: string;
 }

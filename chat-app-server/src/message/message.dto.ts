@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IParticipant } from 'src/ultils/interface';
 
 export class UserJoinChat {
   @IsNotEmpty()
@@ -17,21 +18,10 @@ export class PayloadCreateMessage {
   message_type: string;
   message_content: string;
   conversationId: string;
-  message_received: UserJoinChat | UserJoinChat[] | null;
-}
-
-export class ConstructorMessage {
-  message_type: string | null;
-
-  message_content?: string | null;
-
-  conversationId: string;
-
-  message_received?: UserJoinChat | UserJoinChat[] | null;
+  message_received: UserJoinChat[];
 }
 
 export class CreateMessageData {
-  @IsNotEmpty()
   message_type: string;
 
   @IsNotEmpty()
@@ -40,18 +30,20 @@ export class CreateMessageData {
   @IsNotEmpty()
   conversationId: string;
 
-  // @IsNotEmpty()
-  // message_received: UserJoinChat | UserJoinChat[];
+  participants: IParticipant[];
 }
 
 export class DelelteMessageData {
-  @IsNotEmpty()
   message_type: string;
 
   @IsNotEmpty()
   conversationId: string;
+
+  @IsNotEmpty()
+  message_id: string;
 }
 
-export class UpdateMessageData extends DelelteMessageData {
-  message_content: string | null;
+export class UpdateMessageData extends CreateMessageData {
+  @IsNotEmpty()
+  message_id: string;
 }

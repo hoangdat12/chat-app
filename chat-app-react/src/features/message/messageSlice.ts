@@ -2,6 +2,7 @@ import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { messageService } from './messageService';
 import {
+  IDataDeleteMessageOfConversation,
   IDataFormatMessage,
   IDataGetMessageOfConversation,
   IMessage,
@@ -27,6 +28,13 @@ export const fetchMessageOfConversation = createAsyncThunk(
       data.conversation_type,
       data.conversationId
     );
+  }
+);
+
+export const deleteMessageOfConversation = createAsyncThunk(
+  'message/delete',
+  async (data: IDataDeleteMessageOfConversation) => {
+    return await messageService.deleteMessageOfConversation(data);
   }
 );
 
@@ -63,8 +71,23 @@ const messageSlice = createSlice({
         state.messages = [newMessage, ...state.messages];
       }
     },
-    deleteMessage: (state, action: PayloadAction<string>) => {
-      console.log(action);
+    deleteMessage: (state, action: PayloadAction<IMessage>) => {
+      const message = action.payload;
+      state.messages = state.messages.filter((msgs) => {
+        if (
+          new Date(msgs.messages[0].createdAt).getTime() -
+            new Date(message.createdAt).getTime() <
+          10 * 1000 * 60
+        ) {
+          msgs.messages = msgs.messages.filter((msg) => {
+            return msg._id !== message._id;
+          });
+          if (msgs.messages.length <= 0) {
+            return false;
+          }
+        }
+        return true;
+      });
     },
   },
   extraReducers: (builder) => {
