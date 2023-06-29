@@ -50,7 +50,7 @@ const messageSlice = createSlice({
         new Date(action.payload?.createdAt).getTime() -
           new Date(firstMessage[0]?.createdAt).getTime() <
         5 * 1000 * 60;
-
+      console.log('Inside create message');
       if (condition && senderId === firstMessage[0].message_sender_by.userId)
         state.messages[0].messages = [action.payload, ...firstMessage];
       else {

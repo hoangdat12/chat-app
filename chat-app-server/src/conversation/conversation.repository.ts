@@ -184,6 +184,10 @@ export class ConversationRepository {
     );
   }
 
+  async deleteConversation(conversationId: string) {
+    return await this.conversationModel.deleteOne({ _id: conversationId });
+  }
+
   // ULTILS
   modifyDataPaticipants(participants: IParticipant[], userId: string) {
     for (let participant of participants) {

@@ -2,7 +2,7 @@ import { PayloadCreateConversation } from '../../conversation/conversation.dto';
 import { ConversationRepository } from '../../conversation/conversation.repository';
 import { MessageRepository } from '../../message/message.repository';
 import { UserJoinChat } from '../../message/message.dto';
-import { Messages } from 'src/schema/model/message.model';
+import { Messages } from '../../schema/model/message.model';
 import { ObjectId } from 'mongoose';
 import { IUserCreated } from './auth.interface';
 
@@ -44,4 +44,9 @@ export interface IGatewayDeleteMessage {
   _id: string;
   participants: IParticipant[];
   message_sender_by: IUserCreated;
+}
+
+export interface iSocketDeleteMessage {
+  message: IMessage;
+  lastMessage: IMessage;
 }

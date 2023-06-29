@@ -2,10 +2,10 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { TimeExpires, Headers } from '../ultils/constant';
 import { NextFunction, Request } from 'express';
-import { AuthRepository } from 'src/auth/repository/auth.repository';
-import { KeyTokenRepository } from 'src/auth/repository/keyToken.repository';
+import { AuthRepository } from '../auth/repository/auth.repository';
+import { KeyTokenRepository } from '../auth/repository/keyToken.repository';
 import { KeyToken } from '../schema/model/keyToken.model';
-import { Ok } from 'src/ultils/response';
+import { Ok } from '../ultils/response';
 
 export interface PayloadToken {
   id: string;

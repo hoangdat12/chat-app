@@ -40,7 +40,6 @@ const Header: FC<IPropHeader> = ({
 
   const handleOpen = () => {
     if (innerWidth >= 1024) {
-      console.log(isOpen);
       setIsOpen(!isOpen);
     }
     if (innerWidth <= 768) {

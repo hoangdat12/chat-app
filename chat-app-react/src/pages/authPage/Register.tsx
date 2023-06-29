@@ -1,15 +1,15 @@
-import * as yup from "yup";
-import { useFormik } from "formik";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/Ai";
-import { useState } from "react";
-import Slider from "react-slick";
-import { Link, useNavigate } from "react-router-dom";
+import * as yup from 'yup';
+import { useFormik } from 'formik';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/Ai';
+import { useState } from 'react';
+import Slider from 'react-slick';
+import { Link, useNavigate } from 'react-router-dom';
 
-import poster1 from "../../assets/poster/1.png";
-import poster2 from "../../assets/poster/2.png";
-import poster3 from "../../assets/poster/3.png";
-import poster4 from "../../assets/poster/4.png";
-import { register } from "../../features/auth/authService";
+import poster1 from '../../assets/poster/1.png';
+import poster2 from '../../assets/poster/2.png';
+import poster3 from '../../assets/poster/3.png';
+import poster4 from '../../assets/poster/4.png';
+import { register } from '../../features/auth/authService';
 
 export interface IRegisterData {
   email: string;
@@ -40,28 +40,27 @@ const Register = () => {
   const posters = [poster1, poster2, poster3, poster4];
 
   const registerSchema = yup.object().shape({
-    firstName: yup.string().required("First Name is required field"),
-    lastName: yup.string().required("Last Name is required field"),
+    firstName: yup.string().required('First Name is required field'),
+    lastName: yup.string().required('Last Name is required field'),
     email: yup
       .string()
-      .email("Please enter a valid email")
-      .required("Email is required field"),
-    password: yup.string().min(5).required("Password is required field"),
+      .email('Please enter a valid email')
+      .required('Email is required field'),
+    password: yup.string().min(5).required('Password is required field'),
     rePassword: yup
       .string()
-      .oneOf([yup.ref("password"), ""], "Passwords must match")
-      .required("Confirm password is a required field"),
+      .oneOf([yup.ref('password'), ''], 'Passwords must match')
+      .required('Confirm password is a required field'),
   });
 
   const handleLogin = async (data: IRegisterDataReceived) => {
     const { rePassword, ...payload } = data;
     setIsLoading(true);
     const response = await register(payload);
-    console.log("response", response);
     if (response.status === 201) {
       setIsLoading(false);
       setIsError(false);
-      navigate("/");
+      navigate('/');
     } else {
       setIsLoading(false);
       setIsError(true);
@@ -76,11 +75,11 @@ const Register = () => {
   const { errors, touched, handleBlur, handleChange, handleSubmit } = useFormik(
     {
       initialValues: {
-        email: "",
-        password: "",
-        rePassword: "",
-        firstName: "",
-        lastName: "",
+        email: '',
+        password: '',
+        rePassword: '',
+        firstName: '',
+        lastName: '',
       },
       validationSchema: registerSchema,
       onSubmit: handleLogin,
@@ -133,8 +132,8 @@ const Register = () => {
                     name='firstName'
                     className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
                       errors.firstName && touched.firstName
-                        ? "border-2 border-red-500"
-                        : ""
+                        ? 'border-2 border-red-500'
+                        : ''
                     }`}
                     type='text'
                     onChange={handleChange}
@@ -153,8 +152,8 @@ const Register = () => {
                     name='lastName'
                     className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
                       errors.lastName && touched.lastName
-                        ? "border-2 border-red-500"
-                        : ""
+                        ? 'border-2 border-red-500'
+                        : ''
                     }`}
                     type='text'
                     onChange={handleChange}
@@ -173,7 +172,7 @@ const Register = () => {
               <input
                 name='email'
                 className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
-                  errors.email && touched.email ? "border-2 border-red-500" : ""
+                  errors.email && touched.email ? 'border-2 border-red-500' : ''
                 }`}
                 type='text'
                 onChange={handleChange}
@@ -191,10 +190,10 @@ const Register = () => {
                   name='password'
                   className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
                     errors.password && touched.password
-                      ? "border-2 border-red-500"
-                      : ""
+                      ? 'border-2 border-red-500'
+                      : ''
                   }`}
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   autoComplete='current-password'
@@ -218,10 +217,10 @@ const Register = () => {
                   name='rePassword'
                   className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
                     errors.rePassword && touched.rePassword
-                      ? "border-2 border-red-500"
-                      : ""
+                      ? 'border-2 border-red-500'
+                      : ''
                   }`}
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   autoComplete='current-password'
@@ -272,7 +271,7 @@ const Register = () => {
         </div>
         <div
           className={`absolute ${
-            isLoading ? "flex" : "hidden"
+            isLoading ? 'flex' : 'hidden'
           } items-center justify-center w-full h-full top-0 left-0 bottom-0 right-0 bg-blackOverlay`}
         >
           <span className='loading-spinner'></span>

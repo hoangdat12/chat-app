@@ -17,7 +17,7 @@ import { GitHubAuthGuard } from './github/github.guard';
 import { JwtService } from '../jwt/jwt.service';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
-import { Ok } from 'src/ultils/response';
+import { Ok } from '../ultils/response';
 
 @Controller('auth')
 export class AuthController {

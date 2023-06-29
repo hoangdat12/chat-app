@@ -2,8 +2,9 @@ import { FC, MouseEventHandler, ReactNode, useEffect, useState } from 'react';
 
 import Layout from '../../components/layout/Layout';
 import './conversation.scss';
-import { Link, Route, Routes } from 'react-router-dom';
-import useInnerWidth from '../../hooks/useInnterWidth';
+import { Link } from 'react-router-dom';
+// import { Link, Route, Routes } from 'react-router-dom';
+// import useInnerWidth from '../../hooks/useInnterWidth';
 import ConversationList from '../../components/conversation/ConversationList';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
@@ -12,7 +13,7 @@ import {
 } from '../../features/conversation/conversationSlice';
 import { getUserLocalStorageItem } from '../../ultils';
 import { IConversation } from '../../ultils/interface';
-import ConversationContent from '../../components/conversation/ConversationContent';
+import ConversationContent from '../../components/conversation/ConversationContent/ConversationContent';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
 
 export interface IPropButtonRounded {
@@ -28,7 +29,7 @@ const Conversation = () => {
   const [showMoreConversation, setShowMoreConversation] = useState(false);
   const [conversationSelected, setConversationSelected] =
     useState<IConversation | null>(null);
-  const innerWitdh = useInnerWidth();
+  // const innerWitdh = useInnerWidth();
 
   const user = getUserLocalStorageItem();
   useEffect(() => {
@@ -48,7 +49,7 @@ const Conversation = () => {
   return (
     <Layout>
       <div className='relative md:grid md:grid-cols-12 flex w-full h-full overflow-hidden'>
-        {innerWitdh < 640 ? (
+        {/* {innerWitdh < 640 ? (
           <Routes>
             <Route
               path='/'
@@ -62,7 +63,7 @@ const Conversation = () => {
               }
             />
             <Route
-              path='/:conversationId'
+              path='/'
               element={
                 <ConversationContent
                   user={user}
@@ -90,7 +91,24 @@ const Conversation = () => {
               setShowMoreConversation={setShowMoreConversation}
             />
           </>
-        )}
+        )} */}
+        <>
+          <ConversationList
+            setConversationSelected={setConversationSelected}
+            conversations={conversations}
+            user={user}
+          />
+          <ConversationContent
+            user={user}
+            conversation={conversationSelected}
+            setShowMoreConversation={setShowMoreConversation}
+            showMoreConversation={showMoreConversation}
+          />
+          <ConversationSetting
+            showMoreConversation={showMoreConversation}
+            setShowMoreConversation={setShowMoreConversation}
+          />
+        </>
       </div>
     </Layout>
   );

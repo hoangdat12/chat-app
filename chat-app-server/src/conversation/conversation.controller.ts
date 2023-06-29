@@ -22,7 +22,7 @@ import {
   RenameGroup,
 } from './conversation.dto';
 import { validate } from 'class-validator';
-import { Ok } from 'src/ultils/response';
+import { Ok } from '../ultils/response';
 
 @Controller('conversation')
 export class ConversationController {

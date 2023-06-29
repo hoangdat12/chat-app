@@ -39,37 +39,60 @@ const conversationSlice = createSlice({
       state,
       action: PayloadAction<IDataUpdateLastMessage>
     ) => {
+      const { conversationId } = action.payload;
       const firstKey = state.conversations.keys().next().value;
-      const conversationId = action.payload.conversation._id;
-      if (firstKey === conversationId) {
-        const firstConversation = state.conversations.get(firstKey);
-        if (firstConversation) {
-          firstConversation.lastMessage = action.payload.lastMessage;
+      if (conversationId) {
+        const conversation = state.conversations.get(conversationId);
+        if (firstKey === conversationId && conversation) {
+          conversation.lastMessage = action.payload.lastMessage;
+          return;
         }
-        return;
+        // Update lastMessage up conversation
+        if (conversation) {
+          conversation.lastMessage = action.payload.lastMessage;
+          // Save with conversation is first
+          const conversationUpdate = new Map([[conversationId, conversation]]);
+          state.conversations.delete(conversationId);
+          state.conversations = new Map([
+            ...conversationUpdate,
+            ...state.conversations,
+          ]);
+        }
       }
-      const conversation = state.conversations.get(conversationId);
-      if (!conversation) return;
-
-      // Update lastMessage up conversation
-      conversation.lastMessage = action.payload.lastMessage;
-      // Save with conversation is first
-      const conversationUpdate = new Map([[conversationId, conversation]]);
-      state.conversations.delete(conversationId);
-      state.conversations = new Map([
-        ...conversationUpdate,
-        ...state.conversations,
-      ]);
     },
     updateLastMessage: (
       state,
       action: PayloadAction<IDataUpdateLastMessage>
     ) => {
-      const conversation = state.conversations.get(
-        action.payload.conversation._id
-      );
+      const { conversationId, lastMessage } = action.payload;
+      const conversationFound = state.conversations.get(conversationId ?? '');
+      if (conversationFound) {
+        if (!lastMessage) {
+          if (conversationFound?.conversation_type === 'group') {
+            conversationFound.lastMessage.message_content = '';
+            return;
+          } else {
+            conversationFound.lastMessage.message_content = '';
+          }
+        } else {
+          conversationFound.lastMessage = action.payload.lastMessage;
+        }
+      }
+    },
+    deleteLastMessage: (
+      state,
+      action: PayloadAction<IDataUpdateLastMessage>
+    ) => {
+      const { conversationId, lastMessage } = action.payload;
+      const conversation = state.conversations.get(conversationId ?? '');
       if (conversation) {
-        conversation.lastMessage = action.payload.lastMessage;
+        if (lastMessage !== undefined || lastMessage !== null) {
+          conversation.lastMessage = lastMessage;
+          return;
+        } else {
+          conversation.lastMessage.message_content = '';
+          return;
+        }
       }
     },
   },
@@ -97,6 +120,7 @@ export const {
   createConversation,
   createNewMessageOfConversation,
   updateLastMessage,
+  deleteLastMessage,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

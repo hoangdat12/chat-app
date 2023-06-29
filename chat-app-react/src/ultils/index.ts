@@ -149,7 +149,6 @@ export const convertMessageObjectIdToString = (message: any) => {
     message_conversation,
     message_received,
   } = message;
-  console.log(message);
   return {
     _id: _id.toString(),
     message_type: type,

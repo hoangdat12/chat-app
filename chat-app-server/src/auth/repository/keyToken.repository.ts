@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { KeyToken } from '../../schema/model/keyToken.model';
 import { Model } from 'mongoose';
-import { KeyTokenCreate } from 'src/ultils/interface';
+import { KeyTokenCreate } from '../../ultils/interface';
 
 @Injectable()
 export class KeyTokenRepository {

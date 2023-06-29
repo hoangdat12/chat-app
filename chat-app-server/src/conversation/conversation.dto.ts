@@ -41,7 +41,7 @@ export class PayloadAddPaticipant {
   conversationId: string;
 
   @IsNotEmpty()
-  participant: UserJoinChat;
+  newParticipants: IParticipant[];
 }
 
 export class ChangeTopic {

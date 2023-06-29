@@ -13,7 +13,7 @@ import {
 } from './gateway.sesstion';
 import { Services } from '../ultils/constant';
 import { Messages } from '../schema/model/message.model';
-import { IMessage } from 'src/ultils/interface';
+import { IMessage, iSocketDeleteMessage } from '../ultils/interface';
 
 @WebSocketGateway({
   cors: {
@@ -46,8 +46,6 @@ export class MessagingGateway implements OnModuleInit {
   @OnEvent('message.create')
   handleMessageCreateEvent(payload: Messages) {
     const { message_sender_by, message_received } = payload;
-    const senderSocket = this.sessions.getUserSocket(message_sender_by.userId);
-    if (senderSocket) senderSocket.emit('onMessage', payload);
     for (let received of message_received) {
       if (received.userId === message_sender_by.userId) continue;
       const receivedSocket = this.sessions.getUserSocket(received.userId);
@@ -63,19 +61,19 @@ export class MessagingGateway implements OnModuleInit {
     for (let received of message_received) {
       if (received.userId === message_sender_by.userId) continue;
       const receivedSocket = this.sessions.getUserSocket(received.userId);
-      if (receivedSocket) receivedSocket.emit('onMessage', payload);
+      if (receivedSocket) receivedSocket.emit('onMessageUpdate', payload);
     }
   }
 
   @OnEvent('message.delete')
-  handleMessageDeleteEvent(payload: IMessage) {
-    const { message_sender_by, message_received } = payload;
-    const senderSocket = this.sessions.getUserSocket(message_sender_by.userId);
-    if (senderSocket) senderSocket.emit('onMessage', payload);
+  handleMessageDeleteEvent(payload: iSocketDeleteMessage) {
+    console.log(payload);
+    const { message } = payload;
+    const { message_received, message_sender_by } = message;
     for (let received of message_received) {
       if (received.userId === message_sender_by.userId) continue;
       const receivedSocket = this.sessions.getUserSocket(received.userId);
-      if (receivedSocket) receivedSocket.emit('onMessage', payload);
+      if (receivedSocket) receivedSocket.emit('onMessageDelete', payload);
     }
   }
 }

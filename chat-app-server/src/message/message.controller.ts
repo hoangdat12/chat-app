@@ -14,7 +14,7 @@ import {
 } from './message.dto';
 import { MessageService } from './message.service';
 import { Request } from 'express';
-import { Ok } from 'src/ultils/response';
+import { Ok } from '../ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';

@@ -40,23 +40,26 @@ const ConversationInfor: FC<IPropConversation> = ({
           <span className='' aria-hidden='true' />
           <div className='flex justify-between items-center mb-1'>
             <p className='text-md font-medium text-gray-900'>{nickName}</p>
-            {conversation.lastMessage && (
-              <p
-                className='
+            {conversation?.lastMessage &&
+              conversation.lastMessage.message_content !== '' &&
+              conversation?.createdAt && (
+                <p
+                  className='
               text-xs
               text-gray-400
               font-light
             '
-              >
-                {format(
-                  new Date(
-                    conversation?.lastMessage?.createdAt ??
-                      conversation?.createdAt
-                  ),
-                  'p'
-                )}
-              </p>
-            )}
+                >
+                  {format(
+                    new Date(
+                      conversation?.lastMessage?.createdAt ??
+                        conversation?.createdAt ??
+                        ''
+                    ),
+                    'p'
+                  )}
+                </p>
+              )}
           </div>
           <p
             className={`

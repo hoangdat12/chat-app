@@ -20,7 +20,10 @@ function App() {
           <Route path='/register/success' element={<RegisterSuccess />} />
           <Route path='/login/success' element={<LoginSuccess />} />
           <Route element={<ProtectedRoutes />}>
-            <Route path='/conversation/*' element={<Conversation />} />
+            <Route
+              path='/conversation/:conversationId'
+              element={<Conversation />}
+            />
           </Route>
         </Routes>
       </Router>

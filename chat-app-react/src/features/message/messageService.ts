@@ -68,12 +68,11 @@ const formatMessage = (messages: IMessage[]): IDataFormatMessage[] => {
 };
 
 const fetchMessageOfConversation = async (
-  conversationId: string
+  conversationId: string | undefined | null
 ): Promise<IDataFormatMessage[]> => {
   const res = (await myAxios.get(
     `conversation/${conversationId}`
   )) as IDataReceived<IAllMessageData>;
-  console.log(res);
   if (res.data.status === 200) {
     const formatMessage = messageService.formatMessage(
       res.data.metaData.messages

@@ -2,7 +2,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AuthenticatedSocket } from './gateway.sesstion';
 import { plainToInstance } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
-import { KeyTokenRepository } from 'src/auth/repository/keyToken.repository';
+import { KeyTokenRepository } from '../auth/repository/keyToken.repository';
 
 @Injectable()
 export class WebsocketAdapter extends IoAdapter {

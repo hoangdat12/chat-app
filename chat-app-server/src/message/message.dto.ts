@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { IParticipant } from 'src/ultils/interface';
+import { IParticipant } from '../ultils/interface';
 
 export class UserJoinChat {
   @IsNotEmpty()

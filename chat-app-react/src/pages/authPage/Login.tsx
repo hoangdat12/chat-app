@@ -37,7 +37,6 @@ export const LoginWith: React.FC<IProp> = ({ className, name, Icon }) => {
     if (newWindow) {
       let timer = setInterval(() => {
         if (newWindow.closed) {
-          console.log("Yay we're authenticated");
           dispatch(getInforUserWithOauth2());
           if (timer) clearInterval(timer);
         }

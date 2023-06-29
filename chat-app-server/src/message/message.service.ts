@@ -7,15 +7,15 @@ import {
 } from '@nestjs/common';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { MessageRepository } from './message.repository';
-import { IUserCreated } from 'src/ultils/interface';
+import { IUserCreated } from '../ultils/interface';
 import {
   CreateMessageData,
   DelelteMessageData,
   UpdateMessageData,
-} from 'src/message/message.dto';
-import { MessageType } from 'src/ultils/constant';
-import { ConversationService } from 'src/conversation/conversation.service';
-import { PayloadCreateConversation } from 'src/conversation/conversation.dto';
+} from '../message/message.dto';
+import { MessageType } from '../ultils/constant';
+import { ConversationService } from '../conversation/conversation.service';
+import { PayloadCreateConversation } from '../conversation/conversation.dto';
 
 @Injectable()
 export class MessageService {
@@ -132,12 +132,13 @@ export class MessageService {
   }
 
   async delete(user: IUserCreated, data: DelelteMessageData): Promise<any> {
-    const { conversationId } = data;
+    const { conversationId, message_id } = data;
     const conversation = await this.conversationRepository.findUserExist(
       conversationId,
       user._id,
     );
-    if (!conversation)
+    const message = await this.messageRepository.findById(message_id);
+    if (!conversation || !message)
       throw new HttpException(
         'Conversation not found!',
         HttpStatus.BAD_REQUEST,
@@ -148,7 +149,19 @@ export class MessageService {
       const firstMessageOfConversation =
         await this.messageRepository.findFristMessage(conversationId);
       if (firstMessageOfConversation.length === 1) {
-        conversation.lastMessage = null;
+        if (conversation.conversation_type === MessageType.GROUP) {
+          // Update last message
+          conversation.lastMessage = null;
+          await conversation.save();
+        } else {
+          // delete conversation
+          await this.conversationRepository.deleteConversation(conversationId);
+        }
+        await this.messageRepository.delete(data);
+        return {
+          lastMessage: null,
+          message,
+        };
       }
       // Else if had many message in conversation
       else {
@@ -157,22 +170,12 @@ export class MessageService {
         );
         await conversation.save();
         await this.messageRepository.delete(data);
-        return firstMessageOfConversation[1];
+        return {
+          lastMessage: firstMessageOfConversation[1],
+          message,
+        };
       }
     }
-    await this.messageRepository.delete(data);
-    return {
-      _id: data.message_id,
-      message_received: conversation.participants,
-      message_sender_by: {
-        userId: user._id,
-        avatarUrl: user.avatarUrl,
-        userName: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        enable: true,
-        isReadLastMessage: true,
-      },
-    };
   }
 
   convertObjectIdToString(message: any) {

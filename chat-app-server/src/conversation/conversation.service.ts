@@ -1,7 +1,7 @@
-import { MessageRepository } from 'src/message/message.repository';
+import { MessageRepository } from '../message/message.repository';
 import { ConversationRepository } from './conversation.repository';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { IParticipant, IUserCreated, Pagination } from 'src/ultils/interface';
+import { IParticipant, IUserCreated, Pagination } from '../ultils/interface';
 import {
   ChangeNickNameOfParticipant,
   ChangeTopic,
@@ -11,7 +11,7 @@ import {
   PayloadDeletePaticipant,
   RenameGroup,
 } from './conversation.dto';
-import { MessageType } from 'src/ultils/constant';
+import { MessageType } from '../ultils/constant';
 
 @Injectable()
 export class ConversationService {
@@ -128,131 +128,55 @@ export class ConversationService {
   }
 
   // Add new member
-  // async addPaticipantOfConversation(
-  //   user: IUserCreated,
-  //   data: PayloadAddPaticipant,
-  // ) {
-  //   const { conversation_type, conversationId, participant } = data;
-  //   if (conversation_type !== MessageType.GROUP) {
-  //     return;
-  //   }
-
-  //   const foundConversation = await this.conversationRepository.findUserExist(
-  //     conversationId,
-  //     user._id,
-  //   );
-  //   if (!foundConversation)
-  //     throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
-
-  //   // Check user is exist in participant or not
-  //   let userExistConversation: IParticipant[] = [];
-  //   let newMember: IParticipant[] = [];
-  //   for (let participant of foundConversation.participants) {
-  //     if (participant.userId === user._id) {
-  //       userExistConversation.push(participant);
-  //     } else {
-  //       newMember.push(participant);
-  //     }
-  //   }
-
-  //   let updateParticipantGroup: IParticipant[] = [];
-  //   let participantIds = [];
-  //   // If user is conversation but is deleted
-  //   if (userExistConversation.length > 0) {
-  //     userExistConversation = userExistConversation.filter((userExist) => {
-  //       // delete user exist with enable true
-  //       if (userExist.enable === true) {
-  //         return false;
-  //       } else {
-  //         participantIds.push(userExist.userId);
-  //       }
-  //     });
-  //   }
-
-  //   // update enable is true
-  //   if (participantIds.length > 0) {
-  //     const updateUserExist =
-  //       await this.conversationRepository.addPaticipantOfExistInConversation(
-  //         conversationId,
-  //         participantIds,
-  //       );
-  //   }
-
-  //   if (newMember.length > 0) {
-  //     const addNewMember =
-  //       await this.conversationRepository.addPaticipantOfConversation(
-  //         conversationId,
-  //         newMember,
-  //       );
-  //   }
-
-  //   return updateParticipantGroup;
-  // }
-
-  async addPaticipantOfConversation(user, data) {
-    const { conversation_type, conversationId, participant } = data;
-
-    // Check if the conversation type is not GROUP, return early
+  async addPaticipantOfConversation(
+    user: IUserCreated,
+    data: PayloadAddPaticipant,
+  ) {
+    let { conversation_type, conversationId, newParticipants } = data;
     if (conversation_type !== MessageType.GROUP) {
       return;
     }
 
-    // Find the conversation and check if it exists
     const foundConversation = await this.conversationRepository.findUserExist(
       conversationId,
       user._id,
     );
-    if (!foundConversation) {
+    if (!foundConversation)
       throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
-    }
 
-    let userExistConversation = [];
-    let newMember = [];
-
-    // Separate existing participants from new participants
-    for (let participant of foundConversation.participants) {
-      if (participant.userId === user._id) {
-        userExistConversation.push(participant);
-      } else {
-        newMember.push(participant);
-      }
-    }
-
-    let participantIds = [];
-
-    // Filter out existing participants who are marked as deleted
-    if (userExistConversation.length > 0) {
-      userExistConversation = userExistConversation.filter((userExist) => {
-        if (userExist.enable === true) {
-          return false;
-        } else {
-          participantIds.push(userExist.userId);
-          return true;
+    // Check user is exist in participant or not
+    let userExistConversation: IParticipant[] = [];
+    let newMember: IParticipant[] = [];
+    for (let newer of newParticipants) {
+      for (let participant of foundConversation.participants) {
+        // If user exist in conversation
+        if (participant.userId === newer.userId) {
+          // If user was deleted from group then enable user
+          if (!participant.enable) {
+            participant.enable = true;
+            userExistConversation.push(newer);
+          }
+          continue;
         }
-      });
+      }
+      // If user not exist in conversation
+      newer.enable = true;
+      newer.isReadLastMessage = false;
+      newMember.push(newer);
     }
 
-    const updatePromise =
-      participantIds.length > 0
-        ? this.conversationRepository.addPaticipantOfExistInConversation(
-            conversationId,
-            participantIds,
-          )
-        : Promise.resolve();
+    if (userExistConversation.length > 0) {
+      await foundConversation.save();
+    }
 
-    const addPromise =
-      newMember.length > 0
-        ? this.conversationRepository.addPaticipantOfConversation(
-            conversationId,
-            newMember,
-          )
-        : Promise.resolve();
+    if (newMember.length > 0) {
+      this.conversationRepository.addPaticipantOfConversation(
+        conversationId,
+        newMember,
+      );
+    }
 
-    // Await both update and add promises concurrently
-    await Promise.all([updatePromise, addPromise]);
-
-    // Return the existing participants
-    return 'Add member successfully!';
+    return 'Add new member successfully!';
   }
 
   async setNickNameForParticipant(

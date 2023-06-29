@@ -15,7 +15,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Request } from 'express';
 import { ChangeUsername } from '../auth/auth.dto';
-import { Ok } from 'src/ultils/response';
+import { Ok } from '../ultils/response';
 import { IUserCreated } from '../ultils/interface';
 
 @Controller('user')

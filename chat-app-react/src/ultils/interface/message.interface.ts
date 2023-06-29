@@ -1,5 +1,5 @@
 export interface IDataGetMessageOfConversation {
-  conversationId: string;
+  conversationId: string | undefined | null;
 }
 
 export interface IDataDeleteMessageOfConversation {
@@ -54,7 +54,7 @@ export interface IAllMessageData {
 }
 
 export interface IDataUpdateLastMessage {
-  conversation: IConversation;
+  conversationId: string | undefined | null;
   lastMessage: IMessage;
 }
 
@@ -71,8 +71,13 @@ export interface IDataDeleteMessage {
 }
 
 export interface IDataCreateMessage {
-  message_type: string;
+  message_type: string | null | undefined;
   message_content: string;
   conversationId: string;
-  participants: IParticipant[];
+  participants: IParticipant[] | null | undefined;
+}
+
+export interface iSocketDeleteMessage {
+  message: IMessage;
+  lastMessage: IMessage;
 }
