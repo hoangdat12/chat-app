@@ -1,7 +1,11 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { conversationService } from './conversationService';
-import { IConversation, IDataUpdateLastMessage } from '../../ultils/interface';
+import {
+  IConversation,
+  IPayloadReadLastMessage,
+  IPayloadUpdateLastMessage,
+} from '../../ultils/interface';
 
 export interface IInitialStateConversation {
   conversations: Map<string, IConversation>;
@@ -37,7 +41,7 @@ const conversationSlice = createSlice({
     },
     createNewMessageOfConversation: (
       state,
-      action: PayloadAction<IDataUpdateLastMessage>
+      action: PayloadAction<IPayloadUpdateLastMessage>
     ) => {
       const { conversationId } = action.payload;
       const firstKey = state.conversations.keys().next().value;
@@ -62,7 +66,7 @@ const conversationSlice = createSlice({
     },
     updateLastMessage: (
       state,
-      action: PayloadAction<IDataUpdateLastMessage>
+      action: PayloadAction<IPayloadUpdateLastMessage>
     ) => {
       const { conversationId, lastMessage } = action.payload;
       const conversationFound = state.conversations.get(conversationId ?? '');
@@ -81,7 +85,7 @@ const conversationSlice = createSlice({
     },
     deleteLastMessage: (
       state,
-      action: PayloadAction<IDataUpdateLastMessage>
+      action: PayloadAction<IPayloadUpdateLastMessage>
     ) => {
       const { conversationId, lastMessage } = action.payload;
       const conversation = state.conversations.get(conversationId ?? '');
@@ -92,6 +96,20 @@ const conversationSlice = createSlice({
         } else {
           conversation.lastMessage.message_content = '';
           return;
+        }
+      }
+    },
+    readLastMessage: (
+      state,
+      action: PayloadAction<IPayloadReadLastMessage>
+    ) => {
+      const { user, conversationId } = action.payload;
+      const conversation = state.conversations.get(conversationId ?? '');
+      if (conversation) {
+        for (let participant of conversation.participants) {
+          if (participant.userId === user?._id) {
+            participant.isReadLastMessage = true;
+          }
         }
       }
     },
@@ -121,6 +139,7 @@ export const {
   createNewMessageOfConversation,
   updateLastMessage,
   deleteLastMessage,
+  readLastMessage,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

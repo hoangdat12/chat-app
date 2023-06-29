@@ -37,17 +37,10 @@ export class UserService {
   }
 
   async getConversation(user: IUserCreated, pagination: Pagination) {
-    // const conversations = this.conversationRepository.findConversationOfUser(user._id);
-    // const groups = this.conversationRepository.findGroupOfUser(user._id);
-    // const [conversations, groups] = await Promise.all([
-    //   this.conversationRepository.findConversationOfUser(user._id),
-    //   this.conversationRepository.findGroupOfUser(user._id),
-    // ]);
-    return await this.conversationRepository.findALl(
+    return await this.conversationRepository.findConversationOfUser(
       user._id.toString(),
       pagination,
     );
-    // return new Ok<any>({ conversations, groups }, 'success!');
   }
 
   async changeUserAvatar(email: string, avatarUrl: string) {

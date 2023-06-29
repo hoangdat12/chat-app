@@ -99,7 +99,7 @@ export const getNameAndAvatarOfConversation = (
   };
   if (conversation.conversation_type === 'group') {
     result.name = conversation.nameGroup ?? 'Name Group';
-    result.avatarUrl = conversation.participants[0].avatarUrl;
+    result.avatarUrl = conversation.avatarUrl;
   } else {
     conversation.participants.map((participant) => {
       if (participant.userId !== user?._id) {

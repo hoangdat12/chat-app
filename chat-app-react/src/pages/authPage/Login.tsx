@@ -11,6 +11,8 @@ import BannerLogin from '../../assets/banner.mp4';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { login, selectAuth } from '../../features/auth/authSlice';
 import { getInforUserWithOauth2 } from '../../features/auth/authSlice';
+import axios from 'axios';
+import { IConversation, IResponse } from '../../ultils/interface';
 
 export interface IProp {
   className?: string;
@@ -60,7 +62,7 @@ export const LoginWith: React.FC<IProp> = ({ className, name, Icon }) => {
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { user, status, isLoading } = useAppSelector(selectAuth);
+  const { user, status, token, isLoading } = useAppSelector(selectAuth);
   const [showPassword, setShowPassword] = useState(false);
   const loginSchema = yup.object().shape({
     email: yup
@@ -85,8 +87,27 @@ const Login = () => {
   );
 
   useEffect(() => {
+    const handleNavigate = async () => {
+      if (user) {
+        const res = (await axios.get(
+          `http://localhost:8080/api/v1/user/conversation/${user._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'x-client-id': user?._id,
+            },
+            withCredentials: true,
+          }
+        )) as IResponse<IConversation[]>;
+        if (res.data.metaData.conversations.length) {
+          window.location.href = `/conversation/${res.data.metaData.conversations[0]?._id}`;
+        } else {
+          navigate('/');
+        }
+      }
+    };
     if (user && status === 'idle') {
-      navigate(-1);
+      handleNavigate();
     }
   }, [user, status, navigate]);
 

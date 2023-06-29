@@ -9,11 +9,13 @@ import ConversationInfor, {
 import LogoPage from '../../assets/Logo2.png';
 import { IConversation, IUser } from '../../ultils/interface';
 import { getNameAndAvatarOfConversation } from '../../ultils';
+import { useAppDispatch } from '../../app/hook';
+import { readLastMessage } from '../../features/conversation/conversationSlice';
 
 export interface IPropConversationList {
   conversations: Map<string, IConversation>;
   user: IUser | null;
-  setConversationSelected: (data: any) => void;
+  handleSelectConversation: (conversationId: string) => void;
   // Active Link or not
   to?: boolean;
 }
@@ -21,17 +23,23 @@ export interface IPropConversationList {
 const ConversationList: FC<IPropConversationList> = ({
   conversations,
   user,
-  setConversationSelected,
+  handleSelectConversation,
 }) => {
   // For first
   const [active, setActive] = useState(0);
+  const [isReadLastMessage, setIsReadLastMessage] = useState(true);
   // For after send message
   const [activeAfterSendMessage, setActiveAfterSendMessage] = useState('');
+
+  const dispatch = useAppDispatch();
 
   const handleActive = (idx: number, conversation: IConversation) => {
     setActive(idx);
     setActiveAfterSendMessage(conversation._id);
-    setConversationSelected(conversation);
+    if (!isReadLastMessage) {
+      handleSelectConversation(conversation._id);
+      dispatch(readLastMessage({ user, conversationId: conversation._id }));
+    }
   };
 
   return (
@@ -62,7 +70,7 @@ const ConversationList: FC<IPropConversationList> = ({
         ))}
       </div>
 
-      <div className='max-h-[calc(100vh-14rem)] sm:max-h-[calc(100vh-10.5rem)] mt-4 border-t border-[#e8ebed] overflow-y-scroll scroll-container overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent'>
+      <div className='max-h-[calc(100vh-14rem)] sm:max-h-[calc(100vh-10.5rem)] mt-4 border-t border-[#e8ebed] scroll-container overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent'>
         {Array.from(conversations.values()).map(
           (conversation: IConversation, idx) => {
             const { name, avatarUrl } = getNameAndAvatarOfConversation(
@@ -92,6 +100,8 @@ const ConversationList: FC<IPropConversationList> = ({
                     nickName={name ?? 'undifined'}
                     status={'Active'}
                     conversation={conversation}
+                    isReadLastMessage={isReadLastMessage}
+                    setIsReadLastMessage={setIsReadLastMessage}
                   />
                 </Link>
                 <div

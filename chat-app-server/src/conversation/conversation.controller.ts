@@ -19,6 +19,7 @@ import {
   PayloadAddPaticipant,
   PayloadCreateConversation,
   PayloadDeletePaticipant,
+  ReadLastMessage,
   RenameGroup,
 } from './conversation.dto';
 import { validate } from 'class-validator';
@@ -143,9 +144,8 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.conversationService.setNickNameForParticipant(
-        user,
-        body,
+      return new Ok(
+        await this.conversationService.setNickNameForParticipant(user, body),
       );
     } catch (err) {
       console.log(err);
@@ -164,9 +164,8 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.conversationService.changeTopicOfConversation(
-        user,
-        body,
+      return new Ok(
+        await this.conversationService.changeTopicOfConversation(user, body),
       );
     } catch (err) {
       console.log(err);
@@ -182,7 +181,27 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.conversationService.renameGroup(user, data);
+      return new Ok(await this.conversationService.renameGroup(user, data));
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Post('/read-last-message')
+  async readLastMessage(@Req() req: Request, @Body() data: ReadLastMessage) {
+    try {
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      return new Ok(
+        await this.conversationService.readLastMessage(
+          user,
+          data.conversationId,
+        ),
+      );
     } catch (err) {
       console.log(err);
       throw err;

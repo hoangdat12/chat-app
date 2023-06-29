@@ -67,3 +67,8 @@ export class RenameGroup {
   @IsNotEmpty()
   conversationId: string;
 }
+
+export class ReadLastMessage {
+  @IsNotEmpty()
+  conversationId: string;
+}

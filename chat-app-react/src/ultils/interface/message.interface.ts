@@ -1,3 +1,5 @@
+import { IUser } from '.';
+
 export interface IDataGetMessageOfConversation {
   conversationId: string | undefined | null;
 }
@@ -28,10 +30,11 @@ export interface IConversation {
   conversation_type: string;
   participants: IParticipant[];
   lastMessage: IMessage;
-  nameGroup: string;
+  nameGroup: string | undefined;
   updatedAt: string;
   createdAt: string;
   userId: string[];
+  avatarUrl: string;
   collection: string;
 }
 
@@ -53,7 +56,7 @@ export interface IAllMessageData {
   sortedBy: string;
 }
 
-export interface IDataUpdateLastMessage {
+export interface IPayloadUpdateLastMessage {
   conversationId: string | undefined | null;
   lastMessage: IMessage;
 }
@@ -80,4 +83,9 @@ export interface IDataCreateMessage {
 export interface iSocketDeleteMessage {
   message: IMessage;
   lastMessage: IMessage;
+}
+
+export interface IPayloadReadLastMessage {
+  user: IUser | null | undefined;
+  conversationId: string | null | undefined;
 }

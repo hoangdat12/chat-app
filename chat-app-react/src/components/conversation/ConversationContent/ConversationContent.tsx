@@ -11,7 +11,6 @@ import {
   fetchMessageOfConversation as fetchMessage,
   createNewMessage,
   deleteMessage,
-  updateMessage,
 } from '../../../features/message/messageSlice';
 import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { SocketContext } from '../../../ultils/context/Socket';
@@ -29,13 +28,11 @@ import MessageContent from './MessageContent';
 
 export interface IPropConversationContent {
   user: IUser | null;
-  conversation: IConversation | null;
   setShowMoreConversation?: (value: boolean) => void;
   showMoreConversation?: boolean;
 }
 
 const ConversationContent: FC<IPropConversationContent> = ({
-  // conversation,
   user,
   setShowMoreConversation,
   showMoreConversation,

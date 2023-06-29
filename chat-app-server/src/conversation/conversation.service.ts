@@ -25,13 +25,18 @@ export class ConversationService {
     payload: PayloadCreateConversation,
   ) {
     // Creator group
-    const creator = {
-      userId: user._id,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-      userName: `${user.firstName} ${user.lastName}`,
-    };
-    payload.creators = [creator];
+    const { conversation_type, avatarUrl } = payload;
+    if (conversation_type === MessageType.GROUP) {
+      const creator = {
+        userId: user._id,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        userName: `${user.firstName} ${user.lastName}`,
+      };
+      payload.creators = [creator];
+      payload.avatarUrl =
+        avatarUrl ?? 'http://localhost:8080/assets/avatar.group.jpg';
+    }
     const newConversation =
       await this.conversationRepository.createConversation(payload);
 
@@ -238,5 +243,11 @@ export class ConversationService {
       conversationId,
       nameGroup,
     );
+  }
+
+  async readLastMessage(user: IUserCreated, conversationId: string) {
+    const updateConversation =
+      await this.conversationRepository.readLastMessage(user, conversationId);
+    return updateConversation ? true : false;
   }
 }

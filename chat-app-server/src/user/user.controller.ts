@@ -100,6 +100,7 @@ export class UserController {
       user,
       pagination,
     );
+    console.log(conversations);
     const data = {
       conversations,
       page,

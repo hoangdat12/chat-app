@@ -3,7 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Conversation } from '../schema/model/conversation.model';
 import { UserJoinChat } from '../message/message.dto';
-import { IMessage, IParticipant, Pagination } from '../ultils/interface';
+import {
+  IMessage,
+  IParticipant,
+  IUserCreated,
+  Pagination,
+} from '../ultils/interface';
 import { PayloadCreateConversation } from './conversation.dto';
 
 @Injectable()
@@ -52,6 +57,8 @@ export class ConversationRepository {
           lastMessage: 1,
           lastMessageSendAt: 1,
           updatedAt: 1,
+          nameGroup: 1,
+          avatarUrl: 1,
           userId: '$participants.userId',
           collection: { $literal: 'Conversation' },
         },
@@ -92,14 +99,20 @@ export class ConversationRepository {
     return await this.conversationModel.create(payload);
   }
 
-  async findConversationOfUser(userId: string) {
-    return await this.conversationModel
+  async findConversationOfUser(userId: string, pagination: Pagination) {
+    const { page, limit, sortBy } = pagination;
+    const offset = (page - 1) * limit;
+    const conversations = await this.conversationModel
       .find({
-        $elemMatch: {
-          'participants.userId': userId.toString(),
-        },
+        'participants.userId': userId,
       })
-      .lean();
+      .sort(sortBy === 'ctime' ? { createdAt: -1 } : { createdAt: 1 })
+      .skip(offset)
+      .limit(limit)
+      .lean()
+      .exec();
+    console.log('conversations:::: ', conversations);
+    return conversations;
   }
 
   async updateLastConversationMessage(
@@ -186,6 +199,25 @@ export class ConversationRepository {
 
   async deleteConversation(conversationId: string) {
     return await this.conversationModel.deleteOne({ _id: conversationId });
+  }
+
+  async readLastMessage(user: IUserCreated, conversationId: string) {
+    return await this.conversationModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+        'participants.userId': user._id,
+        'participants.isReadLastMessage': false,
+      },
+      {
+        $set: {
+          'participants.$.isReadLastMessage': true,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
   }
 
   // ULTILS

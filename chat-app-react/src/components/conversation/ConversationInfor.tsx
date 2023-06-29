@@ -1,7 +1,8 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import Avatar, { IPropAvatar } from '../avatars/Avatar';
-import { IConversation } from '../../ultils/interface';
+import { IConversation, IUser } from '../../ultils/interface';
 import { format } from 'date-fns';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface IPropConversation {
   active?: boolean;
@@ -9,6 +10,8 @@ export interface IPropConversation {
   nickName: string;
   status: string;
   conversation: IConversation;
+  isReadLastMessage: boolean;
+  setIsReadLastMessage: (value: boolean) => void;
 }
 
 const ConversationInfor: FC<IPropConversation> = ({
@@ -17,7 +20,23 @@ const ConversationInfor: FC<IPropConversation> = ({
   nickName,
   // status,
   conversation,
+  isReadLastMessage,
+  setIsReadLastMessage,
 }) => {
+  useEffect(() => {
+    const checkUserIsReadLastMessageOfConversation = () => {
+      const user = getUserLocalStorageItem() as IUser;
+      for (let participant of conversation.participants) {
+        if (participant.userId === user._id) {
+          setIsReadLastMessage(participant.isReadLastMessage);
+          return;
+        }
+      }
+      setIsReadLastMessage(false);
+    };
+    checkUserIsReadLastMessageOfConversation();
+  }, [isReadLastMessage, conversation]);
+
   return (
     <div
       className={`flex gap-3 py-4 px-4 xl:px-6 border-b-[2px] ${
@@ -39,34 +58,44 @@ const ConversationInfor: FC<IPropConversation> = ({
         <div className='focus:outline-none'>
           <span className='' aria-hidden='true' />
           <div className='flex justify-between items-center mb-1'>
-            <p className='text-md font-medium text-gray-900'>{nickName}</p>
-            {conversation?.lastMessage &&
-              conversation.lastMessage.message_content !== '' &&
-              conversation?.createdAt && (
-                <p
-                  className='
-              text-xs
-              text-gray-400
-              font-light
-            '
-                >
-                  {format(
-                    new Date(
-                      conversation?.lastMessage?.createdAt ??
-                        conversation?.createdAt ??
-                        ''
-                    ),
-                    'p'
-                  )}
-                </p>
-              )}
+            <p
+              className={`text-md ${
+                !isReadLastMessage
+                  ? 'font-bold text-gray-900'
+                  : 'font-medium text-gray-700'
+              }`}
+            >
+              {nickName}
+            </p>
+            {((conversation?.lastMessage &&
+              conversation.lastMessage.message_content !== '') ||
+              conversation?.createdAt) && (
+              <p
+                className={`
+                  text-xs
+                  ${
+                    !isReadLastMessage
+                      ? 'text-gray-800 font-medium '
+                      : 'text-gray-400 font-light'
+                  }
+                `}
+              >
+                {format(
+                  new Date(
+                    conversation?.lastMessage?.createdAt ??
+                      conversation?.createdAt ??
+                      ''
+                  ),
+                  'p'
+                )}
+              </p>
+            )}
           </div>
           <p
             className={`
           truncate
           text-sm
-
-          ${true ? 'text-gray-500' : 'text-black font-medium'}`}
+          ${!isReadLastMessage ? 'text-black font-medium' : 'text-gray-500'}`}
           >
             {conversation?.lastMessage?.message_content}
           </p>

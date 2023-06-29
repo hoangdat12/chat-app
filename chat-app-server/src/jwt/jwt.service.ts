@@ -69,6 +69,7 @@ export class JwtService {
       delete user.password;
 
       // req.keyToken = keyToken;
+      user._id = user._id.toString();
       req.user = user;
 
       next();

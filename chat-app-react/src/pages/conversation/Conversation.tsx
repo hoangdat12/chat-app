@@ -3,8 +3,6 @@ import { FC, MouseEventHandler, ReactNode, useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import './conversation.scss';
 import { Link } from 'react-router-dom';
-// import { Link, Route, Routes } from 'react-router-dom';
-// import useInnerWidth from '../../hooks/useInnterWidth';
 import ConversationList from '../../components/conversation/ConversationList';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
@@ -12,9 +10,9 @@ import {
   selectConversation,
 } from '../../features/conversation/conversationSlice';
 import { getUserLocalStorageItem } from '../../ultils';
-import { IConversation } from '../../ultils/interface';
 import ConversationContent from '../../components/conversation/ConversationContent/ConversationContent';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
+import myAxios from '../../ultils/myAxios';
 
 export interface IPropButtonRounded {
   icon: ReactNode;
@@ -27,10 +25,9 @@ const Conversation = () => {
   const ditpatch = useAppDispatch();
   const { conversations } = useAppSelector(selectConversation);
   const [showMoreConversation, setShowMoreConversation] = useState(false);
-  const [conversationSelected, setConversationSelected] =
-    useState<IConversation | null>(null);
+  // const [conversationSelected, setConversationSelected] =
+  //   useState<IConversation | null>(null);
   // const innerWitdh = useInnerWidth();
-
   const user = getUserLocalStorageItem();
   useEffect(() => {
     const fetchListConversationOfUser = async () => {
@@ -41,10 +38,17 @@ const Conversation = () => {
       fetchListConversationOfUser();
     }
 
-    if (conversations?.size && !conversationSelected) {
-      setConversationSelected(conversations.values().next().value);
-    }
+    // if (conversations?.size && !conversationSelected) {
+    //   setConversationSelected(conversations.values().next().value);
+    // }
   }, [conversations]);
+
+  // isReadLastMessage = true
+  const handleSelectConversation = async (conversationId: string) => {
+    await myAxios.post('/conversation/read-last-message', {
+      conversationId,
+    });
+  };
 
   return (
     <Layout>
@@ -94,13 +98,12 @@ const Conversation = () => {
         )} */}
         <>
           <ConversationList
-            setConversationSelected={setConversationSelected}
+            handleSelectConversation={handleSelectConversation}
             conversations={conversations}
             user={user}
           />
           <ConversationContent
             user={user}
-            conversation={conversationSelected}
             setShowMoreConversation={setShowMoreConversation}
             showMoreConversation={showMoreConversation}
           />

@@ -7,7 +7,7 @@ export interface IDataConversations {
 
 const fetchConversationOfUser = async (userId: string) => {
   const res = (await myAxios.get(
-    `http://localhost:8080/api/v1/user/conversation/${userId}`
+    `/user/conversation/${userId}`
   )) as IDataReceived<IDataConversations>;
   return res.data.metaData;
 };
