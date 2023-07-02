@@ -12,6 +12,7 @@ import {
   RenameGroup,
 } from './conversation.dto';
 import { MessageType } from '../ultils/constant';
+import { getUsername } from '../ultils';
 
 @Injectable()
 export class ConversationService {
@@ -31,7 +32,7 @@ export class ConversationService {
         userId: user._id,
         email: user.email,
         avatarUrl: user.avatarUrl,
-        userName: `${user.firstName} ${user.lastName}`,
+        userName: getUsername(user),
       };
       payload.creators = [creator];
       payload.avatarUrl =
@@ -249,5 +250,18 @@ export class ConversationService {
     const updateConversation =
       await this.conversationRepository.readLastMessage(user, conversationId);
     return updateConversation ? true : false;
+  }
+
+  // Find by name of group for Group and name of user for Conversation
+  async findByName(
+    user: IUserCreated,
+    keyword: string,
+    pagination: Pagination,
+  ) {
+    return await this.conversationRepository.findByName(
+      user,
+      keyword.trim(),
+      pagination,
+    );
   }
 }

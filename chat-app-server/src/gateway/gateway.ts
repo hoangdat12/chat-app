@@ -12,7 +12,7 @@ import {
   IGatewaySessionManager,
 } from './gateway.sesstion';
 import { Services } from '../ultils/constant';
-import { Messages } from '../schema/model/message.model';
+import { Messages } from '../schema/message.model';
 import { IMessage, iSocketDeleteMessage } from '../ultils/interface';
 
 @WebSocketGateway({
@@ -67,7 +67,6 @@ export class MessagingGateway implements OnModuleInit {
 
   @OnEvent('message.delete')
   handleMessageDeleteEvent(payload: iSocketDeleteMessage) {
-    console.log(payload);
     const { message } = payload;
     const { message_received, message_sender_by } = message;
     for (let received of message_received) {

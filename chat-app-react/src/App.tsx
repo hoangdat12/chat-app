@@ -8,8 +8,10 @@ import Register from './pages/authPage/Register';
 import RegisterSuccess from './pages/authPage/RegisterSuccess';
 import Conversation from './pages/conversation/Conversation';
 import { SocketContext, socket } from './ultils/context/Socket';
+import useInnerWidth from './hooks/useInnterWidth';
 
 function App() {
+  const innerWitdh = useInnerWidth();
   return (
     <SocketContext.Provider value={socket}>
       <Router>
@@ -20,10 +22,17 @@ function App() {
           <Route path='/register/success' element={<RegisterSuccess />} />
           <Route path='/login/success' element={<LoginSuccess />} />
           <Route element={<ProtectedRoutes />}>
-            <Route
-              path='/conversation/:conversationId'
-              element={<Conversation />}
-            />
+            {innerWitdh < 640 ? (
+              <Route
+                path='/conversation/:conversationId/*'
+                element={<Conversation />}
+              />
+            ) : (
+              <Route
+                path='/conversation/:conversationId'
+                element={<Conversation />}
+              />
+            )}
           </Route>
         </Routes>
       </Router>

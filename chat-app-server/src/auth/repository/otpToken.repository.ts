@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { OtpToken } from '../../schema/model/otpToken.model';
+import { OtpToken } from '../../schema/otpToken.model';
 import { Model } from 'mongoose';
 import * as crypto from 'crypto';
 import { IOtpTokenCreate } from '../../ultils/interface';

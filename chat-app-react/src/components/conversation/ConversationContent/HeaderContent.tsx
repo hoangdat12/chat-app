@@ -63,7 +63,7 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
           <ButtonRounded
             className={'text-base p-1'}
             icon={<MdOutlineArrowBack />}
-            to='/conversation'
+            to='/conversation/all/list'
           />
         </div>
         <div className='flex w-full gap-3 cursor-pointer '>
@@ -109,23 +109,5 @@ export interface IInforConversation {
   avatarUrl: string | null;
   status: string | null;
 }
-
-// const getInforChatFromConversation = (
-//   conversation: IConversation | undefined
-// ): IInforConversation => {
-//   if (conversation) {
-//     return {
-//       userName: null,
-//       avatarUrl: null,
-//       status: null,
-//     };
-//   } else {
-//     return {
-//       userName: null,
-//       avatarUrl: null,
-//       status: null,
-//     };
-//   }
-// };
 
 export default HeaderContent;

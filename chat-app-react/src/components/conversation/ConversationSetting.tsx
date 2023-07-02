@@ -1,68 +1,68 @@
-import { FC, useEffect, useRef, useState } from "react";
-import { AiOutlineFileImage, AiOutlineLike } from "react-icons/Ai";
-import { BsChevronDown, BsChevronUp } from "react-icons/bs";
-import { FaPushed } from "react-icons/fa";
-import { IoSearchSharp } from "react-icons/io5";
+import { FC, useEffect, useRef, useState } from 'react';
+import { AiOutlineFileImage, AiOutlineLike } from 'react-icons/Ai';
+import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
+import { FaPushed } from 'react-icons/fa';
+import { IoSearchSharp } from 'react-icons/io5';
 import {
   MdAttachFile,
   MdNotificationsNone,
   MdOutlineArrowBack,
   MdOutlineVideoLibrary,
-} from "react-icons/md";
-import { TfiPin2 } from "react-icons/tfi";
-import { VscTextSize } from "react-icons/vsc";
-import Avatar from "../avatars/Avatar";
-import { ButtonRounded } from "../../pages/conversation/Conversation";
-import { CgProfile } from "react-icons/cg";
+} from 'react-icons/md';
+import { TfiPin2 } from 'react-icons/tfi';
+import { VscTextSize } from 'react-icons/vsc';
+import Avatar from '../avatars/Avatar';
+import { ButtonRounded } from '../../pages/conversation/Conversation';
+import { CgProfile } from 'react-icons/cg';
 
 const ListDetail = [
   {
     SubMenu: {
-      title: "Chat Detail",
+      title: 'Chat Detail',
       icon: <BsChevronDown />,
     },
-    List: [{ title: "Pinned messages", icon: <TfiPin2 /> }],
+    List: [{ title: 'Pinned messages', icon: <TfiPin2 /> }],
   },
   {
     SubMenu: {
-      title: "Custome conversation",
+      title: 'Custome conversation',
       icon: <BsChevronDown />,
     },
     List: [
       {
-        title: "Change theme",
+        title: 'Change theme',
         icon: <FaPushed />,
       },
       {
-        title: "Change emoji",
+        title: 'Change emoji',
         icon: <AiOutlineLike />,
       },
       {
-        title: "Change nick name",
+        title: 'Change nick name',
         icon: <VscTextSize />,
       },
       {
-        title: "Search in conversation",
+        title: 'Search in conversation',
         icon: <IoSearchSharp />,
       },
     ],
   },
   {
     SubMenu: {
-      title: "Shared",
+      title: 'Shared',
       icon: <BsChevronDown />,
     },
     List: [
       {
-        title: "File",
+        title: 'File',
         icon: <AiOutlineFileImage />,
       },
       {
-        title: "Video",
+        title: 'Video',
         icon: <MdOutlineVideoLibrary />,
       },
       {
-        title: "Link",
+        title: 'Link',
         icon: <MdAttachFile />,
       },
     ],
@@ -101,10 +101,10 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
         }
       };
 
-      document.addEventListener("mousedown", clickOutSide);
+      document.addEventListener('mousedown', clickOutSide);
 
       return () => {
-        document.removeEventListener("mousedown", clickOutSide);
+        document.removeEventListener('mousedown', clickOutSide);
       };
     }
   }, [showMoreConversation]);
@@ -112,30 +112,30 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
     <div
       className={`${
         showMoreConversation
-          ? "absolute top-0 right-0 flex flex-row-reverse bg-blackOverlay"
-          : "block sm:hidden xl:block xl:col-span-3 py-6 border-[#f2f3f4]"
+          ? 'absolute top-0 right-0 flex flex-row-reverse bg-blackOverlay'
+          : 'block sm:hidden xl:block xl:col-span-3 py-6 border-[#f2f3f4]'
       } h-full w-full xl:border-l overflow-y-scroll sm:overflow-hidden scrollbar-hide`}
     >
       <div
         className={`${
           showMoreConversation &&
-          "animate__animated animate__fadeInRight w-[350px] bg-[#f2f3f4] py-6"
+          'animate__animated animate__fadeInRight w-[350px] bg-[#f2f3f4] py-6'
         } relative`}
         ref={modelRef}
       >
         <div className='absolute top-0 left-4 flex sm:hidden'>
           <ButtonRounded
-            className={"text-lg p-2"}
+            className={'text-lg p-2'}
             icon={<MdOutlineArrowBack />}
-            to={"/conversation/1"}
+            to={'/conversation/1'}
           />
         </div>
         <div className='flex flex-col items-center justify-center gap-3 cursor-pointer '>
           <div className=''>
             <Avatar
-              className={"w-20 h-20"}
+              className={'w-20 h-20'}
               avatarUrl={
-                "https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1"
+                'https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1'
               }
             />
           </div>
@@ -166,20 +166,16 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
 
         <ul className='mt-12 sm:max-h-[calc(100vh-20rem)] sm:overflow-y-scroll'>
           {ListDetail.map((element, idx) => (
-            <li
-              onClick={() => handleShow(idx)}
-              className={`${idx === 0 ? "" : "mt-5"} px-8`}
-              key={idx}
-            >
+            <li className={`${idx === 0 ? '' : 'mt-5'} px-8`} key={idx}>
               <div className='flex items-center justify-between cursor-pointer'>
-                <a href='#' className='text-base'>
+                <span onClick={() => handleShow(idx)} className='text-base'>
                   {element.SubMenu.title}
-                </a>
+                </span>
                 <span
                   className={`${
                     show.includes(idx)
-                      ? "animate__animated animate__rotateIn"
-                      : ""
+                      ? 'animate__animated animate__rotateIn'
+                      : ''
                   }`}
                 >
                   {show.includes(idx) ? <BsChevronUp /> : <BsChevronDown />}
@@ -187,7 +183,7 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
               </div>
               <ul
                 className={`${
-                  show.includes(idx) ? "block" : " hidden"
+                  show.includes(idx) ? 'block' : ' hidden'
                 } px-2 text-base font-light`}
               >
                 {element.List.map((item, index) => (
@@ -196,12 +192,9 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
                     key={index}
                   >
                     <span>{item.icon}</span>
-                    <a
-                      href=''
-                      className='whitespace-nowrap overflow-hidden text-ellipsis'
-                    >
+                    <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
                       {item.title}
-                    </a>
+                    </span>
                   </li>
                 ))}
               </ul>

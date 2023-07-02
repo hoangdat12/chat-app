@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from '../../schema/model/user.model';
-import { ChangePassword, ChangeUsername, UserRegister } from '../auth.dto';
-import { IUserCreated } from '../../ultils/interface';
+import { User } from '../../schema/user.model';
+import { ChangeUsername, UserRegister } from '../auth.dto';
+import { IUserCreated, Pagination } from '../../ultils/interface';
+import { checkNegativeNumber } from '../../ultils';
 
 @Injectable()
 export class AuthRepository {
@@ -19,6 +20,46 @@ export class AuthRepository {
 
   async findByEmail(userEmail: string): Promise<IUserCreated | null> {
     return await this.userModel.findOne({ email: userEmail }).lean();
+  }
+
+  async findByUserName(keyword: string, pagination: Pagination) {
+    console.log(pagination);
+    const searchRegex = new RegExp(keyword, 'i');
+    const { limit, page } = checkNegativeNumber(pagination);
+    const offset = (page - 1) * limit;
+    const users = await this.userModel
+      .aggregate([
+        {
+          $project: {
+            firstName: 1,
+            lastName: 1,
+            userName: { $concat: ['$firstName', ' ', '$lastName'] },
+            email: 1,
+            avatarUrl: 1,
+            isActive: 1,
+          },
+        },
+        {
+          $match: {
+            userName: {
+              $regex: searchRegex,
+            },
+            isActive: true,
+          },
+        },
+        {
+          $sort: {
+            userName: 1,
+          },
+        },
+      ])
+      .skip(offset)
+      .limit(limit);
+
+    return {
+      users,
+      keyword,
+    };
   }
 
   async activeUser(email: string) {

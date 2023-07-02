@@ -74,25 +74,11 @@ export class MessageService {
     }
 
     // Update last message
-    if (message_type === MessageType.GROUP) {
-      const group =
-        await this.conversationRepository.updateLastConversationMessage(
-          conversationId,
-          this.convertObjectIdToString(message),
-        );
-
-      if (!group)
-        throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
-    } else {
-      const conversation =
-        await this.conversationRepository.updateLastConversationMessage(
-          conversationId,
-          this.convertObjectIdToString(message),
-        );
-
-      if (!conversation)
-        throw new HttpException('DB errors', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    await this.conversationRepository.updateLastConversationMessage(
+      user,
+      conversationId,
+      this.convertObjectIdToString(message),
+    );
 
     return message;
   }
@@ -143,11 +129,12 @@ export class MessageService {
         'Conversation not found!',
         HttpStatus.BAD_REQUEST,
       );
-    if (conversation.lastMessage._id === data.message_id) {
+
+    const firstMessageOfConversation =
+      await this.messageRepository.findFristMessage(conversationId);
+    if (conversation.lastMessage._id === message_id) {
       // get first message
       // If conversation just created and delete message just send
-      const firstMessageOfConversation =
-        await this.messageRepository.findFristMessage(conversationId);
       if (firstMessageOfConversation.length === 1) {
         if (conversation.conversation_type === MessageType.GROUP) {
           // Update last message
@@ -163,18 +150,18 @@ export class MessageService {
           message,
         };
       }
-      // Else if had many message in conversation
-      else {
-        conversation.lastMessage = this.convertObjectIdToString(
-          firstMessageOfConversation[1],
-        );
-        await conversation.save();
-        await this.messageRepository.delete(data);
-        return {
-          lastMessage: firstMessageOfConversation[1],
-          message,
-        };
-      }
+    }
+    // Else if had many message in conversation
+    else {
+      conversation.lastMessage = this.convertObjectIdToString(
+        firstMessageOfConversation[1],
+      );
+      await conversation.save();
+      await this.messageRepository.delete(data);
+      return {
+        lastMessage: firstMessageOfConversation[1],
+        message,
+      };
     }
   }
 

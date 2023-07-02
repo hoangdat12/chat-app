@@ -36,7 +36,6 @@ const ConversationInfor: FC<IPropConversation> = ({
     };
     checkUserIsReadLastMessageOfConversation();
   }, [isReadLastMessage, conversation]);
-
   return (
     <div
       className={`flex gap-3 py-4 px-4 xl:px-6 border-b-[2px] ${
@@ -44,13 +43,7 @@ const ConversationInfor: FC<IPropConversation> = ({
       }`}
     >
       {true ? (
-        <Avatar
-          avatarUrl={avatarUrl}
-          className='h-9
-          w-9
-          md:h-11
-          md:w-11'
-        />
+        <Avatar avatarUrl={avatarUrl} className='h-9 w-9 md:h-11 md:w-11' />
       ) : (
         <Avatar avatarUrl={avatarUrl} />
       )}

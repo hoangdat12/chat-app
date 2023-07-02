@@ -55,7 +55,6 @@ const ConversationContent: FC<IPropConversationContent> = ({
         participants: conversation.participants,
       };
       const res = await messageService.createNewMessage(body);
-      console.log('response create message::: ', res);
       if (res.status === 201) {
         dispatch(createNewMessage(res.data.metaData));
         const dataUpdate = {

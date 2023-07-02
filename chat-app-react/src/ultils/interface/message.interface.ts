@@ -2,6 +2,9 @@ import { IUser } from '.';
 
 export interface IDataGetMessageOfConversation {
   conversationId: string | undefined | null;
+  page?: number;
+  limit?: number;
+  sortedBy?: string;
 }
 
 export interface IDataDeleteMessageOfConversation {

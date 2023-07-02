@@ -42,7 +42,14 @@ const messageSlice = createSlice({
   initialState,
   reducers: {
     createNewMessage: (state, action: PayloadAction<IMessage>) => {
-      const firstMessage = state.messages[0].messages;
+      const firstMessage = state.messages[0]?.messages;
+      if (!firstMessage) {
+        state.messages[0] = {
+          messages: [action.payload],
+          myMessage: user._id === action.payload.message_sender_by.userId,
+          timeSendMessage: getTimeSendMessage(action.payload.createdAt),
+        };
+      }
       const senderId = action.payload.message_sender_by.userId;
 
       // Check time send message compare to lastMessage less then 5 minus or not
@@ -50,7 +57,6 @@ const messageSlice = createSlice({
         new Date(action.payload?.createdAt).getTime() -
           new Date(firstMessage[0]?.createdAt).getTime() <
         5 * 1000 * 60;
-      console.log('Inside create message');
       if (condition && senderId === firstMessage[0].message_sender_by.userId)
         state.messages[0].messages = [action.payload, ...firstMessage];
       else {
@@ -67,6 +73,9 @@ const messageSlice = createSlice({
         // Move to first
         state.messages = [newMessage, ...state.messages];
       }
+    },
+    addMessage: (state, action: PayloadAction<IDataFormatMessage[]>) => {
+      state.messages = [...state.messages, ...action.payload];
     },
     deleteMessage: (state, action: PayloadAction<IMessage>) => {
       const message = action.payload;
@@ -123,7 +132,7 @@ const messageSlice = createSlice({
   },
 });
 
-export const { createNewMessage, deleteMessage, updateMessage } =
+export const { createNewMessage, deleteMessage, updateMessage, addMessage } =
   messageSlice.actions;
 export default messageSlice.reducer;
 export const selectMessage = (state: RootState) => state.message;

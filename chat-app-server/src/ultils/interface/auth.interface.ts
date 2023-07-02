@@ -1,4 +1,4 @@
-import { User } from '../../schema/model/user.model';
+import { User } from '../../schema/user.model';
 
 export interface ILoginWithGoogleData {
   email: string;

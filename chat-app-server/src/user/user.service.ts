@@ -17,6 +17,10 @@ export class UserService {
     return new Ok<any>(users, 'success');
   }
 
+  async searchUser(keyword: string, pagination: Pagination) {
+    return await this.authRepository.findByUserName(keyword.trim(), pagination);
+  }
+
   async getUserDetail(userId: string) {
     const userExist = await this.authRepository.findById(userId);
     if (!userExist)

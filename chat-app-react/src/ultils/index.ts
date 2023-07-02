@@ -94,8 +94,8 @@ export const getNameAndAvatarOfConversation = (
   user: IUser | null
 ) => {
   const result = {
-    name: null as string | null,
-    avatarUrl: null as string | null,
+    name: '',
+    avatarUrl: '',
   };
   if (conversation.conversation_type === 'group') {
     result.name = conversation.nameGroup ?? 'Name Group';
@@ -105,9 +105,7 @@ export const getNameAndAvatarOfConversation = (
       if (participant.userId !== user?._id) {
         result.name = participant.userName;
         result.avatarUrl = participant.avatarUrl;
-        return true; // stop iterating
       }
-      return false;
     });
   }
   return result;
@@ -119,21 +117,21 @@ export const clearLocalStorage = () => {
   localStorage.removeItem('refreshToken');
 };
 
-export const getTokenLocalStorageItem = () => {
+export const getTokenLocalStorageItem = (): string => {
   const tokenJson = localStorage.getItem('token');
   return tokenJson !== 'undefined' && tokenJson !== null
     ? JSON.parse(tokenJson)
     : null;
 };
 
-export const getUserLocalStorageItem = () => {
+export const getUserLocalStorageItem = (): IUser => {
   const userJson = localStorage.getItem('user');
   return userJson !== 'undefined' && userJson !== null
     ? JSON.parse(userJson)
     : null;
 };
 
-export const getRefreshTokenLocalStorageItem = () => {
+export const getRefreshTokenLocalStorageItem = (): string => {
   const refreshTokenJson = localStorage.getItem('refreshToken');
   return refreshTokenJson !== 'undefined' && refreshTokenJson !== null
     ? JSON.parse(refreshTokenJson)

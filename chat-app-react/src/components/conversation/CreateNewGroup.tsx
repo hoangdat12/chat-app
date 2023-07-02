@@ -14,6 +14,7 @@ import { useAppDispatch } from '../../app/hook';
 import { createConversation } from '../../features/conversation/conversationSlice';
 import { getUserLocalStorageItem } from '../../ultils';
 import { IUser } from '../../ultils/interface';
+import useDebounce from '../../hooks/useDebounce';
 
 export interface IPropCreateNewGroup {
   isShowCreateNewGroup: boolean;
@@ -47,7 +48,12 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
   const [listFriend, setListFriend] = useState<IPropUserSearch[]>([]);
   const [member, setMember] = useState(listUserAddGroup.length + 1);
   const [groupName, setGroupName] = useState('');
+  const [searchValue, setSearchValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [keyword, setKeyWord] = useState('');
   const modelRef = useRef<HTMLDivElement>(null);
+
+  const debounceValue = useDebounce(searchValue);
 
   const dispatch = useAppDispatch();
 
@@ -80,14 +86,13 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
     }));
 
     const data = {
-      name: groupName,
+      nameGroup: groupName,
       conversation_type: 'group',
       participants: [creator, ...participantsGroup],
     };
     const res = await myAxios.post('/conversation', data);
-    if (res.data.status === 200) {
+    if (res.status === 201) {
       dispatch(createConversation(res.data.metaData));
-
       setShowListFriend(false);
       setListUserAddGroup([]);
       setGroupName('');
@@ -112,15 +117,38 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
     }
   }, [isShowCreateNewGroup]);
 
+  const getAllUser = async () => {
+    const res = await myAxios.get('/user');
+    if (res.data.status === 200) {
+      setListFriend(res.data.metaData);
+    }
+  };
+
   useEffect(() => {
-    const getAllUser = async () => {
-      const res = await myAxios.get('/user');
-      if (res.data.status === 200) {
-        setListFriend(res.data.metaData);
-      }
-    };
+    if (keyword === searchValue.trim() || searchValue.trim() === '')
+      setIsLoading(false);
+    else setIsLoading(true);
+  }, [searchValue]);
+
+  useEffect(() => {
     getAllUser();
   }, []);
+
+  useEffect(() => {
+    const handleSearch = async () => {
+      const res = await myAxios.get(`/user/search?q=${searchValue.trim()}`);
+      console.log(res);
+      if (res.status === 200) {
+        setListFriend(res.data.metaData.users);
+        setKeyWord(res.data.metaData.keyword);
+      }
+    };
+
+    if (searchValue.trim() !== '' && keyword !== searchValue.trim()) {
+      handleSearch();
+      setIsLoading(false);
+    }
+  }, [debounceValue]);
 
   return (
     <div
@@ -199,7 +227,12 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = ({
             showListFriend ? 'col-span-2' : 'hidden'
           } px-4 xl:px-6 bg-[#f2f3f4] py-6`}
         >
-          <Search className={'w-full bg-white'} />
+          <Search
+            className={'w-full bg-white'}
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
+            isLoading={isLoading}
+          />
           <hr className='my-4' />
           <div className='max-h-create-conversation scrollbar-hide overflow-y-scroll'>
             {listFriend.map((friend, idx) => (

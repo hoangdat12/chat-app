@@ -30,6 +30,7 @@ const Header: FC<IPropHeader> = ({
 }) => {
   const [isSearch, setIsSearch] = useState(false);
   const [isShowModelCreate, setIsShowModelCreate] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
   const innerWidth = useInnerWidth();
 
   useEffect(() => {
@@ -85,6 +86,8 @@ const Header: FC<IPropHeader> = ({
           <Search
             className={'sm:hidden text-sm sm:text-base'}
             width={'w-full'}
+            searchValue={searchValue}
+            setSearchValue={setSearchValue}
           />
         </div>
 

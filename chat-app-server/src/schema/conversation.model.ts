@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IMessage, IParticipant } from '../../ultils/interface';
-import { UserJoinChat } from '../../message/message.dto';
+import { IMessage, IParticipant } from '../ultils/interface';
+import { UserJoinChat } from '../message/message.dto';
 import { Types } from 'mongoose';
 import { Messages } from './message.model';
 

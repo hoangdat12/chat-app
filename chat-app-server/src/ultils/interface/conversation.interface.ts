@@ -2,7 +2,7 @@ import { PayloadCreateConversation } from '../../conversation/conversation.dto';
 import { ConversationRepository } from '../../conversation/conversation.repository';
 import { MessageRepository } from '../../message/message.repository';
 import { UserJoinChat } from '../../message/message.dto';
-import { Messages } from '../../schema/model/message.model';
+import { Messages } from '../../schema/message.model';
 import { ObjectId } from 'mongoose';
 import { IUserCreated } from './auth.interface';
 

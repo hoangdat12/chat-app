@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { UserJoinChat } from '../../message/message.dto';
+import { UserJoinChat } from '../message/message.dto';
 
 @Schema({ collection: 'Messages', timestamps: true })
 export class Messages {

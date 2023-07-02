@@ -18,12 +18,14 @@ import { JwtService } from '../jwt/jwt.service';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
 import { Ok } from '../ultils/response';
+import { FriendService } from '../friend/friend.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
+    private readonly friendService: FriendService,
   ) {}
 
   @Post('register')
@@ -43,8 +45,9 @@ export class AuthController {
   @Get('active/:token')
   async activeAccount(@Param('token') token: string, @Res() res: Response) {
     try {
-      const isValid = await this.authService.activeAccount(token);
+      const { isValid, user } = await this.authService.activeAccount(token);
       if (isValid) {
+        await this.friendService.create(user);
         return res.redirect('http://localhost:5173/login');
       } else {
         return res.redirect('http://localhost:5173/error');

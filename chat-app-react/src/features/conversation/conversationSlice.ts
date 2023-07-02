@@ -30,6 +30,14 @@ const conversationSlice = createSlice({
   name: 'conversation',
   initialState,
   reducers: {
+    searchConversation: (state, action: PayloadAction<IConversation[]>) => {
+      const newConversations = new Map<string, IConversation>();
+      action.payload.map((conversation) =>
+        newConversations.set(conversation._id, conversation)
+      );
+      state.conversations.clear();
+      state.conversations = newConversations;
+    },
     createConversation: (state, action: PayloadAction<IConversation>) => {
       const newConversationMap = new Map([
         [action.payload._id, action.payload],
@@ -140,6 +148,7 @@ export const {
   updateLastMessage,
   deleteLastMessage,
   readLastMessage,
+  searchConversation,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

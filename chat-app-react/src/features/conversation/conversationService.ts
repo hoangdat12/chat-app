@@ -1,4 +1,8 @@
-import { IDataReceived, IConversation } from '../../ultils/interface';
+import {
+  IDataReceived,
+  IConversation,
+  IResponse,
+} from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
 export interface IDataConversations {
@@ -12,6 +16,14 @@ const fetchConversationOfUser = async (userId: string) => {
   return res.data.metaData;
 };
 
+const searchConversationByName = async (
+  keyword: string
+): Promise<IResponse<IConversation[]>> => {
+  const res = await myAxios.get(`/conversation/search?q=${keyword}`);
+  return res;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
+  searchConversationByName,
 };

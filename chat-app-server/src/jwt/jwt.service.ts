@@ -4,7 +4,7 @@ import { TimeExpires, Headers } from '../ultils/constant';
 import { NextFunction, Request } from 'express';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { KeyTokenRepository } from '../auth/repository/keyToken.repository';
-import { KeyToken } from '../schema/model/keyToken.model';
+import { KeyToken } from '../schema/keyToken.model';
 import { Ok } from '../ultils/response';
 
 export interface PayloadToken {

@@ -98,7 +98,7 @@ const Login = () => {
             },
             withCredentials: true,
           }
-        )) as IResponse<IConversation[]>;
+        )) as IResponse<{ conversations: IConversation[] }>;
         if (res.data.metaData.conversations.length) {
           window.location.href = `/conversation/${res.data.metaData.conversations[0]?._id}`;
         } else {

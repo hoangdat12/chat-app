@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Conversation } from '../schema/model/conversation.model';
+import { Conversation } from '../schema/conversation.model';
 import { UserJoinChat } from '../message/message.dto';
 import {
   IMessage,
@@ -10,6 +10,8 @@ import {
   Pagination,
 } from '../ultils/interface';
 import { PayloadCreateConversation } from './conversation.dto';
+import { checkNegativeNumber } from 'src/ultils';
+import { MessageType } from 'src/ultils/constant';
 
 @Injectable()
 export class ConversationRepository {
@@ -40,7 +42,7 @@ export class ConversationRepository {
   }
 
   async findALl(userId: string, pagination: Pagination) {
-    const { page, limit } = pagination;
+    const { page, limit } = checkNegativeNumber(pagination);
     const offset = (page - 1) * limit;
     return await this.conversationModel.aggregate([
       {
@@ -100,22 +102,21 @@ export class ConversationRepository {
   }
 
   async findConversationOfUser(userId: string, pagination: Pagination) {
-    const { page, limit, sortBy } = pagination;
+    const { page, limit, sortBy } = checkNegativeNumber(pagination);
     const offset = (page - 1) * limit;
-    const conversations = await this.conversationModel
+    return await this.conversationModel
       .find({
         'participants.userId': userId,
       })
-      .sort(sortBy === 'ctime' ? { createdAt: -1 } : { createdAt: 1 })
+      .sort(sortBy === 'ctime' ? { updatedAt: -1 } : { updatedAt: 1 })
       .skip(offset)
       .limit(limit)
       .lean()
       .exec();
-    console.log('conversations:::: ', conversations);
-    return conversations;
   }
 
   async updateLastConversationMessage(
+    user: IUserCreated,
     conversationId: string,
     message: IMessage,
   ) {
@@ -124,9 +125,19 @@ export class ConversationRepository {
       {
         lastMessage: message,
         lastMessageSendAt: Date.now(),
-        $set: { 'participants.$[].isReadLastMessage': false },
+        $set: {
+          'participants.$[elem].isReadLastMessage': true,
+        },
       },
-      { new: true },
+      {
+        new: true,
+        upsert: true,
+        arrayFilters: [
+          {
+            'elem.userId': user._id,
+          },
+        ],
+      },
     );
   }
 
@@ -218,6 +229,35 @@ export class ConversationRepository {
         upsert: true,
       },
     );
+  }
+
+  async findByName(
+    user: IUserCreated,
+    keyword: string,
+    pagination: Pagination,
+  ) {
+    const searchRegex = new RegExp(keyword, 'i');
+    const { limit, page } = checkNegativeNumber(pagination);
+    const offset = (page - 1) * limit;
+    return await this.conversationModel
+      .find({
+        'participants.userId': user._id,
+        $or: [
+          {
+            conversation_type: MessageType.GROUP,
+            nameGroup: searchRegex,
+          },
+          {
+            conversation_type: MessageType.CONVERSATION,
+            'participants.userName': searchRegex,
+          },
+        ],
+      })
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit)
+      .lean()
+      .exec();
   }
 
   // ULTILS

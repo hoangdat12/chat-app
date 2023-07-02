@@ -2,7 +2,7 @@ import { FC, MouseEventHandler, ReactNode, useEffect, useState } from 'react';
 
 import Layout from '../../components/layout/Layout';
 import './conversation.scss';
-import { Link } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 import ConversationList from '../../components/conversation/ConversationList';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
@@ -13,6 +13,7 @@ import { getUserLocalStorageItem } from '../../ultils';
 import ConversationContent from '../../components/conversation/ConversationContent/ConversationContent';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
 import myAxios from '../../ultils/myAxios';
+import useInnerWidth from '../../hooks/useInnterWidth';
 
 export interface IPropButtonRounded {
   icon: ReactNode;
@@ -27,7 +28,7 @@ const Conversation = () => {
   const [showMoreConversation, setShowMoreConversation] = useState(false);
   // const [conversationSelected, setConversationSelected] =
   //   useState<IConversation | null>(null);
-  // const innerWitdh = useInnerWidth();
+  const innerWitdh = useInnerWidth();
   const user = getUserLocalStorageItem();
   useEffect(() => {
     const fetchListConversationOfUser = async () => {
@@ -53,40 +54,31 @@ const Conversation = () => {
   return (
     <Layout>
       <div className='relative md:grid md:grid-cols-12 flex w-full h-full overflow-hidden'>
-        {/* {innerWitdh < 640 ? (
+        {innerWitdh < 640 ? (
           <Routes>
             <Route
-              path='/'
+              path='/list'
               element={
                 <ConversationList
-                  setConversationSelected={setConversationSelected}
+                  handleSelectConversation={handleSelectConversation}
                   conversations={conversations}
                   user={user}
                   to={true}
                 />
               }
             />
-            <Route
-              path='/'
-              element={
-                <ConversationContent
-                  user={user}
-                  conversation={conversationSelected}
-                />
-              }
-            />
+            <Route path='/' element={<ConversationContent user={user} />} />
             <Route path='/setting' element={<ConversationSetting />} />
           </Routes>
         ) : (
           <>
             <ConversationList
-              setConversationSelected={setConversationSelected}
+              handleSelectConversation={handleSelectConversation}
               conversations={conversations}
               user={user}
             />
             <ConversationContent
               user={user}
-              conversation={conversationSelected}
               setShowMoreConversation={setShowMoreConversation}
               showMoreConversation={showMoreConversation}
             />
@@ -95,8 +87,8 @@ const Conversation = () => {
               setShowMoreConversation={setShowMoreConversation}
             />
           </>
-        )} */}
-        <>
+        )}
+        {/* <>
           <ConversationList
             handleSelectConversation={handleSelectConversation}
             conversations={conversations}
@@ -111,7 +103,7 @@ const Conversation = () => {
             showMoreConversation={showMoreConversation}
             setShowMoreConversation={setShowMoreConversation}
           />
-        </>
+        </> */}
       </div>
     </Layout>
   );

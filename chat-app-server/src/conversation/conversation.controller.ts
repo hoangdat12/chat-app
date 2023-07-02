@@ -40,7 +40,33 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return await this.conversationService.createConversation(user, body);
+      return new Ok(
+        await this.conversationService.createConversation(user, body),
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Get('search')
+  async findConversationByName(
+    @Req() req: Request,
+    @Query('q') keyword: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+    @Query('sortBy') sortBy: string = 'ctime',
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      const pagination = {
+        page,
+        limit,
+        sortBy,
+      };
+      return new Ok(
+        await this.conversationService.findByName(user, keyword, pagination),
+      );
     } catch (err) {
       console.log(err);
       throw err;
@@ -51,16 +77,16 @@ export class ConversationController {
   async getMessageOfConversation(
     @Req() req: Request,
     @Param('conversationId') conversationId: string,
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('sortBy') sortBy: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 50,
+    @Query('sortBy') sortBy: string = 'ctime',
   ) {
     try {
       const user = req.user as IUserCreated;
       const pagination = {
-        page: page || 1,
-        limit: limit || 50,
-        sortBy: sortBy || 'ctime',
+        page,
+        limit,
+        sortBy,
       };
       const response = await this.conversationService.getMessageOfConversation(
         user,

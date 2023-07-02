@@ -1,5 +1,5 @@
-import { FC, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { FC, useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 import Avatar, { AvatarSquare } from '../avatars/Avatar';
 import Search from '../search/Search';
@@ -11,6 +11,8 @@ import { IConversation, IUser } from '../../ultils/interface';
 import { getNameAndAvatarOfConversation } from '../../ultils';
 import { useAppDispatch } from '../../app/hook';
 import { readLastMessage } from '../../features/conversation/conversationSlice';
+import useDebounce from '../../hooks/useDebounce';
+import { conversationService } from '../../features/conversation/conversationService';
 
 export interface IPropConversationList {
   conversations: Map<string, IConversation>;
@@ -25,22 +27,51 @@ const ConversationList: FC<IPropConversationList> = ({
   user,
   handleSelectConversation,
 }) => {
+  const { conversationId } = useParams();
   // For first
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState<string>(
+    conversationId ?? conversations.keys().next().value
+  );
   const [isReadLastMessage, setIsReadLastMessage] = useState(true);
   // For after send message
   const [activeAfterSendMessage, setActiveAfterSendMessage] = useState('');
-
+  const [searchValue, setSearchValue] = useState('');
+  const [listConversations, setListConversations] = useState<IConversation[]>();
+  const [isShowSearchResult, setIsShowSearchResult] = useState(false);
   const dispatch = useAppDispatch();
 
-  const handleActive = (idx: number, conversation: IConversation) => {
-    setActive(idx);
+  const handleActive = (conversation: IConversation) => {
+    setActive(conversation._id);
     setActiveAfterSendMessage(conversation._id);
     if (!isReadLastMessage) {
       handleSelectConversation(conversation._id);
       dispatch(readLastMessage({ user, conversationId: conversation._id }));
     }
   };
+  const debounceValue = useDebounce(searchValue, 500);
+
+  useEffect(() => {
+    if (searchValue.trim() === '') {
+      setIsShowSearchResult(false);
+      setListConversations([]);
+    }
+  }, [searchValue]);
+
+  useEffect(() => {
+    const handleSearchConversation = async () => {
+      const res = await conversationService.searchConversationByName(
+        searchValue.trim()
+      );
+      console.log(res);
+      if (res.status === 200) {
+        setListConversations(res.data.metaData);
+        setIsShowSearchResult(true);
+      }
+    };
+    if (searchValue.trim() !== '') {
+      handleSearchConversation();
+    }
+  }, [debounceValue]);
 
   return (
     <div className='xl:col-span-3 md:col-span-4 w-full sm:w-[80px] md:w-auto bg-[#f2f3f4] h-full py-6 sm:py-8 overflow-hidden'>
@@ -48,6 +79,11 @@ const ConversationList: FC<IPropConversationList> = ({
         <Search
           className={'bg-white flex sm:hidden md:flex'}
           width={'w-full'}
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+          isShow={isShowSearchResult}
+          listResult={listConversations}
+          setIsShow={setIsShowSearchResult}
         />
         <AvatarSquare
           avatarUrl={LogoPage}
@@ -55,7 +91,7 @@ const ConversationList: FC<IPropConversationList> = ({
         />
       </div>
 
-      {/* Mobile online */}
+      {/* Friend online on Mobile*/}
       <div className='flex sm:hidden gap-3 my-4 mx-6 overflow-x-scroll scrollbar-hide'>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ele) => (
           <div className='relative' key={ele}>
@@ -85,18 +121,17 @@ const ConversationList: FC<IPropConversationList> = ({
                   key={`${conversation._id}`}
                   className={`block sm:hidden md:block cursor-pointer ${
                     activeAfterSendMessage === conversation._id ||
-                    (idx === active && activeAfterSendMessage === '')
+                    (active === conversation._id &&
+                      activeAfterSendMessage === '' &&
+                      innerWidth >= 640)
                       ? 'bg-white'
                       : ''
                   }`}
-                  onClick={() => handleActive(idx, conversation)}
+                  onClick={() => handleActive(conversation)}
                 >
                   <ConversationInfor
-                    active={idx === active}
-                    avatarUrl={
-                      avatarUrl ??
-                      'https://i0.wp.com/thatnhucuocsong.com.vn/wp-content/uploads/2022/04/Anh-avatar-dep-anh-dai-dien-FB-Tiktok-Zalo.jpg?ssl=1'
-                    }
+                    active={active === conversation._id}
+                    avatarUrl={avatarUrl}
                     nickName={name ?? 'undifined'}
                     status={'Active'}
                     conversation={conversation}
@@ -108,11 +143,12 @@ const ConversationList: FC<IPropConversationList> = ({
                   key={`${conversation._id}10`}
                   className={`hidden sm:block md:hidden cursor-pointer ${
                     activeAfterSendMessage === conversation._id ||
-                    (idx === active && activeAfterSendMessage === '')
+                    (active === conversation._id &&
+                      activeAfterSendMessage === '')
                       ? 'bg-white'
                       : ''
                   } w-full border-b-[2px] border-[#e8ebed]`}
-                  onClick={() => handleActive(idx, conversation)}
+                  onClick={() => handleActive(conversation)}
                 >
                   <div className='flex justify-center'>
                     <ConversationInforMobile

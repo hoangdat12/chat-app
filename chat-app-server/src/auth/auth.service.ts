@@ -15,6 +15,7 @@ import {
 } from '../mail-sender/mail-sender.template';
 import { ILoginWithGoogleData } from '../ultils/interface';
 import { IUserCreated } from '../ultils/interface';
+import { convertUserIdString, getUsername } from '../ultils';
 
 @Injectable()
 export class AuthService {
@@ -73,38 +74,8 @@ export class AuthService {
     if (!userUpdate) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
     await this.otpTokenRepository.deleteByToken(tokenActive);
-
-    return true;
-    // const { privateKey, publicKey } = await this.generateKeyPair();
-
-    // const payload = {
-    //   id: userUpdate._id as unknown as string,
-    //   email: userUpdate.email,
-    // };
-    // const { accessToken, refreshToken } = this.jwtService.createTokenPair(
-    //   payload,
-    //   privateKey,
-    // );
-
-    // const dataKeyToken = {
-    //   user: userUpdate,
-    //   refreshToken,
-    //   publicKey,
-    //   privateKey,
-    // };
-
-    // await this.keyTokenRepository.createKeyToken(dataKeyToken);
-
-    // delete userUpdate.password;
-
-    // const metaData = {
-    //   user: userUpdate,
-    //   token: accessToken,
-    // };
-    // return {
-    //   response: new Created<any>(metaData, 'Register success!'),
-    //   refreshToken,
-    // };
+    const user = convertUserIdString(userUpdate);
+    return { isValid: true, user };
   }
 
   async login(data: UserLogin) {
@@ -226,7 +197,7 @@ export class AuthService {
       console.log(otpToken);
       // Send mail
       const link = `http://localhost:8080/verify-otp/${otpToken.token}`;
-      const userName = `${userExist.firstName} ${userExist.lastName}`;
+      const userName = getUsername(userExist);
       const content = confirmEmail(userName, link);
       await this.mailSender.sendEmailWithText(
         email,

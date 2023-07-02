@@ -32,6 +32,26 @@ export class UserController {
     }
   }
 
+  @Get('/search')
+  async searchUserByName(
+    @Query('q') keyword: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+    @Query('sortBy') sortBy: string = 'name',
+  ) {
+    try {
+      const pagination = {
+        page,
+        limit,
+        sortBy,
+      };
+      return new Ok(await this.userService.searchUser(keyword, pagination));
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
   @Get('/:userId')
   async getUserDetail(@Param('userId') userId: string) {
     try {
@@ -100,7 +120,6 @@ export class UserController {
       user,
       pagination,
     );
-    console.log(conversations);
     const data = {
       conversations,
       page,

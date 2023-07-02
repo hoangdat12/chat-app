@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Messages } from '../schema/model/message.model';
+import { Messages } from '../schema/message.model';
 import { Model } from 'mongoose';
 import {
   DelelteMessageData,
@@ -8,6 +8,7 @@ import {
   UpdateMessageData,
 } from './message.dto';
 import { IUserCreated, Pagination } from '../ultils/interface';
+import { checkNegativeNumber, getUsername } from '../ultils';
 
 export interface IDataDeleteMessage {
   messageType: string;
@@ -74,7 +75,7 @@ export class MessageRepository {
     conversationId: string,
     pagination: Pagination,
   ) {
-    const { page, limit, sortBy } = pagination;
+    const { page, limit, sortBy } = checkNegativeNumber(pagination);
     const offset = (page - 1) * limit;
     return await this.messageModel
       .find({
@@ -112,7 +113,7 @@ export class MessageRepository {
       userId: user._id,
       email: user.email,
       avatarUrl: user.avatarUrl,
-      userName: `${user.firstName} ${user.lastName}`,
+      userName: getUsername(user),
       enable: true,
     };
     const { conversationId, ...payload } = data;

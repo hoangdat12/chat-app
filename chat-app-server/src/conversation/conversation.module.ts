@@ -3,7 +3,7 @@ import { ConversationController } from './conversation.controller';
 import { ConversationService } from './conversation.service';
 import { ConversationRepository } from './conversation.repository';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConversationModel } from '../schema/model/conversation.model';
+import { ConversationModel } from '../schema/conversation.model';
 import { MessageModule } from '../message/message.module';
 
 @Global()

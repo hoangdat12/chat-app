@@ -6,7 +6,7 @@ export * from './auth.interface';
 export interface IResponse<T> extends AxiosResponse {
   data: {
     message: string;
-    metaData: { conversations: T };
+    metaData: T;
     status: number;
   };
 }
