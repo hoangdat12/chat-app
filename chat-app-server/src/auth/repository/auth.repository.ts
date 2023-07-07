@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { User } from '../../schema/user.model';
 import { ChangeUsername, UserRegister } from '../auth.dto';
 import { IUserCreated, Pagination } from '../../ultils/interface';
@@ -15,7 +15,8 @@ export class AuthRepository {
   }
 
   async findById(userId: string): Promise<IUserCreated | null> {
-    return await this.userModel.findOne({ _id: userId }).lean();
+    const objectId = new mongoose.Types.ObjectId(userId);
+    return await this.userModel.findOne({ _id: objectId }).lean();
   }
 
   async findByEmail(userEmail: string): Promise<IUserCreated | null> {
@@ -23,7 +24,6 @@ export class AuthRepository {
   }
 
   async findByUserName(keyword: string, pagination: Pagination) {
-    console.log(pagination);
     const searchRegex = new RegExp(keyword, 'i');
     const { limit, page } = checkNegativeNumber(pagination);
     const offset = (page - 1) * limit;
@@ -55,7 +55,6 @@ export class AuthRepository {
       ])
       .skip(offset)
       .limit(limit);
-
     return {
       users,
       keyword,

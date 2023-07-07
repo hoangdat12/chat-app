@@ -1,3 +1,4 @@
+import { MessageType } from './constant/message.constant';
 import { IConversation, IUser } from './interface';
 
 export const calculatorTime = (timeStamp: string) => {
@@ -97,7 +98,7 @@ export const getNameAndAvatarOfConversation = (
     name: '',
     avatarUrl: '',
   };
-  if (conversation.conversation_type === 'group') {
+  if (conversation.conversation_type === MessageType.GROUP) {
     result.name = conversation.nameGroup ?? 'Name Group';
     result.avatarUrl = conversation.avatarUrl;
   } else {
@@ -157,4 +158,8 @@ export const convertMessageObjectIdToString = (message: any) => {
     createdAt: message.createdAt,
     updatedAt: message.updatedAt,
   };
+};
+
+export const getUsername = (user: IUser | null) => {
+  return `${user?.firstName} ${user?.lastName}`;
 };

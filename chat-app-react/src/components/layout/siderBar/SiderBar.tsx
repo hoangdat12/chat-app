@@ -1,71 +1,22 @@
 import { Link } from 'react-router-dom';
 import { FC, useEffect, useRef } from 'react';
-import { AiOutlineClose, AiOutlineHome, AiOutlinePlus } from 'react-icons/Ai';
-import { FiSend, FiSettings } from 'react-icons/fi';
-import { BsPerson } from 'react-icons/bs';
-import { AvatarSquare } from '../../avatars/Avatar';
+import { AiOutlineClose, AiOutlinePlus } from 'react-icons/Ai';
 
+import AvatarSquare from '../../avatars/AvatarSquare';
+import { useAppDispatch, useAppSelector } from '../../../app/hook';
+import {
+  getFirstConversation,
+  selectConversation,
+} from '../../../features/conversation/conversationSlice';
+import useInnerWidth from '../../../hooks/useInnterWidth';
 import LogoPage from '../../../assets/Logo2.png';
+
 import './siderBar.scss';
 import {
-  IoGameControllerOutline,
-  IoHelpBuoyOutline,
-  IoMusicalNotesOutline,
-} from 'react-icons/io5';
-
-export const selectNav1 = [
-  {
-    display: 'NewsFeed',
-    path: '/home',
-    icons: <AiOutlineHome />,
-  },
-  {
-    display: 'Messenges',
-    path: '/messenges/3/5',
-    icons: <FiSend />,
-  },
-  {
-    display: 'Profile',
-    path: '/profile',
-    icons: <BsPerson />,
-  },
-  // {
-  //   display: "Friends",
-  //   path: "/friends",
-  //   icons: <RiGitRepositoryPrivateLine />,
-  // },
-];
-
-export const selectNavUtils = [
-  {
-    display: 'Games',
-    path: '/setting/general',
-    icons: <IoGameControllerOutline />,
-  },
-  {
-    display: 'Music',
-    path: '/page/login',
-    icons: <IoMusicalNotesOutline />,
-  },
-];
-
-const selectNav2 = [
-  {
-    display: 'Setting',
-    path: '/setting/general',
-    icons: <FiSettings />,
-  },
-  {
-    display: 'Help',
-    path: '/page/login',
-    icons: <IoHelpBuoyOutline />,
-  },
-  // {
-  //   display: "Logout",
-  //   path: "/page/login",
-  //   icons: <RiLogoutCircleRLine />,
-  // },
-];
+  selectNav1,
+  selectNav2,
+  selectNavUtils,
+} from '../../../ultils/list/siderBar.list';
 
 export interface IPropSiderBar {
   isOpen: boolean;
@@ -75,11 +26,20 @@ export interface IPropSiderBar {
 
 const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
   const siderBarMobileRef = useRef<HTMLDivElement>(null);
+  const { firstConversation } = useAppSelector(selectConversation);
+  const dispatch = useAppDispatch();
+  const innerWitdh = useInnerWidth();
 
   const handleCloseSiderBar = () => {
     setShowMobile(false);
   };
 
+  // getFirstConversation
+  useEffect(() => {
+    dispatch(getFirstConversation());
+  }, []);
+
+  // Handle mousedown close sidebar mobile
   useEffect(() => {
     if (!isOpen) {
       const handleClickOutside = (e: MouseEvent) => {
@@ -163,7 +123,13 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                   className={`link whitespace-nowrap overflow-hidden ${
                     showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
-                  to='/'
+                  to={`${
+                    select.display === 'Messages'
+                      ? innerWitdh < 640
+                        ? '/conversation/all/list'
+                        : `${select.path}/${firstConversation?._id}`
+                      : select.path
+                  }`}
                 >
                   <i className='w-16 flex justify-center whitespace-nowrap'>
                     {select.icons}

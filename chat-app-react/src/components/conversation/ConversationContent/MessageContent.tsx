@@ -9,6 +9,7 @@ import {
 } from '../../../features/message/messageSlice';
 import MessageBoxGroup from '../../message/MessageUserBox';
 import { messageService } from '../../../features/message/messageService';
+import { MessageType } from '../../../ultils/constant/message.constant';
 
 const MessageContent = () => {
   const [currentPageOfMessage, setCurrentPageOfMessage] = useState<number>(1);
@@ -61,7 +62,7 @@ const MessageContent = () => {
         <div>
           <span className='loading-spinner'></span>
         </div>
-      ) : conversation?.conversation_type === 'group' ? (
+      ) : conversation?.conversation_type === MessageType.GROUP ? (
         <>
           {messages.map((messageFormat) => {
             return messageFormat.messages.map((message) => (

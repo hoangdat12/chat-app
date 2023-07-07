@@ -4,6 +4,7 @@ import { Response } from 'express';
 @Catch()
 export class ErrorHandler implements ExceptionFilter {
   catch(err: any, host: ArgumentsHost) {
+    console.log(err);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const statusCode = err.status || 500;

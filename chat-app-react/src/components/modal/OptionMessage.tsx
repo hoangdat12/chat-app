@@ -46,7 +46,6 @@ const OptionMessage: FC<IPropOptionMessage> = memo(
           conversation_type: conversation?.conversation_type,
           conversationId: message.message_conversation,
         };
-        console.log(data);
         const response = await messageService.deleteMessageOfConversation(data);
         console.log(response);
         if (conversation?.lastMessage._id === message._id) {

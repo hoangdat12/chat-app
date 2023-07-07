@@ -35,14 +35,16 @@ export class UserController {
   @Get('/search')
   async searchUserByName(
     @Query('q') keyword: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
     @Query('sortBy') sortBy: string = 'name',
   ) {
     try {
+      const parsedPage = parseInt(page, 10);
+      const parsedLimit = parseInt(limit, 10);
       const pagination = {
-        page,
-        limit,
+        page: parsedPage,
+        limit: parsedLimit,
         sortBy,
       };
       return new Ok(await this.userService.searchUser(keyword, pagination));

@@ -53,7 +53,6 @@ export class JwtService {
           'Missing request header!',
           HttpStatus.BAD_REQUEST,
         );
-
       const user = await this.authRepository.findById(clientId);
       if (!user)
         throw new HttpException('User not found!', HttpStatus.NOT_FOUND);

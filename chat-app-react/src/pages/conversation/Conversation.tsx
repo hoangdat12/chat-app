@@ -11,7 +11,6 @@ import {
 } from '../../features/conversation/conversationSlice';
 import { getUserLocalStorageItem } from '../../ultils';
 import ConversationContent from '../../components/conversation/ConversationContent/ConversationContent';
-import ConversationSetting from '../../components/conversation/ConversationSetting';
 import myAxios from '../../ultils/myAxios';
 import useInnerWidth from '../../hooks/useInnterWidth';
 
@@ -25,11 +24,23 @@ export interface IPropButtonRounded {
 const Conversation = () => {
   const ditpatch = useAppDispatch();
   const { conversations } = useAppSelector(selectConversation);
-  const [showMoreConversation, setShowMoreConversation] = useState(false);
-  // const [conversationSelected, setConversationSelected] =
-  //   useState<IConversation | null>(null);
+  const [showListConversationSM, setShowListConversationSM] = useState(false);
+
   const innerWitdh = useInnerWidth();
   const user = getUserLocalStorageItem();
+
+  // Show list conversation with reponsive for sm
+  const handleShowListConversation = () => {
+    setShowListConversationSM(!showListConversationSM);
+  };
+
+  // isReadLastMessage = true
+  const handleSelectConversation = async (conversationId: string) => {
+    await myAxios.post('/conversation/read-last-message', {
+      conversationId,
+    });
+  };
+
   useEffect(() => {
     const fetchListConversationOfUser = async () => {
       await ditpatch(fetchConversationOfUser(user?._id ? user?._id : ' '));
@@ -38,18 +49,7 @@ const Conversation = () => {
     if (!conversations?.size) {
       fetchListConversationOfUser();
     }
-
-    // if (conversations?.size && !conversationSelected) {
-    //   setConversationSelected(conversations.values().next().value);
-    // }
   }, [conversations]);
-
-  // isReadLastMessage = true
-  const handleSelectConversation = async (conversationId: string) => {
-    await myAxios.post('/conversation/read-last-message', {
-      conversationId,
-    });
-  };
 
   return (
     <Layout>
@@ -67,8 +67,14 @@ const Conversation = () => {
                 />
               }
             />
-            <Route path='/' element={<ConversationContent user={user} />} />
-            <Route path='/setting' element={<ConversationSetting />} />
+            <Route
+              path='/'
+              element={
+                <>
+                  <ConversationContent user={user} />
+                </>
+              }
+            />
           </Routes>
         ) : (
           <>
@@ -76,34 +82,15 @@ const Conversation = () => {
               handleSelectConversation={handleSelectConversation}
               conversations={conversations}
               user={user}
+              showListConversationSM={showListConversationSM}
             />
             <ConversationContent
               user={user}
-              setShowMoreConversation={setShowMoreConversation}
-              showMoreConversation={showMoreConversation}
-            />
-            <ConversationSetting
-              showMoreConversation={showMoreConversation}
-              setShowMoreConversation={setShowMoreConversation}
+              handleShowListConversation={handleShowListConversation}
+              showListConversationSM={showListConversationSM}
             />
           </>
         )}
-        {/* <>
-          <ConversationList
-            handleSelectConversation={handleSelectConversation}
-            conversations={conversations}
-            user={user}
-          />
-          <ConversationContent
-            user={user}
-            setShowMoreConversation={setShowMoreConversation}
-            showMoreConversation={showMoreConversation}
-          />
-          <ConversationSetting
-            showMoreConversation={showMoreConversation}
-            setShowMoreConversation={setShowMoreConversation}
-          />
-        </> */}
       </div>
     </Layout>
   );

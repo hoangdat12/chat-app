@@ -2,6 +2,8 @@ import {
   IDataReceived,
   IConversation,
   IResponse,
+  IDataCreateNewGroup,
+  IDataAddNewMember,
 } from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
@@ -23,7 +25,27 @@ const searchConversationByName = async (
   return res;
 };
 
+const getFirstConversation = async (): Promise<IConversation> => {
+  const res = await myAxios.get(`/conversation/first`);
+  return res.data.metaData;
+};
+
+const createNewGroup = async (data: IDataCreateNewGroup) => {
+  return await myAxios.post('/conversation', data);
+};
+
+const handleAddNewMember = async (
+  data: IDataAddNewMember
+): Promise<IConversation> => {
+  const res = await myAxios.post('/conversation/group/participant/add', data);
+  console.log(res);
+  return res.data.metaData;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
   searchConversationByName,
+  getFirstConversation,
+  createNewGroup,
+  handleAddNewMember,
 };

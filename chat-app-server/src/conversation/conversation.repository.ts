@@ -260,6 +260,17 @@ export class ConversationRepository {
       .exec();
   }
 
+  async getFirstConversation(user: IUserCreated) {
+    return await this.conversationModel
+      .find({
+        'participants.userId': user._id,
+      })
+      .sort({ updatedAt: -1 })
+      .limit(1)
+      .lean()
+      .exec();
+  }
+
   // ULTILS
   modifyDataPaticipants(participants: IParticipant[], userId: string) {
     for (let participant of participants) {

@@ -1,4 +1,11 @@
-import { FC, useEffect, useRef, useState, useContext } from 'react';
+import {
+  FC,
+  useEffect,
+  useRef,
+  useState,
+  useContext,
+  useCallback,
+} from 'react';
 
 import useInnerWidth from '../../../hooks/useInnterWidth';
 import {
@@ -22,22 +29,27 @@ import {
 } from '../../../ultils/interface';
 import { messageService } from '../../../features/message/messageService';
 import { useParams } from 'react-router-dom';
-import HeaderContent from './HeaderContent';
+import HeaderContent, { IInforConversation } from './HeaderContent';
 import InputSendMessage from './InputSendMessage';
 import MessageContent from './MessageContent';
+import ConversationSetting from '../ConversationSetting';
+import { MessageType } from '../../../ultils/constant/message.constant';
+import CreateNewGroup from '../../modal/CreateNewGroup';
 
 export interface IPropConversationContent {
   user: IUser | null;
-  setShowMoreConversation?: (value: boolean) => void;
-  showMoreConversation?: boolean;
+  handleShowListConversation?: () => void;
+  showListConversationSM?: boolean;
 }
 
 const ConversationContent: FC<IPropConversationContent> = ({
   user,
-  setShowMoreConversation,
-  showMoreConversation,
+  handleShowListConversation,
+  showListConversationSM,
 }) => {
   const [messageValue, setMessageValue] = useState('');
+  const [showMoreConversation, setShowMoreConversation] = useState(false);
+  const [isShowAddNewMember, setIsShowAddNewMember] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const innterWidth = useInnerWidth();
   const socket = useContext(SocketContext);
@@ -46,6 +58,48 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const { conversationId } = useParams();
   const { conversations } = useAppSelector(selectConversation);
   const conversation = conversations.get(conversationId ?? '') as IConversation;
+
+  const getInforChatFromConversation = useCallback(
+    (conversation: IConversation | undefined) => {
+      if (conversation) {
+        if (conversation.conversation_type === MessageType.GROUP) {
+          return {
+            userName: conversation.nameGroup,
+            avatarUrl: conversation.avatarUrl,
+            status: null,
+          };
+        } else {
+          for (let received of conversation.participants) {
+            if (received.userId !== user?._id) {
+              return {
+                userName: received.userName,
+                avatarUrl: received.avatarUrl,
+                status: 'online',
+              };
+            }
+          }
+        }
+      } else {
+        return {
+          userName: null,
+          avatarUrl: null,
+          status: null,
+        };
+      }
+    },
+    [conversation]
+  );
+  const { userName, status, avatarUrl } = getInforChatFromConversation(
+    conversation
+  ) as IInforConversation;
+
+  // Show modal add new Member
+  const handleAddNewMember = () => {
+    setIsShowAddNewMember(true);
+    setShowMoreConversation(false);
+  };
+
+  // Send message
   const handleSendMessage = async () => {
     if (conversation) {
       const body = {
@@ -68,12 +122,14 @@ const ConversationContent: FC<IPropConversationContent> = ({
     }
   };
 
+  // Show more conversation
   const handleShowMoreConversation = () => {
-    if (setShowMoreConversation && innterWidth < 1280 && innterWidth >= 640) {
+    if (setShowMoreConversation && innterWidth < 1280) {
       setShowMoreConversation(!showMoreConversation);
     }
   };
 
+  // Socket received message created
   const handleSocketCreateMessage = (payload: IMessage) => {
     const { message_sender_by, message_conversation } = payload;
     if (message_sender_by.userId === user?._id) {
@@ -90,6 +146,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
     dispatch(createNewMessage(payload));
   };
 
+  // Socket received message updated
   const handleSocketUpdateMessage = (payload: any) => {
     const { message_sender_by, message_conversation, message_received } =
       payload;
@@ -112,6 +169,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
     }
   };
 
+  // Socket received message deleted
   const handleSocketDeleteMessage = (payload: iSocketDeleteMessage) => {
     const { message, lastMessage } = payload;
     const { message_sender_by, message_conversation, message_received } =
@@ -136,6 +194,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
     }
   };
 
+  // Handle event Enter
   useEffect(() => {
     if (messageValue !== '') {
       const enterEvent = (e: any) => {
@@ -152,6 +211,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
     }
   }, [messageValue]);
 
+  // Get message of conversation
   useEffect(() => {
     if (conversation) {
       const data = {
@@ -178,7 +238,14 @@ const ConversationContent: FC<IPropConversationContent> = ({
 
   return (
     <div className='block xl:col-span-6 md:col-span-8 w-full h-full'>
-      <HeaderContent handleShowMoreConversation={handleShowMoreConversation} />
+      <HeaderContent
+        handleShowMoreConversation={handleShowMoreConversation}
+        handleShowListConversation={handleShowListConversation}
+        showListConversationSM={showListConversationSM}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        status={status}
+      />
 
       <MessageContent />
 
@@ -187,6 +254,22 @@ const ConversationContent: FC<IPropConversationContent> = ({
         messageValue={messageValue}
         setMessageValue={setMessageValue}
         handleSendMessage={handleSendMessage}
+      />
+
+      <ConversationSetting
+        showMoreConversation={showMoreConversation}
+        setShowMoreConversation={setShowMoreConversation}
+        userName={userName}
+        avatarUrl={avatarUrl}
+        status={status}
+        conversation={conversation}
+        handleAddNewMember={handleAddNewMember}
+      />
+
+      <CreateNewGroup
+        isShowCreateNewGroup={isShowAddNewMember}
+        setShowCreateNewGroup={setIsShowAddNewMember}
+        type={'add'}
       />
     </div>
   );

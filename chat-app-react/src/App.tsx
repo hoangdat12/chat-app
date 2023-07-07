@@ -9,6 +9,7 @@ import RegisterSuccess from './pages/authPage/RegisterSuccess';
 import Conversation from './pages/conversation/Conversation';
 import { SocketContext, socket } from './ultils/context/Socket';
 import useInnerWidth from './hooks/useInnterWidth';
+import Profile from './pages/profile/Profile';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -33,6 +34,7 @@ function App() {
                 element={<Conversation />}
               />
             )}
+            <Route path='/profile/:userId/*' element={<Profile />} />
           </Route>
         </Routes>
       </Router>

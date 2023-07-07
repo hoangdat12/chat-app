@@ -73,6 +73,17 @@ export class ConversationController {
     }
   }
 
+  @Get('/first')
+  async getFirstConversation(@Req() req: Request) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(await this.conversationService.getFirstConversation(user));
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
   @Get('/:conversationId')
   async getMessageOfConversation(
     @Req() req: Request,
@@ -139,7 +150,7 @@ export class ConversationController {
     }
   }
 
-  @Patch('/group/participant/add')
+  @Post('/group/participant/add')
   async addPaticipantOfConversation(
     @Req() req: Request,
     @Body() body: PayloadAddPaticipant,

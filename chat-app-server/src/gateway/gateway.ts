@@ -14,6 +14,7 @@ import {
 import { Services } from '../ultils/constant';
 import { Messages } from '../schema/message.model';
 import { IMessage, iSocketDeleteMessage } from '../ultils/interface';
+import { ISocketAddFriend } from 'src/ultils/interface/friend.interface';
 
 @WebSocketGateway({
   cors: {
@@ -74,5 +75,20 @@ export class MessagingGateway implements OnModuleInit {
       const receivedSocket = this.sessions.getUserSocket(received.userId);
       if (receivedSocket) receivedSocket.emit('onMessageDelete', payload);
     }
+  }
+
+  @OnEvent('friend.received.add')
+  handleSendConfirmToFriend(payload: ISocketAddFriend) {
+    const { user, friend } = payload;
+    console.log('payload:::: ', payload);
+    const friendSocket = this.sessions.getUserSocket(friend.userId);
+    if (friendSocket) friendSocket.emit('onAddFriend', user);
+  }
+
+  @OnEvent('friend.user.cancel')
+  handleUserCancelAddFriend(payload: ISocketAddFriend) {
+    const { user, friend } = payload;
+    const friendSocket = this.sessions.getUserSocket(friend.userId);
+    if (friendSocket) friendSocket.emit('onCancelFriend', user);
   }
 }

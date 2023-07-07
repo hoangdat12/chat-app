@@ -18,6 +18,17 @@ export interface IDataUpdateMessageOfConversation
   message_content: string;
 }
 
+export interface IMessage {
+  _id: string;
+  message_content: string;
+  message_conversation: string;
+  message_received: IParticipant[];
+  message_sender_by: IParticipant;
+  message_type: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IParticipant {
   userId: string;
   email: string;
@@ -39,17 +50,6 @@ export interface IConversation {
   userId: string[];
   avatarUrl: string;
   collection: string;
-}
-
-export interface IMessage {
-  _id: string;
-  message_content: string;
-  message_conversation: string;
-  message_received: IParticipant[];
-  message_sender_by: IParticipant;
-  message_type: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface IAllMessageData {
@@ -91,4 +91,16 @@ export interface iSocketDeleteMessage {
 export interface IPayloadReadLastMessage {
   user: IUser | null | undefined;
   conversationId: string | null | undefined;
+}
+
+export interface IDataCreateNewGroup {
+  nameGroup: string;
+  conversation_type: string;
+  participants: IParticipant[];
+}
+
+export interface IDataAddNewMember {
+  conversation_type: string;
+  conversationId: string;
+  newParticipants: IParticipant[];
 }

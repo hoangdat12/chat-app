@@ -40,9 +40,13 @@
 }
 
 .max-h-create-conversation {
-  max-height: calc(100% - 10% - 7rem);
+  max-height: calc(90% - 7rem);
 }
 
 .hover-message-show-button:hover .show-button-more {
   display: flex;
+}
+
+.top-more-feed {
+  top: calc(-100% - 6rem);
 }

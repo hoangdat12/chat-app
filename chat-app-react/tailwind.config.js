@@ -21,6 +21,7 @@ export default {
         nomal: 'rgba(0, 0, 0, 0.04) 0px 3px 5px',
         'normal-top': 'rgba(0, 0, 0, 0.09) 0px 3px 12px',
         'option-message': 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
+        default: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
       },
       fontSize: {
         'sider-bar': ['0.9rem', '1.35rem'],

@@ -154,7 +154,7 @@ export class AuthService {
     if (!userExist)
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
 
-    const { privateKey } = this.generateKeyPair();
+    const { privateKey, publicKey } = this.generateKeyPair();
 
     const payload = {
       id: userExist._id,
@@ -166,6 +166,15 @@ export class AuthService {
       payload,
       privateKey,
     );
+
+    const dataKeyToken = {
+      user: userExist,
+      refreshToken,
+      publicKey,
+      privateKey,
+    };
+
+    await this.keyTokenRepository.createKeyToken(dataKeyToken);
 
     const metaData = {
       user: userExist,

@@ -4,11 +4,15 @@ export interface IPropAvatar {
   className?: string;
   status?: string;
   avatarUrl: string;
+  onClick?: any;
 }
 
-const Avatar: FC<IPropAvatar> = ({ className, avatarUrl }) => {
+const Avatar: FC<IPropAvatar> = ({ className, avatarUrl, onClick }) => {
   return (
-    <div className={`${className} overflow-hidden rounded-full cursor-pointer`}>
+    <div
+      onClick={onClick}
+      className={`${className} overflow-hidden rounded-full cursor-pointer`}
+    >
       <img className='w-full rounded-full' src={avatarUrl} alt='' />
     </div>
   );
@@ -30,16 +34,6 @@ export const AvatarOnline: FC<IPropAvatar> = (props) => {
       >
         6 minus
       </span>
-    </div>
-  );
-};
-
-export const AvatarSquare: FC<IPropAvatar> = (props) => {
-  return (
-    <div
-      className={`${props?.className} overflow-hidden rounded-md cursor-pointer relative`}
-    >
-      <img className='w-full rounded-md' src={props.avatarUrl} alt='' />
     </div>
   );
 };

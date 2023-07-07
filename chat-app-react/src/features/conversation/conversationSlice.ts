@@ -3,26 +3,44 @@ import { RootState } from '../../app/store';
 import { conversationService } from './conversationService';
 import {
   IConversation,
+  IDataAddNewMember,
   IPayloadReadLastMessage,
   IPayloadUpdateLastMessage,
 } from '../../ultils/interface';
+import { MessageType } from '../../ultils/constant/message.constant';
 
 export interface IInitialStateConversation {
   conversations: Map<string, IConversation>;
   isLoading: boolean;
   status: 'idle' | 'pending' | 'succeeded' | 'failed';
+  firstConversation: IConversation | null;
 }
 
 const initialState: IInitialStateConversation = {
   conversations: new Map<string, IConversation>(),
   isLoading: false,
   status: 'idle',
+  firstConversation: null,
 };
 
 export const fetchConversationOfUser = createAsyncThunk(
   'conversation/getAll',
   async (userId: string) => {
     return await conversationService.fetchConversationOfUser(userId);
+  }
+);
+
+export const getFirstConversation = createAsyncThunk(
+  'conversation/getFirst',
+  async () => {
+    return await conversationService.getFirstConversation();
+  }
+);
+
+export const addFriendToGroup = createAsyncThunk(
+  'conversation/addMember',
+  async (data: IDataAddNewMember) => {
+    return await conversationService.handleAddNewMember(data);
   }
 );
 
@@ -46,6 +64,7 @@ const conversationSlice = createSlice({
         ...newConversationMap,
         ...state.conversations,
       ]);
+      state.firstConversation = action.payload;
     },
     createNewMessageOfConversation: (
       state,
@@ -69,6 +88,7 @@ const conversationSlice = createSlice({
             ...conversationUpdate,
             ...state.conversations,
           ]);
+          state.firstConversation = conversation;
         }
       }
     },
@@ -80,7 +100,7 @@ const conversationSlice = createSlice({
       const conversationFound = state.conversations.get(conversationId ?? '');
       if (conversationFound) {
         if (!lastMessage) {
-          if (conversationFound?.conversation_type === 'group') {
+          if (conversationFound?.conversation_type === MessageType.GROUP) {
             conversationFound.lastMessage.message_content = '';
             return;
           } else {
@@ -123,6 +143,7 @@ const conversationSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Get last conversation
     builder
       .addCase(fetchConversationOfUser.pending, (state) => {
         state.status = 'pending';
@@ -134,8 +155,38 @@ const conversationSlice = createSlice({
         action.payload.conversations.map((conversation) =>
           state.conversations.set(conversation._id, conversation)
         );
+        state.firstConversation = action.payload.conversations[0];
       })
       .addCase(fetchConversationOfUser.rejected, (state) => {
+        state.status = 'failed';
+        state.isLoading = false;
+      })
+
+      // Get first Conversation
+      .addCase(getFirstConversation.pending, (state) => {
+        state.status = 'pending';
+        state.isLoading = true;
+      })
+      .addCase(getFirstConversation.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isLoading = false;
+        state.firstConversation = action.payload;
+      })
+      .addCase(getFirstConversation.rejected, (state) => {
+        state.status = 'failed';
+        state.isLoading = false;
+      })
+
+      // Add member
+      .addCase(addFriendToGroup.pending, (state) => {
+        state.status = 'pending';
+        state.isLoading = true;
+      })
+      .addCase(addFriendToGroup.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isLoading = false;
+      })
+      .addCase(addFriendToGroup.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
       });

@@ -182,7 +182,7 @@ export class ConversationService {
       );
     }
 
-    return 'Add new member successfully!';
+    return newMember;
   }
 
   async setNickNameForParticipant(
@@ -263,5 +263,10 @@ export class ConversationService {
       keyword.trim(),
       pagination,
     );
+  }
+
+  async getFirstConversation(user: IUserCreated) {
+    const data = await this.conversationRepository.getFirstConversation(user);
+    return data[0];
   }
 }

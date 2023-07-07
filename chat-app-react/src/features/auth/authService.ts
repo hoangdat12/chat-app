@@ -23,7 +23,6 @@ const getInforUserWithOauth2 = async () => {
   const response = (await myAxios.get('/auth/status', {
     withCredentials: true,
   })) as IDataReceived<IDataLoginSuccess>;
-
   if (response.data.status === 200) {
     localStorage.setItem('user', JSON.stringify(response.data.metaData.user));
     localStorage.setItem('token', JSON.stringify(response.data.metaData.token));

@@ -52,7 +52,7 @@ const ConversationInfor: FC<IPropConversation> = ({
           <span className='' aria-hidden='true' />
           <div className='flex justify-between items-center mb-1'>
             <p
-              className={`text-md ${
+              className={`text-sm md:text-base ${
                 !isReadLastMessage
                   ? 'font-bold text-gray-900'
                   : 'font-medium text-gray-700'
@@ -65,7 +65,7 @@ const ConversationInfor: FC<IPropConversation> = ({
               conversation?.createdAt) && (
               <p
                 className={`
-                  text-xs
+                  text-[10px] md:text-xs
                   ${
                     !isReadLastMessage
                       ? 'text-gray-800 font-medium '
@@ -87,7 +87,7 @@ const ConversationInfor: FC<IPropConversation> = ({
           <p
             className={`
           truncate
-          text-sm
+          text-xs md:text-sm
           ${!isReadLastMessage ? 'text-black font-medium' : 'text-gray-500'}`}
           >
             {conversation?.lastMessage?.message_content}
