@@ -1,10 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserJoinChat } from '../message/message.dto';
+import { MessageContentType } from '../ultils/constant/message.constant';
 
 @Schema({ collection: 'Messages', timestamps: true })
 export class Messages {
   @Prop({ required: true, default: 'conversation' })
   message_type: string;
+
+  @Prop({ default: MessageContentType.MESSAGE, enum: MessageContentType })
+  message_content_type?: string;
 
   @Prop({ required: true })
   message_content: string;

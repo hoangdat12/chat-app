@@ -52,9 +52,9 @@ export class ChangeTopic {
   conversationId: string;
 }
 
-export class ChangeNickNameOfParticipant {
+export class IDataChangeUsernameOfParticipant {
   @IsNotEmpty()
-  newNicknameOfUser: IInforUserChangeNickname[];
+  newUsernameOfParticipant: IParticipant;
 
   @IsNotEmpty()
   conversationId: string;

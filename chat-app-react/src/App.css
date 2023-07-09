@@ -50,3 +50,7 @@
 .top-more-feed {
   top: calc(-100% - 6rem);
 }
+
+.overflow-wrap {
+  overflow-wrap: break-word;
+}

@@ -1,37 +1,50 @@
-import { FC, MouseEventHandler, ReactNode, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import Layout from '../../components/layout/Layout';
 import './conversation.scss';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Route, Routes, useParams } from 'react-router-dom';
 import ConversationList from '../../components/conversation/ConversationList';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
   fetchConversationOfUser,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
-import { getUserLocalStorageItem } from '../../ultils';
+import { getUserLocalStorageItem, getUserNameAndAvatarUrl } from '../../ultils';
 import ConversationContent from '../../components/conversation/ConversationContent/ConversationContent';
 import myAxios from '../../ultils/myAxios';
 import useInnerWidth from '../../hooks/useInnterWidth';
-
-export interface IPropButtonRounded {
-  icon: ReactNode;
-  className?: string;
-  onClick?: MouseEventHandler<HTMLAnchorElement>;
-  to?: string;
-}
+import ConversationSetting from '../../components/conversation/ConversationSetting';
+import { IInforConversation } from '../../components/conversation/ConversationContent/HeaderContent';
+import CreateNewGroup from '../../components/modal/CreateNewGroup';
+import ChangeNickName from '../../components/modal/ChangeNickName';
 
 const Conversation = () => {
   const ditpatch = useAppDispatch();
   const { conversations } = useAppSelector(selectConversation);
   const [showListConversationSM, setShowListConversationSM] = useState(false);
+  const [isShowAddNewMember, setIsShowAddNewMember] = useState(false);
+  const [isShowChangeUsername, setIsShowChangeUsername] = useState(false);
 
   const innerWitdh = useInnerWidth();
   const user = getUserLocalStorageItem();
+  const { conversationId } = useParams();
+  const conversation = conversations.get(conversationId ?? '');
+
+  const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
+    conversation,
+  ]);
+  const { userName, status, avatarUrl } = getInforChatFromConversation(
+    user,
+    conversation
+  ) as IInforConversation;
 
   // Show list conversation with reponsive for sm
   const handleShowListConversation = () => {
     setShowListConversationSM(!showListConversationSM);
+  };
+
+  const handleAddNewMember = () => {
+    setIsShowAddNewMember(true);
   };
 
   // isReadLastMessage = true
@@ -71,7 +84,12 @@ const Conversation = () => {
               path='/'
               element={
                 <>
-                  <ConversationContent user={user} />
+                  <ConversationContent
+                    user={user}
+                    isShowAddNewMember={isShowAddNewMember}
+                    setIsShowAddNewMember={setIsShowAddNewMember}
+                    setIsShowChangeUsername={setIsShowChangeUsername}
+                  />
                 </>
               }
             />
@@ -88,28 +106,33 @@ const Conversation = () => {
               user={user}
               handleShowListConversation={handleShowListConversation}
               showListConversationSM={showListConversationSM}
+              isShowAddNewMember={isShowAddNewMember}
+              setIsShowAddNewMember={setIsShowAddNewMember}
+              setIsShowChangeUsername={setIsShowChangeUsername}
+            />
+
+            <ConversationSetting
+              userName={userName}
+              avatarUrl={avatarUrl}
+              status={status}
+              conversation={conversation}
+              handleAddNewMember={handleAddNewMember}
+              setIsShowChangeUsername={setIsShowChangeUsername}
             />
           </>
         )}
+        <CreateNewGroup
+          isShowCreateNewGroup={isShowAddNewMember}
+          setShowCreateNewGroup={setIsShowAddNewMember}
+          type={'add'}
+        />
+        <ChangeNickName
+          conversation={conversation}
+          isShow={isShowChangeUsername}
+          setIsShow={setIsShowChangeUsername}
+        />
       </div>
     </Layout>
-  );
-};
-
-export const ButtonRounded: FC<IPropButtonRounded> = ({
-  icon,
-  className,
-  onClick,
-  to,
-}) => {
-  return (
-    <Link
-      to={to ? to : '#'}
-      className={`${className} flex items-center justify-center text-[22px] p-2 bg-[#f1f3f4] rounded-full cursor-pointer`}
-      onClick={onClick ? onClick : undefined}
-    >
-      {icon}
-    </Link>
   );
 };
 

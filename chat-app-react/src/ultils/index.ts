@@ -147,6 +147,7 @@ export const convertMessageObjectIdToString = (message: any) => {
     message_content: content,
     message_conversation,
     message_received,
+    message_content_type,
   } = message;
   return {
     _id: _id.toString(),
@@ -157,9 +158,41 @@ export const convertMessageObjectIdToString = (message: any) => {
     message_received,
     createdAt: message.createdAt,
     updatedAt: message.updatedAt,
+    message_content_type,
   };
 };
 
 export const getUsername = (user: IUser | null) => {
   return `${user?.firstName} ${user?.lastName}`;
+};
+
+export const getUserNameAndAvatarUrl = (
+  user: IUser | null,
+  conversation: IConversation | undefined
+) => {
+  if (conversation) {
+    if (conversation.conversation_type === MessageType.GROUP) {
+      return {
+        userName: conversation.nameGroup,
+        avatarUrl: conversation.avatarUrl,
+        status: null,
+      };
+    } else {
+      for (let received of conversation.participants) {
+        if (received.userId !== user?._id) {
+          return {
+            userName: received.userName,
+            avatarUrl: received.avatarUrl,
+            status: 'online',
+          };
+        }
+      }
+    }
+  } else {
+    return {
+      userName: null,
+      avatarUrl: null,
+      status: null,
+    };
+  }
 };

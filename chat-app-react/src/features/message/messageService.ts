@@ -91,6 +91,11 @@ const createNewMessage = async (data: IDataCreateMessage) => {
   return res;
 };
 
+const createNewMessageImage = async (data: FormData) => {
+  const res = await myAxios.post('/message/image', data);
+  return res;
+};
+
 const deleteMessageOfConversation = async (
   data: IDataDeleteMessageOfConversation
 ) => {
@@ -110,5 +115,6 @@ export const messageService = {
   formatMessage,
   deleteMessageOfConversation,
   createNewMessage,
+  createNewMessageImage,
   updateMessageOfConversation,
 };

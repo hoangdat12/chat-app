@@ -33,23 +33,31 @@ import HeaderContent, { IInforConversation } from './HeaderContent';
 import InputSendMessage from './InputSendMessage';
 import MessageContent from './MessageContent';
 import ConversationSetting from '../ConversationSetting';
-import { MessageType } from '../../../ultils/constant/message.constant';
-import CreateNewGroup from '../../modal/CreateNewGroup';
+import { MessageContentType } from '../../../ultils/constant/message.constant';
+import { getUserNameAndAvatarUrl } from '../../../ultils';
 
 export interface IPropConversationContent {
   user: IUser | null;
   handleShowListConversation?: () => void;
   showListConversationSM?: boolean;
+  isShowAddNewMember: boolean;
+  setIsShowAddNewMember: (value: boolean) => void;
+  setIsShowChangeUsername: (value: boolean) => void;
 }
 
 const ConversationContent: FC<IPropConversationContent> = ({
   user,
   handleShowListConversation,
   showListConversationSM,
+  setIsShowAddNewMember,
+  setIsShowChangeUsername,
 }) => {
   const [messageValue, setMessageValue] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [fileImageMessage, setFileImageMessage] = useState<FileList | null>(
+    null
+  );
   const [showMoreConversation, setShowMoreConversation] = useState(false);
-  const [isShowAddNewMember, setIsShowAddNewMember] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const innterWidth = useInnerWidth();
   const socket = useContext(SocketContext);
@@ -59,37 +67,11 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const { conversations } = useAppSelector(selectConversation);
   const conversation = conversations.get(conversationId ?? '') as IConversation;
 
-  const getInforChatFromConversation = useCallback(
-    (conversation: IConversation | undefined) => {
-      if (conversation) {
-        if (conversation.conversation_type === MessageType.GROUP) {
-          return {
-            userName: conversation.nameGroup,
-            avatarUrl: conversation.avatarUrl,
-            status: null,
-          };
-        } else {
-          for (let received of conversation.participants) {
-            if (received.userId !== user?._id) {
-              return {
-                userName: received.userName,
-                avatarUrl: received.avatarUrl,
-                status: 'online',
-              };
-            }
-          }
-        }
-      } else {
-        return {
-          userName: null,
-          avatarUrl: null,
-          status: null,
-        };
-      }
-    },
-    [conversation]
-  );
+  const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
+    conversation,
+  ]);
   const { userName, status, avatarUrl } = getInforChatFromConversation(
+    user,
     conversation
   ) as IInforConversation;
 
@@ -102,21 +84,51 @@ const ConversationContent: FC<IPropConversationContent> = ({
   // Send message
   const handleSendMessage = async () => {
     if (conversation) {
-      const body = {
-        message_type: conversation?.conversation_type,
-        message_content: messageValue,
-        conversationId: conversation?._id,
-        participants: conversation.participants,
-      };
-      const res = await messageService.createNewMessage(body);
-      if (res.status === 201) {
-        dispatch(createNewMessage(res.data.metaData));
-        const dataUpdate = {
-          lastMessage: res.data.metaData,
+      if (messageValue.trim() !== '') {
+        const body = {
+          message_type: conversation?.conversation_type,
+          message_content: messageValue,
           conversationId: conversation?._id,
+          participants: conversation.participants,
+          message_content_type: MessageContentType.MESSAGE,
         };
-        dispatch(createNewMessageOfConversation(dataUpdate));
+        const res = await messageService.createNewMessage(body);
+        if (res.status === 201) {
+          dispatch(createNewMessage(res.data.metaData));
+          const dataUpdate = {
+            lastMessage: res.data.metaData,
+            conversationId: conversation?._id,
+          };
+          dispatch(createNewMessageOfConversation(dataUpdate));
+        }
       }
+      if (fileImageMessage?.length) {
+        for (let file of fileImageMessage) {
+          const formData = new FormData();
+          formData.append('file', file);
+          const body = {
+            message_type: conversation?.conversation_type,
+            message_content: messageValue,
+            conversationId: conversation?._id,
+            participants: conversation.participants,
+            message_content_type: MessageContentType.IMAGE,
+          };
+          formData.append('body', JSON.stringify(body));
+          console.log(formData);
+          const res = await messageService.createNewMessageImage(formData);
+          console.log(res);
+          if (res.status === 201) {
+            dispatch(createNewMessage(res.data.metaData));
+            const dataUpdate = {
+              lastMessage: res.data.metaData,
+              conversationId: conversation?._id,
+            };
+            dispatch(createNewMessageOfConversation(dataUpdate));
+          }
+        }
+      }
+      setImages([]);
+      setFileImageMessage(null);
       setMessageValue('');
       inputRef.current?.focus();
     }
@@ -254,6 +266,10 @@ const ConversationContent: FC<IPropConversationContent> = ({
         messageValue={messageValue}
         setMessageValue={setMessageValue}
         handleSendMessage={handleSendMessage}
+        images={images}
+        setImages={setImages}
+        files={fileImageMessage}
+        setFiles={setFileImageMessage}
       />
 
       <ConversationSetting
@@ -264,12 +280,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         status={status}
         conversation={conversation}
         handleAddNewMember={handleAddNewMember}
-      />
-
-      <CreateNewGroup
-        isShowCreateNewGroup={isShowAddNewMember}
-        setShowCreateNewGroup={setIsShowAddNewMember}
-        type={'add'}
+        setIsShowChangeUsername={setIsShowChangeUsername}
       />
     </div>
   );

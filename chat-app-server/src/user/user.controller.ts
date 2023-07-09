@@ -17,6 +17,7 @@ import { Request } from 'express';
 import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from '../ultils/response';
 import { IUserCreated } from '../ultils/interface';
+import { multerOptions } from '../ultils/constant/multer.config';
 
 @Controller('user')
 export class UserController {
@@ -76,20 +77,7 @@ export class UserController {
   }
 
   @Patch('change-avatar')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './public/assets',
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', multerOptions))
   async changeAvatar(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,

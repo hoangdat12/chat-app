@@ -3,7 +3,7 @@ import { ConversationRepository } from './conversation.repository';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { IParticipant, IUserCreated, Pagination } from '../ultils/interface';
 import {
-  ChangeNickNameOfParticipant,
+  IDataChangeUsernameOfParticipant,
   ChangeTopic,
   GetDeleteMessageOfConversation,
   PayloadAddPaticipant,
@@ -12,7 +12,12 @@ import {
   RenameGroup,
 } from './conversation.dto';
 import { MessageType } from '../ultils/constant';
-import { getUsername } from '../ultils';
+import {
+  convertMessageWithIdToString,
+  getMessageNotify,
+  getUsername,
+} from '../ultils';
+import { MessageContentType } from 'src/ultils/constant/message.constant';
 
 @Injectable()
 export class ConversationService {
@@ -151,67 +156,116 @@ export class ConversationService {
       throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
 
     // Check user is exist in participant or not
-    let userExistConversation: IParticipant[] = [];
+    let userWasDeletedId: string[] = [];
+    let userWasDeleted: IParticipant[] = [];
     let newMember: IParticipant[] = [];
+
     for (let newer of newParticipants) {
+      let userExist = false;
       for (let participant of foundConversation.participants) {
         // If user exist in conversation
         if (participant.userId === newer.userId) {
+          userExist = true;
           // If user was deleted from group then enable user
           if (!participant.enable) {
             participant.enable = true;
-            userExistConversation.push(newer);
+            userWasDeletedId.push(newer.userId);
+            userWasDeleted.push(newer);
+            continue;
+          } else {
+            continue;
           }
-          continue;
         }
       }
       // If user not exist in conversation
-      newer.enable = true;
-      newer.isReadLastMessage = false;
-      newMember.push(newer);
+      if (!userExist) {
+        newer.enable = true;
+        newer.isReadLastMessage = false;
+        newMember.push(newer);
+      }
     }
 
-    if (userExistConversation.length > 0) {
-      await foundConversation.save();
-    }
-
-    if (newMember.length > 0) {
-      this.conversationRepository.addPaticipantOfConversation(
+    // if (userWasDeleted.length > 0) {
+    //   console.log('foundConversation::: ', foundConversation);
+    //   await foundConversation.save();
+    // }
+    if (userWasDeletedId.length > 0) {
+      await this.conversationRepository.addPaticipantOfExistInConversation(
+        conversationId,
+        userWasDeletedId,
+      );
+    } else if (newMember.length > 0) {
+      await this.conversationRepository.addPaticipantOfConversation(
         conversationId,
         newMember,
       );
-    }
+    } else
+      return {
+        conversationId,
+        newMember: [],
+        lastMessage: null,
+      };
 
-    return newMember;
-  }
-
-  async setNickNameForParticipant(
-    user: IUserCreated,
-    data: ChangeNickNameOfParticipant,
-  ) {
-    let { newNicknameOfUser, conversationId } = data;
-
-    const foundConversation = await this.conversationRepository.findUserExist(
+    // Notify
+    const payload = {
+      message_type: foundConversation.conversation_type,
+      message_content: getMessageNotify(user, [
+        ...newMember,
+        ...userWasDeleted,
+      ]),
       conversationId,
-      user._id,
+      message_received: [
+        ...foundConversation.participants,
+        ...newMember,
+        ...userWasDeleted,
+      ],
+      message_content_type: MessageContentType.NOTIFY,
+    };
+
+    // Create new Message
+    const message = await this.messageRepository.createMessageConversation(
+      user,
+      payload,
+    );
+    if (!message)
+      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    // Update lastMessage
+    await this.conversationRepository.updateLastConversationMessage(
+      user,
+      conversationId,
+      convertMessageWithIdToString(message),
     );
 
-    if (!foundConversation)
-      throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
+    return {
+      conversationId,
+      newMember: [...newMember, ...userWasDeleted],
+      lastMessage: message,
+    };
+  }
 
-    for (let participant of foundConversation.participants) {
-      newNicknameOfUser = newNicknameOfUser.filter((changer) => {
-        if (participant.userId === changer.userId) {
-          participant.userName = changer.userName;
-          return false;
-        }
-        return true;
-      });
-      if (newNicknameOfUser.length <= 0) break;
-    }
+  async changeUsernameOfUser(
+    user: IUserCreated,
+    data: IDataChangeUsernameOfParticipant,
+  ) {
+    const userExistInConversation =
+      await this.conversationRepository.findUserExist(
+        data.conversationId,
+        user._id,
+      );
+    if (!userExistInConversation)
+      throw new HttpException('User not permission!', HttpStatus.BAD_REQUEST);
+    const updated = await this.conversationRepository.changeUsernameOfUser(
+      user,
+      data,
+    );
+    if (!updated)
+      throw new HttpException(
+        'Server Error!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
 
-    foundConversation.save();
-    return foundConversation;
+    return { ...data, participants: userExistInConversation.participants };
   }
 
   async changeTopicOfConversation(user: IUserCreated, data: ChangeTopic) {

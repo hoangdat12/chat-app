@@ -4,6 +4,7 @@ import { conversationService } from './conversationService';
 import {
   IConversation,
   IDataAddNewMember,
+  IDataChangeUsernameOfConversation,
   IPayloadReadLastMessage,
   IPayloadUpdateLastMessage,
 } from '../../ultils/interface';
@@ -41,6 +42,13 @@ export const addFriendToGroup = createAsyncThunk(
   'conversation/addMember',
   async (data: IDataAddNewMember) => {
     return await conversationService.handleAddNewMember(data);
+  }
+);
+
+export const changeUsernameOfConversation = createAsyncThunk(
+  'conversation/changeUsername',
+  async (data: IDataChangeUsernameOfConversation) => {
+    return await conversationService.handleChangeUsername(data);
   }
 );
 
@@ -185,8 +193,46 @@ const conversationSlice = createSlice({
       .addCase(addFriendToGroup.fulfilled, (state, action) => {
         state.status = 'idle';
         state.isLoading = false;
+        if (!action.payload.newMember.length) return;
+        const { conversationId, newMember } = action.payload;
+        const conversation = state.conversations.get(conversationId);
+        if (conversation) {
+          conversation.participants = [
+            ...conversation.participants,
+            ...newMember,
+          ];
+        }
       })
       .addCase(addFriendToGroup.rejected, (state) => {
+        state.status = 'failed';
+        state.isLoading = false;
+      })
+
+      // Change username of participant in conversation
+      .addCase(changeUsernameOfConversation.pending, (state) => {
+        state.status = 'pending';
+        state.isLoading = true;
+      })
+      .addCase(changeUsernameOfConversation.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isLoading = false;
+        const conversation = state.conversations.get(
+          action.payload.conversationId
+        );
+        if (conversation) {
+          for (let participant of conversation.participants) {
+            if (
+              participant.userId ===
+              action.payload.newUsernameOfParticipant.userId
+            ) {
+              participant.userName =
+                action.payload.newUsernameOfParticipant.userName;
+              return;
+            }
+          }
+        }
+      })
+      .addCase(changeUsernameOfConversation.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
       });

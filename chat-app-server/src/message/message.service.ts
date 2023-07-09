@@ -27,7 +27,13 @@ export class MessageService {
   ) {}
 
   async createMessage(user: IUserCreated, data: CreateMessageData) {
-    let { message_type, message_content, conversationId, participants } = data;
+    let {
+      message_type,
+      message_content,
+      conversationId,
+      participants,
+      message_content_type,
+    } = data;
     // Check user is Exist in conversation
     const conversation = await this.conversationRepository.findUserExist(
       conversationId,
@@ -59,6 +65,7 @@ export class MessageService {
       message_content,
       conversationId,
       message_received: conversation?.participants ?? participants,
+      message_content_type,
     };
 
     // Create new Message
@@ -149,17 +156,23 @@ export class MessageService {
           lastMessage: null,
           message,
         };
+      } else {
+        conversation.lastMessage = this.convertObjectIdToString(
+          firstMessageOfConversation[1],
+        );
+        await conversation.save();
+        await this.messageRepository.delete(data);
+        return {
+          lastMessage: firstMessageOfConversation[1],
+          message,
+        };
       }
     }
     // Else if had many message in conversation
     else {
-      conversation.lastMessage = this.convertObjectIdToString(
-        firstMessageOfConversation[1],
-      );
-      await conversation.save();
       await this.messageRepository.delete(data);
       return {
-        lastMessage: firstMessageOfConversation[1],
+        lastMessage: null,
         message,
       };
     }
@@ -172,6 +185,7 @@ export class MessageService {
       message_sender_by,
       message_content: content,
       message_conversation,
+      message_content_type,
       message_received,
     } = message;
     return {
@@ -179,6 +193,7 @@ export class MessageService {
       message_type: type,
       message_sender_by,
       message_content: content,
+      message_content_type,
       message_conversation,
       message_received,
       createdAt: message.createdAt,

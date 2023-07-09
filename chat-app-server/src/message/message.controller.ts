@@ -6,6 +6,8 @@ import {
   Patch,
   Post,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   CreateMessageData,
@@ -18,6 +20,8 @@ import { Ok } from '../ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
+import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { multerOptions } from 'src/ultils/constant/multer.config';
 
 @Controller('message')
 export class MessageController {
@@ -25,15 +29,41 @@ export class MessageController {
     private readonly messageService: MessageService,
     private readonly evenEmiter: EventEmitter2,
   ) {}
+
   @Post()
   async createMessage(@Req() req: Request, @Body() body: CreateMessageData) {
     try {
+      console.log('Run');
       const errors = await validate(body);
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
+      // const user = req.user as IUserCreated;
+      // const newMessage = await this.messageService.createMessage(user, body);
+      // this.evenEmiter.emit('message.create', newMessage);
+      // return new Ok<any>(newMessage);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  @Post('/image')
+  @UseInterceptors(FileInterceptor('file', multerOptions))
+  async createMessageImage(
+    @Req() req: Request,
+    @Body('body') body: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    try {
+      const data = JSON.parse(body) as CreateMessageData;
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
       const user = req.user as IUserCreated;
-      const newMessage = await this.messageService.createMessage(user, body);
+      data.message_content = `http://localhost:8080/assets/${file.filename}`;
+      const newMessage = await this.messageService.createMessage(user, data);
       this.evenEmiter.emit('message.create', newMessage);
       return new Ok<any>(newMessage);
     } catch (err) {

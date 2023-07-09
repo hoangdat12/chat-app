@@ -9,7 +9,10 @@ import {
   IUserCreated,
   Pagination,
 } from '../ultils/interface';
-import { PayloadCreateConversation } from './conversation.dto';
+import {
+  IDataChangeUsernameOfParticipant,
+  PayloadCreateConversation,
+} from './conversation.dto';
 import { checkNegativeNumber } from 'src/ultils';
 import { MessageType } from 'src/ultils/constant';
 
@@ -269,6 +272,28 @@ export class ConversationRepository {
       .limit(1)
       .lean()
       .exec();
+  }
+
+  async changeUsernameOfUser(
+    user: IUserCreated,
+    data: IDataChangeUsernameOfParticipant,
+  ) {
+    const { conversationId, newUsernameOfParticipant } = data;
+    return await this.conversationModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+        'participants.userId': newUsernameOfParticipant.userId,
+      },
+      {
+        $set: {
+          'participants.$.userName': newUsernameOfParticipant.userName,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
   }
 
   // ULTILS

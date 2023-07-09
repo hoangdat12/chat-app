@@ -1,4 +1,7 @@
-import { PayloadCreateConversation } from '../../conversation/conversation.dto';
+import {
+  IDataChangeUsernameOfParticipant,
+  PayloadCreateConversation,
+} from '../../conversation/conversation.dto';
 import { ConversationRepository } from '../../conversation/conversation.repository';
 import { MessageRepository } from '../../message/message.repository';
 import { UserJoinChat } from '../../message/message.dto';
@@ -49,4 +52,9 @@ export interface IGatewayDeleteMessage {
 export interface iSocketDeleteMessage {
   message: IMessage;
   lastMessage: IMessage;
+}
+
+export interface ISocketChangeUsername
+  extends IDataChangeUsernameOfParticipant {
+  participants: IParticipant[];
 }

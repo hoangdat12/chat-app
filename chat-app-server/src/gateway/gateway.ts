@@ -13,8 +13,14 @@ import {
 } from './gateway.sesstion';
 import { Services } from '../ultils/constant';
 import { Messages } from '../schema/message.model';
-import { IMessage, iSocketDeleteMessage } from '../ultils/interface';
+import {
+  IMessage,
+  IParticipant,
+  ISocketChangeUsername,
+  iSocketDeleteMessage,
+} from '../ultils/interface';
 import { ISocketAddFriend } from 'src/ultils/interface/friend.interface';
+import { IDataChangeUsernameOfParticipant } from 'src/conversation/conversation.dto';
 
 @WebSocketGateway({
   cors: {
@@ -77,10 +83,21 @@ export class MessagingGateway implements OnModuleInit {
     }
   }
 
+  @OnEvent('conversation.changeUsername')
+  handleChangeUsername(payload: ISocketChangeUsername) {
+    const { participants, ...data } = payload;
+    for (let participant of participants) {
+      const participantSocket = this.sessions.getUserSocket(
+        participant.userName,
+      );
+      if (participantSocket)
+        participantSocket.emit('onChangeUsernameOfConversation', data);
+    }
+  }
+
   @OnEvent('friend.received.add')
   handleSendConfirmToFriend(payload: ISocketAddFriend) {
     const { user, friend } = payload;
-    console.log('payload:::: ', payload);
     const friendSocket = this.sessions.getUserSocket(friend.userId);
     if (friendSocket) friendSocket.emit('onAddFriend', user);
   }

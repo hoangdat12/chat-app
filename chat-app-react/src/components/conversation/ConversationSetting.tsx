@@ -2,7 +2,6 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { IoSearchSharp } from 'react-icons/io5';
 import { MdNotificationsNone, MdOutlineArrowBack } from 'react-icons/md';
-import { ButtonRounded } from '../../pages/conversation/Conversation';
 import { CgProfile } from 'react-icons/cg';
 import { AiOutlinePlusCircle } from 'react-icons/Ai';
 
@@ -10,15 +9,17 @@ import { ListDetailSetting } from '../../ultils/list/setting.list';
 import { IConversation } from '../../ultils/interface';
 import { MessageType } from '../../ultils/constant/message.constant';
 import Avatar from '../avatars/Avatar';
+import { ButtonRounded } from '../button/ButtonRounded';
 
 export interface IPropConversationSetting {
-  showMoreConversation: boolean;
-  setShowMoreConversation: (value: boolean) => void;
+  showMoreConversation?: boolean;
+  setShowMoreConversation?: (value: boolean) => void;
   userName: string | null;
   avatarUrl: string | null;
   status?: string | null;
-  conversation: IConversation;
+  conversation: IConversation | undefined;
   handleAddNewMember: () => void;
+  setIsShowChangeUsername?: (value: boolean) => void;
 }
 
 const ConversationSetting: FC<IPropConversationSetting> = ({
@@ -28,6 +29,7 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
   avatarUrl,
   conversation,
   handleAddNewMember,
+  setIsShowChangeUsername,
 }) => {
   const [show, setShow] = useState<number[]>([]);
   const modelRef = useRef<HTMLDivElement>(null);
@@ -37,6 +39,14 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
       setShow((prev) => prev.filter((ele) => ele !== idx));
     } else {
       setShow((prev) => [...prev, idx]);
+    }
+  };
+
+  const hanldeChangeUsername = () => {
+    console.log('show');
+    if (setIsShowChangeUsername && setShowMoreConversation) {
+      setIsShowChangeUsername(true);
+      setShowMoreConversation(false);
     }
   };
 
@@ -59,6 +69,7 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
       };
     }
   }, [showMoreConversation]);
+
   return (
     <div
       className={`${
@@ -78,7 +89,9 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
           <ButtonRounded
             className={'text-lg p-2 bg-white mt-4'}
             icon={<MdOutlineArrowBack />}
-            onClick={() => setShowMoreConversation(false)}
+            onClick={
+              setShowMoreConversation && (() => setShowMoreConversation(false))
+            }
           />
         </div>
         <div className='flex flex-col items-center justify-center gap-3 cursor-pointer '>
@@ -149,6 +162,11 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
                   <li
                     className='flex items-center gap-2 mt-3 cursor-pointer'
                     key={index}
+                    onClick={
+                      item.title === 'Change nick name'
+                        ? hanldeChangeUsername
+                        : undefined
+                    }
                   >
                     <span>{item.icon}</span>
                     <span className='whitespace-nowrap overflow-hidden text-ellipsis'>

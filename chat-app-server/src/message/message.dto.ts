@@ -24,13 +24,14 @@ export class PayloadCreateMessage {
 export class CreateMessageData {
   message_type: string;
 
-  @IsNotEmpty()
   message_content: string;
 
   @IsNotEmpty()
   conversationId: string;
 
   participants: IParticipant[];
+
+  message_content_type?: string;
 }
 
 export class DelelteMessageData {

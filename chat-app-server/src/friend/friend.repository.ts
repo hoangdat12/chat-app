@@ -280,4 +280,46 @@ export class FriendRepository {
       { $limit: numberNotify },
     ]);
   }
+
+  async findFriendNotInGroup(
+    user: IUserCreated,
+    keyword: string,
+    conversationId: string,
+  ) {
+    const searchRegex = new RegExp(keyword, 'i');
+
+    return await this.friendModel.aggregate([
+      {
+        $match: { user: user._id },
+      },
+      {
+        $lookup: {
+          from: 'Conversation',
+          localField: 'friends.userId',
+          foreignField: 'participants.userId',
+          as: 'matchedConversations',
+        },
+      },
+      {
+        $addFields: {
+          matchedConversations: {
+            $filter: {
+              input: '$matchedConversations',
+              as: 'conversation',
+              cond: { $eq: ['$$conversation._id', conversationId] },
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          matchedConversations: { $size: 0 },
+          'friends.userName': { $regex: searchRegex },
+        },
+      },
+      {
+        $project: { _id: 0, friends: 1 },
+      },
+    ]);
+  }
 }

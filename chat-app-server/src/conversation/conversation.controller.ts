@@ -14,7 +14,7 @@ import { ConversationService } from './conversation.service';
 import { Request } from 'express';
 import { IUserCreated } from '../ultils/interface';
 import {
-  ChangeNickNameOfParticipant,
+  IDataChangeUsernameOfParticipant,
   ChangeTopic,
   PayloadAddPaticipant,
   PayloadCreateConversation,
@@ -24,10 +24,14 @@ import {
 } from './conversation.dto';
 import { validate } from 'class-validator';
 import { Ok } from '../ultils/response';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('conversation')
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly eventEmiter: EventEmitter2,
+  ) {}
 
   @Post()
   async createConversation(
@@ -173,7 +177,7 @@ export class ConversationController {
   @Patch('/change-username')
   async setNicknameOfParticipant(
     @Req() req: Request,
-    @Body() body: ChangeNickNameOfParticipant,
+    @Body() body: IDataChangeUsernameOfParticipant,
   ) {
     try {
       const errors = await validate(body);
@@ -181,9 +185,12 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return new Ok(
-        await this.conversationService.setNickNameForParticipant(user, body),
+      const updated = await this.conversationService.changeUsernameOfUser(
+        user,
+        body,
       );
+      this.eventEmiter.emit('conversation.changeUsername', updated);
+      return new Ok(updated.newUsernameOfParticipant);
     } catch (err) {
       console.log(err);
       throw err;

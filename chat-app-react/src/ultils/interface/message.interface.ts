@@ -21,6 +21,7 @@ export interface IDataUpdateMessageOfConversation
 export interface IMessage {
   _id: string;
   message_content: string;
+  message_content_type: string;
   message_conversation: string;
   message_received: IParticipant[];
   message_sender_by: IParticipant;
@@ -81,6 +82,7 @@ export interface IDataCreateMessage {
   message_content: string;
   conversationId: string;
   participants: IParticipant[] | null | undefined;
+  message_content_type?: string;
 }
 
 export interface iSocketDeleteMessage {
@@ -103,4 +105,15 @@ export interface IDataAddNewMember {
   conversation_type: string;
   conversationId: string;
   newParticipants: IParticipant[];
+}
+
+export interface IDataAddNewMemberResponse {
+  conversationId: string;
+  newMember: IParticipant[];
+  lastMessage: IMessage;
+}
+
+export interface IDataChangeUsernameOfConversation {
+  conversationId: string;
+  newUsernameOfParticipant: IParticipant;
 }

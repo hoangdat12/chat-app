@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { IMessage } from '../../ultils/interface';
 import OptionMessage from '../modal/OptionMessage';
+import { MessageContentType } from '../../ultils/constant/message.constant';
 
 export interface IPropMessageBox {
   message: IMessage;
@@ -62,7 +63,9 @@ const MessageBox: FC<IPropMessageBox> = ({
           setUpdateMessage={setUpdateMessage}
         />
       </div>
-      {!updateMessage ? (
+      {message.message_content_type === MessageContentType.IMAGE ? (
+        <img src={message.message_content} className='max-w-[80%]' />
+      ) : !updateMessage ? (
         <p
           className={`max-w-[80%] text-sm sm:text-base px-2 sm:px-3 py-1 ${
             myMessage ? 'bg-sky-500 text-white' : 'bg-[#f2f3f4] order-1'

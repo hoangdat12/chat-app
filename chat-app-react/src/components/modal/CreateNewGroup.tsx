@@ -2,6 +2,7 @@ import { FC, memo, useEffect, useRef, useState } from 'react';
 import Search from '../search/Search';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
+  addFriendToGroup,
   createConversation,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
@@ -45,6 +46,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
     const [searchValue, setSearchValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [keyword, setKeyWord] = useState('');
+
     const modelRef = useRef<HTMLDivElement>(null);
     const { conversationId } = useParams();
 
@@ -52,7 +54,8 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
 
     const dispatch = useAppDispatch();
     const { friends, isLoading: loadingFriend } = useAppSelector(selectFriend);
-    const { conversations } = useAppSelector(selectConversation);
+    const { conversations, isLoading: loadingConversation } =
+      useAppSelector(selectConversation);
 
     const user = getUserLocalStorageItem();
 
@@ -64,12 +67,15 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
 
     // Click close form create
     const handleCloseForm = () => {
+      setListUserAddGroup([]);
+      setGroupName('');
+      setSearchValue('');
       setShowCreateNewGroup(false);
     };
 
     // Call api create new group
     const handleCreateNewGroupConversation = async () => {
-      if (member < 3 || groupName === '') {
+      if (member < 2 || groupName === '') {
         return;
       }
       const creator = {
@@ -108,16 +114,17 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
 
     // Call api add new member
     const handleAddNewMember = async () => {
-      const conversation = conversations.get(conversationId ?? '');
-      if (conversation) {
-        const data = {
-          conversationId: conversation._id,
-          conversation_type: conversation.conversation_type,
-          newParticipants: listUserAddGroup,
-        };
-        console.log(data);
-        const res = await conversationService.handleAddNewMember(data);
-        console.log('res::: ', res);
+      if (listUserAddGroup.length !== 0) {
+        const conversation = conversations.get(conversationId ?? '');
+        if (conversation) {
+          const data = {
+            conversationId: conversation._id,
+            conversation_type: conversation.conversation_type,
+            newParticipants: listUserAddGroup,
+          };
+          await dispatch(addFriendToGroup(data));
+          handleCloseForm();
+        }
       }
     };
 
@@ -172,12 +179,12 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
         } items-center justify-center w-screen h-screen bg-blackOverlay z-[1000]`}
       >
         <div
+          ref={modelRef}
           className={`grid grid-cols-6 animate__animated animate__fadeInDown ${
             showListFriend
               ? 'sm:w-[80%] lg:w-[70%]'
               : 'sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%]'
           } h-[90%] bg-white rounded-lg overflow-hidden`}
-          ref={modelRef}
         >
           <div
             className={`${
@@ -216,7 +223,9 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
             <div
               className={`absolute flex items-end justify-between w-full left-0 px-6 bottom-6`}
             >
-              <div className='text-black font-light'>{`Member ${member}/3`}</div>
+              <div className='text-black font-light'>{`Member ${member - 1}${
+                type !== 'add' ? '/2' : ''
+              }`}</div>
               <div className='flex gap-3'>
                 <button
                   className='px-4 py-1 rounded-lg border'
@@ -231,7 +240,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
                       : handleCreateNewGroupConversation
                   }
                   className={`px-4 py-1 rounded-lg bg-blue-500 text-white ${
-                    member < 3 || groupName === ''
+                    type !== 'add' && (member < 2 || groupName === '')
                       ? 'opacity-60 cursor-not-allowed'
                       : 'cursor-pointer'
                   }`}
@@ -268,6 +277,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
                           friend={friend}
                           setListUserAddGroup={setListUserAddGroup}
                           setMember={setMember}
+                          isShowCreateNewGroup={isShowCreateNewGroup}
                         />
                       </div>
                     ))
@@ -277,12 +287,21 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
                           friend={friend.friends}
                           setListUserAddGroup={setListUserAddGroup}
                           setMember={setMember}
+                          isShowCreateNewGroup={isShowCreateNewGroup}
                         />
                       </div>
                     ))}
               </div>
             )}
           </div>
+        </div>
+
+        <div
+          className={`${
+            loadingConversation ? 'fixed' : 'hidden'
+          } top-0 left-0 bottom-0 right-0 z-[1001] flex items-center justify-center  w-screen h-screen bg-blackOverlay`}
+        >
+          <Loading />
         </div>
       </div>
     );

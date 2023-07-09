@@ -13,6 +13,7 @@ import {
 } from '../../features/message/messageSlice';
 import { messageService } from '../../features/message/messageService';
 import { convertMessageObjectIdToString } from '../../ultils';
+import { MessageContentType } from '../../ultils/constant/message.constant';
 
 export interface IPropOptionMessage {
   showItem: boolean;
@@ -133,7 +134,9 @@ const OptionMessage: FC<IPropOptionMessage> = memo(
           className={`absolute left-[50%] -translate-x-1/2 ${
             showItem ? 'flex' : 'hidden'
           } flex-col items-center w-[80px] sm:w-[100px] ${
-            isOwn ? 'h-16 sm:h-20 -top-[90px]' : '-top-[60px]'
+            isOwn && message.message_content_type !== MessageContentType.IMAGE
+              ? 'h-16 sm:h-20 -top-[90px]'
+              : '-top-[60px]'
           } bg-white shadow-option-message rounded-md p-1 z-[100]`}
           // ref={modalRef}
         >
@@ -146,7 +149,9 @@ const OptionMessage: FC<IPropOptionMessage> = memo(
 
           <button
             className={`${
-              isOwn ? 'flex' : 'hidden'
+              isOwn && message.message_content_type !== MessageContentType.IMAGE
+                ? 'flex'
+                : 'hidden'
             } items-center justify-center text-sm sm:text-base min-h-[1.875rem] sm:min-h-[2.25rem] w-full hover:bg-slate-200 duration-300`}
             onClick={() => activeUpdateMessageChange(message)}
           >
@@ -157,41 +162,5 @@ const OptionMessage: FC<IPropOptionMessage> = memo(
     );
   }
 );
-
-// <button
-//           className={`${
-//             showItem === message._id ? 'block' : 'hidden'
-//           } show-button-more cursor-pointer px-2 py-1`}
-//           onClick={() => {
-//             setShowItem(message._id);
-//           }}
-//         >
-//           <IoIosMore />
-//         </button>
-
-//         <div
-//           className={`absolute left-[50%] -translate-x-1/2 ${
-//             showItem === message._id ? 'flex' : 'hidden'
-//           } flex-col items-center w-[100px] ${
-//             myMessage ? 'h-20 -top-[90px]' : '-top-[60px]'
-//           } bg-white shadow-option-message z-10 rounded-md p-1`}
-//           // ref={modalRef}
-//         >
-//           <button
-//             className='flex items-center justify-center min-h-[2.25rem] w-full hover:bg-slate-200 duration-300 z-10'
-//             onClick={() => handleDeleteMessage(message)}
-//           >
-//             Delete
-//           </button>
-
-//           <button
-//             className={`${
-//               myMessage ? 'flex' : 'hidden'
-//             } items-center justify-center min-h-[2.25rem] w-full hover:bg-slate-200 duration-300`}
-//             onClick={() => activeUpdateMessageChange(message)}
-//           >
-//             Edit
-//           </button>
-//         </div>
 
 export default OptionMessage;

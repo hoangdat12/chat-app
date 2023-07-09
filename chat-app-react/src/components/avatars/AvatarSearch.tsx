@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 import { AiOutlineClose, AiOutlinePlus } from 'react-icons/Ai';
 import { AvatarOnline } from './Avatar';
 import { IFriend } from '../../ultils/interface/friend.interface';
@@ -8,12 +8,14 @@ export interface IPropAvatarSearch {
   friend: IFriend;
   setListUserAddGroup?: Dispatch<SetStateAction<IParticipant[]>>;
   setMember: (value: any) => void;
+  isShowCreateNewGroup: boolean;
 }
 
 export const AvatarSearch: FC<IPropAvatarSearch> = ({
   friend,
   setListUserAddGroup,
   setMember,
+  isShowCreateNewGroup,
 }) => {
   const [add, setAdd] = useState(false);
   const handleAddUser = (data: IFriend) => {
@@ -35,6 +37,12 @@ export const AvatarSearch: FC<IPropAvatarSearch> = ({
       setAdd(!add);
     }
   };
+
+  useEffect(() => {
+    if (isShowCreateNewGroup === false) {
+      setAdd(false);
+    }
+  }, [isShowCreateNewGroup]);
 
   return (
     <div className='flex items-center justify-between mt-4 cursor-pointer'>

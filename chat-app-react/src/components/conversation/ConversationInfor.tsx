@@ -3,6 +3,7 @@ import Avatar, { IPropAvatar } from '../avatars/Avatar';
 import { IConversation, IUser } from '../../ultils/interface';
 import { format } from 'date-fns';
 import { getUserLocalStorageItem } from '../../ultils';
+import { MessageContentType } from '../../ultils/constant/message.constant';
 
 export interface IPropConversation {
   active?: boolean;
@@ -90,7 +91,10 @@ const ConversationInfor: FC<IPropConversation> = ({
           text-xs md:text-sm
           ${!isReadLastMessage ? 'text-black font-medium' : 'text-gray-500'}`}
           >
-            {conversation?.lastMessage?.message_content}
+            {conversation?.lastMessage?.message_content_type ===
+            MessageContentType.IMAGE
+              ? `${conversation?.lastMessage?.message_sender_by.userName} sent 1 photo`
+              : conversation?.lastMessage?.message_content}
           </p>
         </div>
       </div>

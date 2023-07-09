@@ -1,10 +1,10 @@
-import { ButtonRounded } from '../../../pages/conversation/Conversation';
 import { MdOutlineArrowBack, MdOutlineArrowForward } from 'react-icons/md';
 import Avatar from '../../avatars/Avatar';
 import { IoCallOutline, IoVideocamOutline } from 'react-icons/io5';
 import { BsPinAngle } from 'react-icons/bs';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { FC, MouseEventHandler, memo } from 'react';
+import { ButtonRounded } from '../../button/ButtonRounded';
 
 export interface IPropHeaderContent {
   handleShowMoreConversation: MouseEventHandler<HTMLAnchorElement>;

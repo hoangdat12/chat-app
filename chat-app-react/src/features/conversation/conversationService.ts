@@ -4,6 +4,8 @@ import {
   IResponse,
   IDataCreateNewGroup,
   IDataAddNewMember,
+  IDataAddNewMemberResponse,
+  IDataChangeUsernameOfConversation,
 } from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
@@ -36,9 +38,15 @@ const createNewGroup = async (data: IDataCreateNewGroup) => {
 
 const handleAddNewMember = async (
   data: IDataAddNewMember
-): Promise<IConversation> => {
+): Promise<IDataAddNewMemberResponse> => {
   const res = await myAxios.post('/conversation/group/participant/add', data);
-  console.log(res);
+  return res.data.metaData;
+};
+
+const handleChangeUsername = async (
+  data: IDataChangeUsernameOfConversation
+): Promise<IDataChangeUsernameOfConversation> => {
+  const res = await myAxios.patch('/conversation/change-username', data);
   return res.data.metaData;
 };
 
@@ -48,4 +56,5 @@ export const conversationService = {
   getFirstConversation,
   createNewGroup,
   handleAddNewMember,
+  handleChangeUsername,
 };
