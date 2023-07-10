@@ -72,3 +72,11 @@ export class ReadLastMessage {
   @IsNotEmpty()
   conversationId: string;
 }
+
+export class ChangeEmoji {
+  @IsNotEmpty() 
+  conversationId: string
+
+  @IsNotEmpty()
+  emoji: string
+}

@@ -18,6 +18,9 @@ export class Conversation {
   @Prop({ default: 'default' })
   topic: string;
 
+  @Prop({ default: '👍' })
+  emoji?: string;
+
   @Prop()
   creators: UserJoinChat[] | null;
 

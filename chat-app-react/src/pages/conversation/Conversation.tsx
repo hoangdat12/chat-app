@@ -17,13 +17,15 @@ import ConversationSetting from '../../components/conversation/ConversationSetti
 import { IInforConversation } from '../../components/conversation/ConversationContent/HeaderContent';
 import CreateNewGroup from '../../components/modal/CreateNewGroup';
 import ChangeNickName from '../../components/modal/ChangeNickName';
+import ChangeEmoji from '../../components/modal/ChangeEmoji';
 
 const Conversation = () => {
-  const ditpatch = useAppDispatch();
-  const { conversations } = useAppSelector(selectConversation);
   const [showListConversationSM, setShowListConversationSM] = useState(false);
   const [isShowAddNewMember, setIsShowAddNewMember] = useState(false);
   const [isShowChangeUsername, setIsShowChangeUsername] = useState(false);
+  const [isShowChangeEmoji, setIsShowChangeEmoji] = useState(false);
+  const ditpatch = useAppDispatch();
+  const { conversations } = useAppSelector(selectConversation);
 
   const innerWitdh = useInnerWidth();
   const user = getUserLocalStorageItem();
@@ -89,6 +91,7 @@ const Conversation = () => {
                     isShowAddNewMember={isShowAddNewMember}
                     setIsShowAddNewMember={setIsShowAddNewMember}
                     setIsShowChangeUsername={setIsShowChangeUsername}
+                    setIsShowChangeEmoji={setIsShowChangeEmoji}
                   />
                 </>
               }
@@ -109,6 +112,7 @@ const Conversation = () => {
               isShowAddNewMember={isShowAddNewMember}
               setIsShowAddNewMember={setIsShowAddNewMember}
               setIsShowChangeUsername={setIsShowChangeUsername}
+              setIsShowChangeEmoji={setIsShowChangeEmoji}
             />
 
             <ConversationSetting
@@ -118,6 +122,7 @@ const Conversation = () => {
               conversation={conversation}
               handleAddNewMember={handleAddNewMember}
               setIsShowChangeUsername={setIsShowChangeUsername}
+              setIsShowChangeEmoji={setIsShowChangeEmoji}
             />
           </>
         )}
@@ -130,6 +135,10 @@ const Conversation = () => {
           conversation={conversation}
           isShow={isShowChangeUsername}
           setIsShow={setIsShowChangeUsername}
+        />
+        <ChangeEmoji
+          isShow={isShowChangeEmoji}
+          setIsShow={setIsShowChangeEmoji}
         />
       </div>
     </Layout>

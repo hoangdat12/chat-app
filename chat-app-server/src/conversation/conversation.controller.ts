@@ -21,6 +21,7 @@ import {
   PayloadDeletePaticipant,
   ReadLastMessage,
   RenameGroup,
+  ChangeEmoji,
 } from './conversation.dto';
 import { validate } from 'class-validator';
 import { Ok } from '../ultils/response';
@@ -48,7 +49,6 @@ export class ConversationController {
         await this.conversationService.createConversation(user, body),
       );
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -72,7 +72,6 @@ export class ConversationController {
         await this.conversationService.findByName(user, keyword, pagination),
       );
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -83,7 +82,6 @@ export class ConversationController {
       const user = req.user as IUserCreated;
       return new Ok(await this.conversationService.getFirstConversation(user));
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -110,7 +108,6 @@ export class ConversationController {
       );
       return new Ok(response);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -126,7 +123,6 @@ export class ConversationController {
         conversationId,
       });
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -149,7 +145,6 @@ export class ConversationController {
         );
       return new Ok(response);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -169,7 +164,6 @@ export class ConversationController {
         await this.conversationService.addPaticipantOfConversation(user, body);
       return new Ok(response);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -192,7 +186,6 @@ export class ConversationController {
       this.eventEmiter.emit('conversation.changeUsername', updated);
       return new Ok(updated.newUsernameOfParticipant);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -212,7 +205,6 @@ export class ConversationController {
         await this.conversationService.changeTopicOfConversation(user, body),
       );
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -227,7 +219,6 @@ export class ConversationController {
       const user = req.user as IUserCreated;
       return new Ok(await this.conversationService.renameGroup(user, data));
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -247,7 +238,28 @@ export class ConversationController {
         ),
       );
     } catch (err) {
-      console.log(err);
+      throw err;
+    }
+  }
+
+  @Patch('/change-emoji')
+  async changeEmoji(@Req() req: Request, @Body() data: ChangeEmoji) {
+    try {
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      const responseData = await this.conversationService.changeEmoji(
+        user,
+        data,
+      );
+      this.eventEmiter.emit('conversation.changeEmoji', {
+        user,
+        conversation: responseData,
+      });
+      return new Ok(responseData);
+    } catch (err) {
       throw err;
     }
   }

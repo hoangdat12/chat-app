@@ -38,10 +38,10 @@ export class MessageController {
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
-      // const user = req.user as IUserCreated;
-      // const newMessage = await this.messageService.createMessage(user, body);
-      // this.evenEmiter.emit('message.create', newMessage);
-      // return new Ok<any>(newMessage);
+      const user = req.user as IUserCreated;
+      const newMessage = await this.messageService.createMessage(user, body);
+      this.evenEmiter.emit('message.create', newMessage);
+      return new Ok<any>(newMessage);
     } catch (err) {
       console.log(err);
       throw err;

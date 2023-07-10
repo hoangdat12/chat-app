@@ -3,17 +3,17 @@ import { BsChevronDown } from 'react-icons/bs';
 import { FaPushed } from 'react-icons/fa';
 import { IoSearchSharp } from 'react-icons/io5';
 import { MdAttachFile, MdOutlineVideoLibrary } from 'react-icons/md';
-import { TfiPin2 } from 'react-icons/tfi';
+// import { TfiPin2 } from 'react-icons/tfi';
 import { VscTextSize } from 'react-icons/vsc';
 
 export const ListDetailSetting = [
-  {
-    SubMenu: {
-      title: 'Chat Detail',
-      icon: <BsChevronDown />,
-    },
-    List: [{ title: 'Pinned messages', icon: <TfiPin2 /> }],
-  },
+  // {
+  //   SubMenu: {
+  //     title: 'Chat Detail',
+  //     icon: <BsChevronDown />,
+  //   },
+  //   List: [{ title: 'Pinned messages', icon: <TfiPin2 /> }],
+  // },
   {
     SubMenu: {
       title: 'Custome conversation',
@@ -29,7 +29,7 @@ export const ListDetailSetting = [
         icon: <AiOutlineLike />,
       },
       {
-        title: 'Change nick name',
+        title: 'Change username',
         icon: <VscTextSize />,
       },
       {

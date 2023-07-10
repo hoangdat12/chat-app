@@ -9,10 +9,18 @@ import { Messages } from '../../schema/message.model';
 import { ObjectId } from 'mongoose';
 import { IUserCreated } from './auth.interface';
 
-export interface IConstructorConversation extends PayloadCreateConversation {
-  conversationId: string | null;
-  conversationRepository: ConversationRepository;
-  messageRepository: MessageRepository;
+export interface IConversation {
+  _id: string;
+  conversation_type: string;
+  participants: IParticipant[];
+  lastMessage: IMessage;
+  nameGroup: string | undefined;
+  updatedAt: string;
+  createdAt: string;
+  userId: string[];
+  avatarUrl: string;
+  collection: string;
+  emoji?: string;
 }
 
 export interface IParticipant extends UserJoinChat {
@@ -57,4 +65,9 @@ export interface iSocketDeleteMessage {
 export interface ISocketChangeUsername
   extends IDataChangeUsernameOfParticipant {
   participants: IParticipant[];
+}
+
+export interface ISocketChangeEmoji {
+  user: IUserCreated;
+  conversation: IConversation;
 }

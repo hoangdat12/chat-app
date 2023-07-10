@@ -10,6 +10,7 @@ import {
   PayloadCreateConversation,
   PayloadDeletePaticipant,
   RenameGroup,
+  ChangeEmoji,
 } from './conversation.dto';
 import { MessageType } from '../ultils/constant';
 import {
@@ -322,5 +323,36 @@ export class ConversationService {
   async getFirstConversation(user: IUserCreated) {
     const data = await this.conversationRepository.getFirstConversation(user);
     return data[0];
+  }
+
+  async changeEmoji(user: IUserCreated, data: ChangeEmoji) {
+    const foundConversation = await this.conversationRepository.findUserExist(
+      data.conversationId,
+      user._id,
+    );
+
+    if (!foundConversation)
+      throw new HttpException('You not permission!', HttpStatus.BAD_REQUEST);
+
+    const payload = {
+      message_type: foundConversation.conversation_type,
+      message_content: `${getUsername(user)} changed emoji to ${data.emoji}`,
+      conversationId: data.conversationId,
+      message_received: foundConversation.participants,
+      message_content_type: MessageContentType.NOTIFY,
+    };
+    // Create new Message
+    const message = await this.messageRepository.createMessageConversation(
+      user,
+      payload,
+    );
+    if (!message)
+      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    foundConversation.emoji = data.emoji;
+    foundConversation.lastMessage = convertMessageWithIdToString(message);
+    await foundConversation.save();
+
+    return foundConversation;
   }
 }

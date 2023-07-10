@@ -20,6 +20,7 @@ export interface IPropConversationSetting {
   conversation: IConversation | undefined;
   handleAddNewMember: () => void;
   setIsShowChangeUsername?: (value: boolean) => void;
+  setIsShowChangeEmoji?: (value: boolean) => void;
 }
 
 const ConversationSetting: FC<IPropConversationSetting> = ({
@@ -30,10 +31,10 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
   conversation,
   handleAddNewMember,
   setIsShowChangeUsername,
+  setIsShowChangeEmoji,
 }) => {
   const [show, setShow] = useState<number[]>([]);
   const modelRef = useRef<HTMLDivElement>(null);
-
   const handleShow = (idx: number) => {
     if (show.includes(idx)) {
       setShow((prev) => prev.filter((ele) => ele !== idx));
@@ -43,10 +44,28 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
   };
 
   const hanldeChangeUsername = () => {
-    console.log('show');
     if (setIsShowChangeUsername && setShowMoreConversation) {
       setIsShowChangeUsername(true);
       setShowMoreConversation(false);
+    }
+  };
+
+  const handleShowChangeEmoji = () => {
+    if (setIsShowChangeEmoji) {
+      setIsShowChangeEmoji(true);
+    }
+  };
+
+  const handleClick = (title: string) => {
+    switch (title) {
+      case 'Change username':
+        hanldeChangeUsername();
+        break;
+      case 'Change emoji':
+        handleShowChangeEmoji();
+        break;
+      default:
+        break;
     }
   };
 
@@ -162,13 +181,13 @@ const ConversationSetting: FC<IPropConversationSetting> = ({
                   <li
                     className='flex items-center gap-2 mt-3 cursor-pointer'
                     key={index}
-                    onClick={
-                      item.title === 'Change nick name'
-                        ? hanldeChangeUsername
-                        : undefined
-                    }
+                    onClick={() => handleClick(item.title)}
                   >
-                    <span>{item.icon}</span>
+                    <span>
+                      {item.title === 'Change emoji'
+                        ? conversation?.emoji ?? '👍'
+                        : item.icon}
+                    </span>
                     <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
                       {item.title}
                     </span>

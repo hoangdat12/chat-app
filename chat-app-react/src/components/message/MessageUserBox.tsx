@@ -28,12 +28,16 @@ export const MessageBoxGroup: FC<IMessageBoxGroupProp> = ({
   };
   return (
     <div
-      className={`flex gap-3 p-4 ${
-        isOwn && 'justify-end'
-      } max-w-[80%] hover-message-show-button`}
+      className={`flex gap-3 ${isOwn && 'justify-end'} ${
+        message.message_content_type === MessageContentType.NOTIFY
+          ? 'w-full pt-4'
+          : 'max-w-[80%] p-4'
+      } hover-message-show-button`}
     >
       {message.message_content_type === MessageContentType.NOTIFY ? (
-        <div className='w-[80%] mx-auto'>{message.message_content}</div>
+        <div className='flex items-center justify-center w-full mx-auto text-gray-400 text-sm'>
+          {message.message_content}
+        </div>
       ) : (
         <>
           <div className={`${isOwn && 'order-2'}`}>
@@ -78,7 +82,16 @@ export const MessageBoxGroup: FC<IMessageBoxGroupProp> = ({
                     }`}
                   >
                     {!updateMessage ? (
-                      <p className=''>{message.message_content}</p>
+                      <p
+                        className={`${
+                          message.message_content_type ===
+                          MessageContentType.EMOJI
+                            ? 'text-xl sm:text-2xl'
+                            : 'text-base'
+                        }`}
+                      >
+                        {message.message_content}
+                      </p>
                     ) : (
                       <input
                         className={`border-none outline-none w-auto px-2 sm:px-3 py-1 bg-sky-500 text-white rounded-xl`}

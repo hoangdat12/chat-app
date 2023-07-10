@@ -3,4 +3,5 @@ export enum MessageContentType {
   IMAGE = 'image',
   NOTIFY = 'notify',
   VIDEO = 'video',
+  EMOJI = 'emoji',
 }

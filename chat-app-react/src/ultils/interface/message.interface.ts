@@ -51,6 +51,7 @@ export interface IConversation {
   userId: string[];
   avatarUrl: string;
   collection: string;
+  emoji?: string;
 }
 
 export interface IAllMessageData {
@@ -116,4 +117,9 @@ export interface IDataAddNewMemberResponse {
 export interface IDataChangeUsernameOfConversation {
   conversationId: string;
   newUsernameOfParticipant: IParticipant;
+}
+
+export interface IDataChangeEmoji {
+  conversationId: string;
+  emoji: string;
 }

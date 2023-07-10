@@ -6,6 +6,7 @@ import {
   IDataAddNewMember,
   IDataAddNewMemberResponse,
   IDataChangeUsernameOfConversation,
+  IDataChangeEmoji,
 } from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
@@ -50,6 +51,13 @@ const handleChangeUsername = async (
   return res.data.metaData;
 };
 
+const handleChangeEmoji = async (
+  data: IDataChangeEmoji
+): Promise<IConversation> => {
+  const res = await myAxios.patch('/conversation/change-emoji', data);
+  return res.data.metaData;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
   searchConversationByName,
@@ -57,4 +65,5 @@ export const conversationService = {
   createNewGroup,
   handleAddNewMember,
   handleChangeUsername,
+  handleChangeEmoji,
 };

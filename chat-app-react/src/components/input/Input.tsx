@@ -13,8 +13,8 @@ const Input: FC<IInputProp> = ({ defaultValue, participant }) => {
   const [value, setValue] = useState(defaultValue);
   const dispatch = useAppDispatch();
   const { conversationId } = useParams();
-
   const handleBlur = () => {
+    console.log('blur');
     if (value !== defaultValue && conversationId) {
       const data = {
         conversationId,

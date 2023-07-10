@@ -14,8 +14,10 @@ import {
 import { Services } from '../ultils/constant';
 import { Messages } from '../schema/message.model';
 import {
+  IConversation,
   IMessage,
   IParticipant,
+  ISocketChangeEmoji,
   ISocketChangeUsername,
   iSocketDeleteMessage,
 } from '../ultils/interface';
@@ -92,6 +94,22 @@ export class MessagingGateway implements OnModuleInit {
       );
       if (participantSocket)
         participantSocket.emit('onChangeUsernameOfConversation', data);
+    }
+  }
+
+  @OnEvent('conversation.changeEmoji')
+  handleChangeEmoji(payload: ISocketChangeEmoji) {
+    const { user, conversation } = payload;
+    const { participants } = conversation;
+    for (let participant of participants) {
+      if (participant.userId === user._id) {
+        break;
+      }
+      const participantSocket = this.sessions.getUserSocket(
+        participant.userName,
+      );
+      if (participantSocket)
+        participantSocket.emit('onChangeUsernameOfConversation', conversation);
     }
   }
 

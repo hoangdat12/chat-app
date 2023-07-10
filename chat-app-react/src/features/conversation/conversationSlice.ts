@@ -4,6 +4,7 @@ import { conversationService } from './conversationService';
 import {
   IConversation,
   IDataAddNewMember,
+  IDataChangeEmoji,
   IDataChangeUsernameOfConversation,
   IPayloadReadLastMessage,
   IPayloadUpdateLastMessage,
@@ -49,6 +50,13 @@ export const changeUsernameOfConversation = createAsyncThunk(
   'conversation/changeUsername',
   async (data: IDataChangeUsernameOfConversation) => {
     return await conversationService.handleChangeUsername(data);
+  }
+);
+
+export const changEmojiOfConversation = createAsyncThunk(
+  'conversation/changeEmoji',
+  async (data: IDataChangeEmoji) => {
+    return await conversationService.handleChangeEmoji(data);
   }
 );
 
@@ -149,6 +157,26 @@ const conversationSlice = createSlice({
         }
       }
     },
+    changeUsernameOfParticipant: (
+      state,
+      action: PayloadAction<IDataChangeUsernameOfConversation>
+    ) => {
+      const conversation = state.conversations.get(
+        action.payload.conversationId
+      );
+      if (conversation) {
+        for (let participant of conversation.participants) {
+          if (
+            participant.userId ===
+            action.payload.newUsernameOfParticipant.userId
+          ) {
+            participant.userName =
+              action.payload.newUsernameOfParticipant.userName;
+            return;
+          }
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     // Get last conversation
@@ -235,6 +263,25 @@ const conversationSlice = createSlice({
       .addCase(changeUsernameOfConversation.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
+      })
+
+      // Change emoji of participant in conversation
+      .addCase(changEmojiOfConversation.pending, (state) => {
+        state.status = 'pending';
+        state.isLoading = true;
+      })
+      .addCase(changEmojiOfConversation.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isLoading = false;
+        const conversation = state.conversations.get(action.payload._id);
+        if (conversation) {
+          conversation.emoji = action.payload.emoji;
+          conversation.lastMessage = action.payload.lastMessage;
+        }
+      })
+      .addCase(changEmojiOfConversation.rejected, (state) => {
+        state.status = 'failed';
+        state.isLoading = false;
       });
   },
 });
@@ -246,6 +293,7 @@ export const {
   deleteLastMessage,
   readLastMessage,
   searchConversation,
+  changeUsernameOfParticipant,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

@@ -9,6 +9,7 @@ import {
 
 import useInnerWidth from '../../../hooks/useInnterWidth';
 import {
+  changeUsernameOfParticipant,
   createNewMessageOfConversation,
   deleteLastMessage,
   selectConversation,
@@ -23,6 +24,7 @@ import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { SocketContext } from '../../../ultils/context/Socket';
 import {
   IConversation,
+  IDataChangeUsernameOfConversation,
   IMessage,
   IUser,
   iSocketDeleteMessage,
@@ -43,6 +45,7 @@ export interface IPropConversationContent {
   isShowAddNewMember: boolean;
   setIsShowAddNewMember: (value: boolean) => void;
   setIsShowChangeUsername: (value: boolean) => void;
+  setIsShowChangeEmoji?: (value: boolean) => void;
 }
 
 const ConversationContent: FC<IPropConversationContent> = ({
@@ -51,6 +54,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
   showListConversationSM,
   setIsShowAddNewMember,
   setIsShowChangeUsername,
+  setIsShowChangeEmoji,
 }) => {
   const [messageValue, setMessageValue] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -114,9 +118,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
             message_content_type: MessageContentType.IMAGE,
           };
           formData.append('body', JSON.stringify(body));
-          console.log(formData);
           const res = await messageService.createNewMessageImage(formData);
-          console.log(res);
           if (res.status === 201) {
             dispatch(createNewMessage(res.data.metaData));
             const dataUpdate = {
@@ -131,6 +133,25 @@ const ConversationContent: FC<IPropConversationContent> = ({
       setFileImageMessage(null);
       setMessageValue('');
       inputRef.current?.focus();
+    }
+  };
+
+  const handleSendEmoji = async (emoji: any) => {
+    const body = {
+      message_type: conversation?.conversation_type,
+      message_content: emoji,
+      conversationId: conversation?._id,
+      participants: conversation.participants,
+      message_content_type: MessageContentType.EMOJI,
+    };
+    const res = await messageService.createNewMessage(body);
+    if (res.status === 201) {
+      dispatch(createNewMessage(res.data.metaData));
+      const dataUpdate = {
+        lastMessage: res.data.metaData,
+        conversationId: conversation?._id,
+      };
+      dispatch(createNewMessageOfConversation(dataUpdate));
     }
   };
 
@@ -206,6 +227,14 @@ const ConversationContent: FC<IPropConversationContent> = ({
     }
   };
 
+  // Socket received change userName of participant
+  const handleChangeUsernameOfParticipant = (
+    payload: IDataChangeUsernameOfConversation
+  ) => {
+    console.log('Change username');
+    dispatch(changeUsernameOfParticipant(payload));
+  };
+
   // Handle event Enter
   useEffect(() => {
     if (messageValue !== '') {
@@ -240,11 +269,18 @@ const ConversationContent: FC<IPropConversationContent> = ({
     socket.on('onMessage', handleSocketCreateMessage);
     socket.on('onMessageUpdate', handleSocketUpdateMessage);
     socket.on('onMessageDelete', handleSocketDeleteMessage);
+
+    socket.on(
+      'onChangeUsernameOfConversation',
+      handleChangeUsernameOfParticipant
+    );
+
     return () => {
       socket.off('connection');
       socket.off('onMessage');
       socket.off('onMessageUpdate');
       socket.off('onMessageDelete');
+      socket.off('onChangeUsernameOfConversation');
     };
   }, []);
 
@@ -264,8 +300,9 @@ const ConversationContent: FC<IPropConversationContent> = ({
       <InputSendMessage
         inputRef={inputRef}
         messageValue={messageValue}
+        handleSendEmoji={handleSendEmoji}
+        conversation={conversation}
         setMessageValue={setMessageValue}
-        handleSendMessage={handleSendMessage}
         images={images}
         setImages={setImages}
         files={fileImageMessage}
@@ -281,6 +318,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         conversation={conversation}
         handleAddNewMember={handleAddNewMember}
         setIsShowChangeUsername={setIsShowChangeUsername}
+        setIsShowChangeEmoji={setIsShowChangeEmoji}
       />
     </div>
   );

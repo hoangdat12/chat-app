@@ -28,12 +28,12 @@ const ChangeNickName: FC<IChangeNickNameProp> = ({
     >
       <div
         ref={modelRef}
-        className={`flex flex-col animate__animated animate__fadeInDown w-[40%] h-[90%] py-6 px-4 bg-white rounded-lg overflow-hidden`}
+        className={`flex flex-col animate__animated animate__fadeInDown w-4/5 sm:w-[60%] md:w-[40%] h-4/5 sm:h-[90%] py-6 px-4 bg-white rounded-lg overflow-hidden`}
       >
         <div className='flex flex-col gap-4 h-[calc(100%-40px)] mb-2 overflow-y-scroll'>
           {conversation &&
             conversation.participants.map((participant) => (
-              <div className='flex gap-4'>
+              <div key={participant.userId} className='flex gap-4'>
                 <div>
                   <Avatar
                     avatarUrl={participant.avatarUrl}
