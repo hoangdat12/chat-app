@@ -28,7 +28,6 @@ export class UserController {
     try {
       return await this.userService.getAllUser();
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -50,7 +49,6 @@ export class UserController {
       };
       return new Ok(await this.userService.searchUser(keyword, pagination));
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -60,7 +58,6 @@ export class UserController {
     try {
       return await this.userService.getUserDetail(userId);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -71,7 +68,6 @@ export class UserController {
       const user = req.user as IUserCreated;
       return await this.userService.changeUserName(user, data);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -87,9 +83,7 @@ export class UserController {
       const avatarUrl = `${process.env.IMAGE_URL}/${file.filename}`;
 
       return await this.userService.changeUserAvatar(user.email, avatarUrl);
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   }
 
   @Get('/conversation/:userId')

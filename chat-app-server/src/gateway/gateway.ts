@@ -89,9 +89,7 @@ export class MessagingGateway implements OnModuleInit {
   handleChangeUsername(payload: ISocketChangeUsername) {
     const { participants, ...data } = payload;
     for (let participant of participants) {
-      const participantSocket = this.sessions.getUserSocket(
-        participant.userName,
-      );
+      const participantSocket = this.sessions.getUserSocket(participant.userId);
       if (participantSocket)
         participantSocket.emit('onChangeUsernameOfConversation', data);
     }
@@ -103,13 +101,26 @@ export class MessagingGateway implements OnModuleInit {
     const { participants } = conversation;
     for (let participant of participants) {
       if (participant.userId === user._id) {
-        break;
+        continue;
       }
-      const participantSocket = this.sessions.getUserSocket(
-        participant.userName,
-      );
+      const participantSocket = this.sessions.getUserSocket(participant.userId);
       if (participantSocket)
-        participantSocket.emit('onChangeUsernameOfConversation', conversation);
+        participantSocket.emit('onChangeEmojiOfConversation', conversation);
+    }
+  }
+
+  @OnEvent('conversation.changeAvatarGroup')
+  handleChangeAvatarGroup(payload: ISocketChangeEmoji) {
+    const { user, conversation } = payload;
+    const { participants } = conversation;
+    for (let participant of participants) {
+      if (participant.userId === user._id) {
+        continue;
+      }
+      const participantSocket = this.sessions.getUserSocket(participant.userId);
+      if (participantSocket) {
+        participantSocket.emit('onChangeAvatarOfGroup', conversation);
+      }
     }
   }
 

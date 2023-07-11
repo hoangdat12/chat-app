@@ -176,7 +176,6 @@ export class FriendController {
       const user = req.user as IUserCreated;
       return new Ok(await this.friendService.getNotifyAddFriend(user));
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }

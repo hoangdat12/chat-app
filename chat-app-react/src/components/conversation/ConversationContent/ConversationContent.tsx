@@ -9,6 +9,8 @@ import {
 
 import useInnerWidth from '../../../hooks/useInnterWidth';
 import {
+  changeAvatarOfConversation,
+  changeEmojiOfConversation,
   changeUsernameOfParticipant,
   createNewMessageOfConversation,
   deleteLastMessage,
@@ -34,34 +36,30 @@ import { useParams } from 'react-router-dom';
 import HeaderContent, { IInforConversation } from './HeaderContent';
 import InputSendMessage from './InputSendMessage';
 import MessageContent from './MessageContent';
-import ConversationSetting from '../ConversationSetting';
 import { MessageContentType } from '../../../ultils/constant/message.constant';
 import { getUserNameAndAvatarUrl } from '../../../ultils';
+import ConversationSetting from '../ConversationSetting';
 
 export interface IPropConversationContent {
   user: IUser | null;
   handleShowListConversation?: () => void;
   showListConversationSM?: boolean;
-  isShowAddNewMember: boolean;
-  setIsShowAddNewMember: (value: boolean) => void;
-  setIsShowChangeUsername: (value: boolean) => void;
-  setIsShowChangeEmoji?: (value: boolean) => void;
+  showMoreConversation: boolean;
+  setShowMoreConversation: (value: boolean) => void;
 }
 
 const ConversationContent: FC<IPropConversationContent> = ({
   user,
   handleShowListConversation,
   showListConversationSM,
-  setIsShowAddNewMember,
-  setIsShowChangeUsername,
-  setIsShowChangeEmoji,
+  showMoreConversation,
+  setShowMoreConversation,
 }) => {
   const [messageValue, setMessageValue] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [fileImageMessage, setFileImageMessage] = useState<FileList | null>(
     null
   );
-  const [showMoreConversation, setShowMoreConversation] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const innterWidth = useInnerWidth();
   const socket = useContext(SocketContext);
@@ -78,12 +76,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
     user,
     conversation
   ) as IInforConversation;
-
-  // Show modal add new Member
-  const handleAddNewMember = () => {
-    setIsShowAddNewMember(true);
-    setShowMoreConversation(false);
-  };
+  const innerWitdh = useInnerWidth();
 
   // Send message
   const handleSendMessage = async () => {
@@ -231,8 +224,17 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const handleChangeUsernameOfParticipant = (
     payload: IDataChangeUsernameOfConversation
   ) => {
-    console.log('Change username');
     dispatch(changeUsernameOfParticipant(payload));
+  };
+
+  // Socket received change emoji of participant
+  const handleChangeEmoji = (payload: IConversation) => {
+    dispatch(changeEmojiOfConversation(payload));
+  };
+
+  // Socket received change avatar of participant
+  const handleChangeAvatar = (payload: IConversation) => {
+    dispatch(changeAvatarOfConversation(payload));
   };
 
   // Handle event Enter
@@ -274,6 +276,8 @@ const ConversationContent: FC<IPropConversationContent> = ({
       'onChangeUsernameOfConversation',
       handleChangeUsernameOfParticipant
     );
+    socket.on('onChangeEmojiOfConversation', handleChangeEmoji);
+    socket.on('onChangeAvatarOfGroup', handleChangeAvatar);
 
     return () => {
       socket.off('connection');
@@ -281,6 +285,8 @@ const ConversationContent: FC<IPropConversationContent> = ({
       socket.off('onMessageUpdate');
       socket.off('onMessageDelete');
       socket.off('onChangeUsernameOfConversation');
+      socket.off('onChangeEmojiOfConversation');
+      socket.off('onChangeAvatarOfGroup');
     };
   }, []);
 
@@ -309,17 +315,16 @@ const ConversationContent: FC<IPropConversationContent> = ({
         setFiles={setFileImageMessage}
       />
 
-      <ConversationSetting
-        showMoreConversation={showMoreConversation}
-        setShowMoreConversation={setShowMoreConversation}
-        userName={userName}
-        avatarUrl={avatarUrl}
-        status={status}
-        conversation={conversation}
-        handleAddNewMember={handleAddNewMember}
-        setIsShowChangeUsername={setIsShowChangeUsername}
-        setIsShowChangeEmoji={setIsShowChangeEmoji}
-      />
+      {innerWitdh < 640 && (
+        <ConversationSetting
+          userName={userName}
+          avatarUrl={avatarUrl}
+          status={status}
+          showMoreConversation={showMoreConversation}
+          setShowMoreConversation={setShowMoreConversation}
+          conversation={conversation}
+        />
+      )}
     </div>
   );
 };

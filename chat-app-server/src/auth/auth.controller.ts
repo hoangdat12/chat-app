@@ -37,7 +37,6 @@ export class AuthController {
       }
       return (await this.authService.register(body)).sender(res);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -53,7 +52,6 @@ export class AuthController {
         return res.redirect('http://localhost:5173/error');
       }
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -72,7 +70,6 @@ export class AuthController {
       });
       return response.sender(res);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -83,7 +80,6 @@ export class AuthController {
     try {
       return { msg: 'Ok' };
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -100,7 +96,6 @@ export class AuthController {
     try {
       return { msg: 'Ok' };
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -125,7 +120,6 @@ export class AuthController {
           .json({ msg: 'Un Authorization!' });
       }
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -142,7 +136,6 @@ export class AuthController {
       // });
       return new Ok({ refreshToken, token: accessToken }).sender(res);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -161,7 +154,6 @@ export class AuthController {
     try {
       return await this.authService.forgetPassword(email);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -171,7 +163,6 @@ export class AuthController {
     try {
       return await this.authService.verifyOtpToken(token);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -188,7 +179,6 @@ export class AuthController {
       }
       return await this.authService.changePassword(data, secret);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }

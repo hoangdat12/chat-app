@@ -31,7 +31,6 @@ myAxios.interceptors.request.use(
     return config;
   },
   function (err) {
-    console.log(err);
     return Promise.reject(err);
   }
 );

@@ -15,15 +15,10 @@ import myAxios from '../../ultils/myAxios';
 import useInnerWidth from '../../hooks/useInnterWidth';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
 import { IInforConversation } from '../../components/conversation/ConversationContent/HeaderContent';
-import CreateNewGroup from '../../components/modal/CreateNewGroup';
-import ChangeNickName from '../../components/modal/ChangeNickName';
-import ChangeEmoji from '../../components/modal/ChangeEmoji';
 
 const Conversation = () => {
   const [showListConversationSM, setShowListConversationSM] = useState(false);
-  const [isShowAddNewMember, setIsShowAddNewMember] = useState(false);
-  const [isShowChangeUsername, setIsShowChangeUsername] = useState(false);
-  const [isShowChangeEmoji, setIsShowChangeEmoji] = useState(false);
+  const [showMoreConversation, setShowMoreConversation] = useState(false);
   const ditpatch = useAppDispatch();
   const { conversations } = useAppSelector(selectConversation);
 
@@ -43,10 +38,6 @@ const Conversation = () => {
   // Show list conversation with reponsive for sm
   const handleShowListConversation = () => {
     setShowListConversationSM(!showListConversationSM);
-  };
-
-  const handleAddNewMember = () => {
-    setIsShowAddNewMember(true);
   };
 
   // isReadLastMessage = true
@@ -88,10 +79,8 @@ const Conversation = () => {
                 <>
                   <ConversationContent
                     user={user}
-                    isShowAddNewMember={isShowAddNewMember}
-                    setIsShowAddNewMember={setIsShowAddNewMember}
-                    setIsShowChangeUsername={setIsShowChangeUsername}
-                    setIsShowChangeEmoji={setIsShowChangeEmoji}
+                    showMoreConversation={showMoreConversation}
+                    setShowMoreConversation={setShowMoreConversation}
                   />
                 </>
               }
@@ -109,37 +98,19 @@ const Conversation = () => {
               user={user}
               handleShowListConversation={handleShowListConversation}
               showListConversationSM={showListConversationSM}
-              isShowAddNewMember={isShowAddNewMember}
-              setIsShowAddNewMember={setIsShowAddNewMember}
-              setIsShowChangeUsername={setIsShowChangeUsername}
-              setIsShowChangeEmoji={setIsShowChangeEmoji}
+              showMoreConversation={showMoreConversation}
+              setShowMoreConversation={setShowMoreConversation}
             />
-
             <ConversationSetting
               userName={userName}
               avatarUrl={avatarUrl}
               status={status}
+              showMoreConversation={showMoreConversation}
+              setShowMoreConversation={setShowMoreConversation}
               conversation={conversation}
-              handleAddNewMember={handleAddNewMember}
-              setIsShowChangeUsername={setIsShowChangeUsername}
-              setIsShowChangeEmoji={setIsShowChangeEmoji}
             />
           </>
         )}
-        <CreateNewGroup
-          isShowCreateNewGroup={isShowAddNewMember}
-          setShowCreateNewGroup={setIsShowAddNewMember}
-          type={'add'}
-        />
-        <ChangeNickName
-          conversation={conversation}
-          isShow={isShowChangeUsername}
-          setIsShow={setIsShowChangeUsername}
-        />
-        <ChangeEmoji
-          isShow={isShowChangeEmoji}
-          setIsShow={setIsShowChangeEmoji}
-        />
       </div>
     </Layout>
   );

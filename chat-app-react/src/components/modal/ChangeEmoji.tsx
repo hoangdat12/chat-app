@@ -20,7 +20,6 @@ const ChangeEmoji: FC<IChangeEmojiProp> = ({ isShow, setIsShow }) => {
   const dispatch = useAppDispatch();
 
   const handleSelectEmoji = (emoji: any): void => {
-    console.log(emoji);
     setCurrentEmoji(emoji);
   };
 
@@ -30,7 +29,6 @@ const ChangeEmoji: FC<IChangeEmojiProp> = ({ isShow, setIsShow }) => {
 
   const handleSave = () => {
     if (conversationId && currentEmoji) {
-      console.log('ChangeEmoji');
       const payload = {
         conversationId: conversationId,
         emoji: currentEmoji.native,

@@ -301,6 +301,39 @@ export class ConversationService {
     );
   }
 
+  async changeAvatarGroup(
+    user: IUserCreated,
+    conversationId: string,
+    file: Express.Multer.File,
+  ) {
+    const foundConversation = await this.conversationRepository.findUserExist(
+      conversationId,
+      user._id,
+    );
+    if (!foundConversation)
+      throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
+
+    const payload = {
+      message_type: foundConversation.conversation_type,
+      message_content: `${getUsername(user)} changed avatar of group`,
+      conversationId: conversationId,
+      message_received: foundConversation.participants,
+      message_content_type: MessageContentType.NOTIFY,
+    };
+    // Create new Message
+    const message = await this.messageRepository.createMessageConversation(
+      user,
+      payload,
+    );
+    if (!message)
+      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    const avatarUrl = `http://localhost:8080/assets/${file.filename}`;
+    foundConversation.avatarUrl = avatarUrl;
+    foundConversation.lastMessage = convertMessageWithIdToString(message);
+    return await foundConversation.save();
+  }
+
   async readLastMessage(user: IUserCreated, conversationId: string) {
     const updateConversation =
       await this.conversationRepository.readLastMessage(user, conversationId);

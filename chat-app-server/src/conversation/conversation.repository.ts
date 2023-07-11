@@ -148,7 +148,7 @@ export class ConversationRepository {
     return await this.conversationModel.findOneAndUpdate(
       { _id: conversationId },
       { nameGroup },
-      { new: true },
+      { new: true, upsert: true },
     );
   }
 

@@ -9,6 +9,8 @@ import {
   Query,
   Req,
   Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ConversationService } from './conversation.service';
 import { Request } from 'express';
@@ -26,6 +28,8 @@ import {
 import { validate } from 'class-validator';
 import { Ok } from '../ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from '../ultils/constant/multer.config';
 
 @Controller('conversation')
 export class ConversationController {
@@ -218,6 +222,30 @@ export class ConversationController {
       }
       const user = req.user as IUserCreated;
       return new Ok(await this.conversationService.renameGroup(user, data));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('/change-avatar-group')
+  @UseInterceptors(FileInterceptor('file', multerOptions))
+  async changeAvatarGroup(
+    @Req() req: Request,
+    @Body('conversationId') conversationId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      const responseData = await this.conversationService.changeAvatarGroup(
+        user,
+        conversationId,
+        file,
+      );
+      this.eventEmiter.emit('conversation.changeAvatarGroup', {
+        user,
+        conversation: responseData,
+      });
+      return new Ok(responseData);
     } catch (err) {
       throw err;
     }

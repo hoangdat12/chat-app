@@ -60,6 +60,13 @@ export const changEmojiOfConversation = createAsyncThunk(
   }
 );
 
+export const changeAvatarOfGroup = createAsyncThunk(
+  'conversation/changeAvatar',
+  async (data: FormData) => {
+    return await conversationService.handleChangeAvatarOfGroup(data);
+  }
+);
+
 const conversationSlice = createSlice({
   name: 'conversation',
   initialState,
@@ -177,6 +184,26 @@ const conversationSlice = createSlice({
         }
       }
     },
+    changeEmojiOfConversation: (
+      state,
+      action: PayloadAction<IConversation>
+    ) => {
+      const conversation = state.conversations.get(action.payload._id);
+      if (conversation) {
+        conversation.emoji = action.payload.emoji;
+        conversation.lastMessage = action.payload.lastMessage;
+      }
+    },
+    changeAvatarOfConversation: (
+      state,
+      action: PayloadAction<IConversation>
+    ) => {
+      const conversation = state.conversations.get(action.payload._id);
+      if (conversation) {
+        conversation.avatarUrl = action.payload.avatarUrl;
+        conversation.lastMessage = action.payload.lastMessage;
+      }
+    },
   },
   extraReducers: (builder) => {
     // Get last conversation
@@ -282,6 +309,25 @@ const conversationSlice = createSlice({
       .addCase(changEmojiOfConversation.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
+      })
+
+      // Change avatar of participant in conversation
+      .addCase(changeAvatarOfGroup.pending, (state) => {
+        state.status = 'pending';
+        state.isLoading = true;
+      })
+      .addCase(changeAvatarOfGroup.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isLoading = false;
+        const conversation = state.conversations.get(action.payload._id);
+        if (conversation) {
+          conversation.avatarUrl = action.payload.avatarUrl;
+          conversation.lastMessage = action.payload.lastMessage;
+        }
+      })
+      .addCase(changeAvatarOfGroup.rejected, (state) => {
+        state.status = 'failed';
+        state.isLoading = false;
       });
   },
 });
@@ -294,6 +340,8 @@ export const {
   readLastMessage,
   searchConversation,
   changeUsernameOfParticipant,
+  changeEmojiOfConversation,
+  changeAvatarOfConversation,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

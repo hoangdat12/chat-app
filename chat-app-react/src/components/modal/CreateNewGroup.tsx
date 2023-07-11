@@ -159,7 +159,6 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
     useEffect(() => {
       const handleSearch = async () => {
         const res = await friendService.searchFriendByUserName(searchValue);
-        console.log(res);
         if (res.status === 200) {
           setListFriend(res.data.metaData.friends);
           setKeyWord(res.data.metaData.keyword);

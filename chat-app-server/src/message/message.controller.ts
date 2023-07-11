@@ -33,7 +33,6 @@ export class MessageController {
   @Post()
   async createMessage(@Req() req: Request, @Body() body: CreateMessageData) {
     try {
-      console.log('Run');
       const errors = await validate(body);
       if (errors.length > 0) {
         throw new Error('Missing value!');
@@ -43,7 +42,6 @@ export class MessageController {
       this.evenEmiter.emit('message.create', newMessage);
       return new Ok<any>(newMessage);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -67,7 +65,6 @@ export class MessageController {
       this.evenEmiter.emit('message.create', newMessage);
       return new Ok<any>(newMessage);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -84,7 +81,6 @@ export class MessageController {
       this.evenEmiter.emit('message.update', messageUpdate);
       return new Ok(messageUpdate);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }
@@ -101,7 +97,6 @@ export class MessageController {
       this.evenEmiter.emit('message.delete', messageDelete);
       return new Ok(messageDelete);
     } catch (err) {
-      console.log(err);
       throw err;
     }
   }

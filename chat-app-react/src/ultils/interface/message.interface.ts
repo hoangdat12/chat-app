@@ -123,3 +123,8 @@ export interface IDataChangeEmoji {
   conversationId: string;
   emoji: string;
 }
+
+export interface IDataChangeAvatarOfConversation {
+  conversationId: string;
+  file: File;
+}
