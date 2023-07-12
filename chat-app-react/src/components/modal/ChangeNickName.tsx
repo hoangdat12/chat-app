@@ -2,6 +2,7 @@ import { FC, memo, useRef } from 'react';
 import { IConversation } from '../../ultils/interface';
 import Avatar from '../avatars/Avatar';
 import Input from '../input/Input';
+import useClickOutside from '../../hooks/useClickOutside';
 
 export interface IChangeNickNameProp {
   conversation: IConversation | undefined;
@@ -16,6 +17,8 @@ const ChangeNickName: FC<IChangeNickNameProp> = memo(
     const handleCloseModel = () => {
       setIsShow(false);
     };
+
+    useClickOutside(modelRef, handleCloseModel, 'mousedown');
 
     return (
       <div

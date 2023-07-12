@@ -1,19 +1,23 @@
-import { AiOutlineFileImage, AiOutlineLike } from 'react-icons/Ai';
-import { BsChevronDown } from 'react-icons/bs';
+import { AiFillDelete, AiFillFileImage, AiOutlineLike } from 'react-icons/Ai';
+import { BsChevronDown, BsFillPeopleFill } from 'react-icons/bs';
 import { FaPushed } from 'react-icons/fa';
 import { IoSearchSharp } from 'react-icons/io5';
-import { MdAttachFile, MdOutlineVideoLibrary } from 'react-icons/md';
-// import { TfiPin2 } from 'react-icons/tfi';
+import { MdVideoLibrary } from 'react-icons/md';
 import { VscTextSize } from 'react-icons/vsc';
+import { BiLogOutCircle } from 'react-icons/bi';
 
 export const ListDetailSetting = [
-  // {
-  //   SubMenu: {
-  //     title: 'Chat Detail',
-  //     icon: <BsChevronDown />,
-  //   },
-  //   List: [{ title: 'Pinned messages', icon: <TfiPin2 /> }],
-  // },
+  {
+    SubMenu: {
+      title: 'Chat Detail',
+      icon: <BsChevronDown />,
+    },
+    List: [
+      { title: 'Member', icon: <BsFillPeopleFill /> },
+      { title: 'Delete conversation', icon: <AiFillDelete /> },
+      { title: 'Leave group', icon: <BiLogOutCircle /> },
+    ],
+  },
   {
     SubMenu: {
       title: 'Custome conversation',
@@ -46,15 +50,11 @@ export const ListDetailSetting = [
     List: [
       {
         title: 'File',
-        icon: <AiOutlineFileImage />,
+        icon: <AiFillFileImage />,
       },
       {
         title: 'Video',
-        icon: <MdOutlineVideoLibrary />,
-      },
-      {
-        title: 'Link',
-        icon: <MdAttachFile />,
+        icon: <MdVideoLibrary />,
       },
     ],
   },

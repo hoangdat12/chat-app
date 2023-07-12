@@ -30,7 +30,7 @@ export class PayloadDeletePaticipant {
   conversationId: string;
 
   @IsNotEmpty()
-  participantId: string;
+  participant: IParticipant;
 }
 
 export class PayloadAddPaticipant {
@@ -74,9 +74,9 @@ export class ReadLastMessage {
 }
 
 export class ChangeEmoji {
-  @IsNotEmpty() 
-  conversationId: string
+  @IsNotEmpty()
+  conversationId: string;
 
   @IsNotEmpty()
-  emoji: string
+  emoji: string;
 }

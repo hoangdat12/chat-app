@@ -1,6 +1,5 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
-import { IoSearchSharp } from 'react-icons/io5';
 import { MdNotificationsNone, MdOutlineArrowBack } from 'react-icons/md';
 import { CgProfile } from 'react-icons/cg';
 import { AiOutlinePlusCircle } from 'react-icons/Ai';
@@ -15,244 +14,295 @@ import ChangeNickName from '../modal/ChangeNickName';
 import ChangeEmoji from '../modal/ChangeEmoji';
 import ChangeAvatarGroup from '../modal/ChangeAvatarGroup';
 import { CiEdit } from 'react-icons/ci';
+import useClickOutside from '../../hooks/useClickOutside';
+import { conversationService } from '../../features/conversation/conversationService';
+import MenagerMember from '../modal/MenagerMember';
 
 export interface IPropConversationSetting {
   showMoreConversation?: boolean;
   setShowMoreConversation: (value: boolean) => void;
-  userName: string | null;
+  userName: string;
   avatarUrl: string | null;
   status?: string | null;
   conversation: IConversation | undefined;
 }
 
-const ConversationSetting: FC<IPropConversationSetting> = ({
-  showMoreConversation,
-  setShowMoreConversation,
-  userName,
-  avatarUrl,
-  conversation,
-}) => {
-  const [show, setShow] = useState<number[]>([]);
+const ConversationSetting: FC<IPropConversationSetting> = memo(
+  ({
+    showMoreConversation,
+    setShowMoreConversation,
+    userName,
+    avatarUrl,
+    conversation,
+  }) => {
+    const [show, setShow] = useState<number[]>([]);
 
-  const [isShowAddNewMember, setIsShowAddNewMember] = useState(false);
-  const [isShowChangeUsername, setIsShowChangeUsername] = useState(false);
-  const [isShowChangeEmoji, setIsShowChangeEmoji] = useState(false);
-  const [isShowChangeAvatarOfGroup, setIsShowChangeAvatarOfGroup] =
-    useState(false);
-  const [image, setViewImage] = useState<string | ArrayBuffer | null>(null);
-  const modelRef = useRef<HTMLDivElement>(null);
+    const [isShowAddNewMember, setIsShowAddNewMember] = useState(false);
+    const [isShowChangeUsername, setIsShowChangeUsername] = useState(false);
+    const [isShowChangeEmoji, setIsShowChangeEmoji] = useState(false);
+    const [isShowChangeAvatarOfGroup, setIsShowChangeAvatarOfGroup] =
+      useState(false);
+    const [isShowRenameGroup, setIsShowRenameGroup] = useState(false);
+    const [newNameGroup, setNewNameGroup] = useState(userName);
+    const [image, setViewImage] = useState<string | ArrayBuffer | null>(null);
+    const [isShowManagerMember, setIsShowManagerMember] = useState(false);
 
-  const handleShow = (idx: number) => {
-    if (show.includes(idx)) {
-      setShow((prev) => prev.filter((ele) => ele !== idx));
-    } else {
-      setShow((prev) => [...prev, idx]);
-    }
-  };
+    const modelRef = useRef<HTMLDivElement | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Show modal add new Member
-  const handleAddNewMember = () => {
-    setIsShowAddNewMember(true);
-    setShowMoreConversation(false);
-  };
+    const handleShow = (idx: number) => {
+      if (show.includes(idx)) {
+        setShow((prev) => prev.filter((ele) => ele !== idx));
+      } else {
+        setShow((prev) => [...prev, idx]);
+      }
+    };
 
-  const hanldeChangeUsername = () => {
-    setIsShowChangeUsername(true);
-    setShowMoreConversation(false);
-  };
+    // Show modal add new Member
+    const handleAddNewMember = () => {
+      setShowMoreConversation(false);
+      setIsShowAddNewMember(true);
+    };
 
-  const handleShowChangeEmoji = () => {
-    setIsShowChangeEmoji(true);
-    setShowMoreConversation(false);
-  };
+    const handleShowChangeUsername = () => {
+      setShowMoreConversation(false);
+      setIsShowChangeUsername(true);
+    };
 
-  useEffect(() => {
-    if (image) {
-      setIsShowChangeAvatarOfGroup(true);
-    }
-  }, [image]);
+    const handleShowChangeEmoji = () => {
+      setShowMoreConversation(false);
+      setIsShowChangeEmoji(true);
+    };
 
-  const handleClick = (title: string) => {
-    switch (title) {
-      case 'Change username':
-        hanldeChangeUsername();
-        break;
-      case 'Change emoji':
-        handleShowChangeEmoji();
-        break;
-      default:
-        break;
-    }
-  };
+    const handleChangeNameGroup = () => {
+      setIsShowRenameGroup(true);
+    };
 
-  const handleChangeNameGroup = () => {};
+    const handleShowManegerMember = () => {
+      setShowMoreConversation(false);
+      setIsShowManagerMember(true);
+    };
 
-  useEffect(() => {
-    if (showMoreConversation) {
-      const clickOutSide = (e: MouseEvent) => {
-        if (modelRef.current && !modelRef.current?.contains(e.target as Node)) {
-          if (isShowAddNewMember) setIsShowAddNewMember(false);
-          if (isShowChangeAvatarOfGroup) setIsShowChangeAvatarOfGroup(false);
-          if (isShowChangeEmoji) setIsShowChangeEmoji(false);
-          if (isShowChangeUsername) setIsShowChangeUsername(false);
-          setShowMoreConversation(false);
-        }
-      };
+    const handleClick = (title: string) => {
+      switch (title) {
+        case 'Change username':
+          handleShowChangeUsername();
+          break;
+        case 'Change emoji':
+          handleShowChangeEmoji();
+          break;
+        case 'Member':
+          handleShowManegerMember();
+          break;
+        default:
+          break;
+      }
+    };
+    // Change name group
+    const changeNameGroup = async () => {
+      if (
+        isShowRenameGroup &&
+        newNameGroup !== userName &&
+        newNameGroup?.trim() !== '' &&
+        conversation
+      ) {
+        await conversationService.handleChangeNameOfGroup({
+          conversationId: conversation?._id,
+          nameGroup: newNameGroup,
+        });
+      }
+      setIsShowRenameGroup(false);
+    };
 
-      document.addEventListener('mousedown', clickOutSide);
+    useClickOutside(inputRef, changeNameGroup, 'mousedown');
 
-      return () => {
-        document.removeEventListener('mousedown', clickOutSide);
-      };
-    }
-  }, [showMoreConversation]);
+    useEffect(() => {
+      if (image) {
+        setShowMoreConversation(false);
+        setIsShowChangeAvatarOfGroup(true);
+      }
+    }, [image]);
 
-  return (
-    <>
-      <div
-        className={`${
-          showMoreConversation
-            ? 'absolute top-0 right-0 flex flex-row-reverse bg-blackOverlay'
-            : 'hidden xl:block xl:col-span-3 py-6 border-[#f2f3f4]'
-        } h-full w-full xl:border-l overflow-y-scroll sm:overflow-hidden scrollbar-hide font-poppins`}
-      >
+    useEffect(() => {
+      if (showMoreConversation) {
+        const clickOutSide = (e: MouseEvent) => {
+          if (
+            modelRef.current &&
+            !modelRef.current?.contains(e.target as Node)
+          ) {
+            if (isShowAddNewMember) setIsShowAddNewMember(false);
+            if (isShowChangeAvatarOfGroup) setIsShowChangeAvatarOfGroup(false);
+            if (isShowChangeEmoji) setIsShowChangeEmoji(false);
+            if (isShowChangeUsername) setIsShowChangeUsername(false);
+            setShowMoreConversation(false);
+          }
+        };
+
+        document.addEventListener('mousedown', clickOutSide);
+
+        return () => {
+          document.removeEventListener('mousedown', clickOutSide);
+        };
+      }
+    }, [showMoreConversation]);
+
+    return (
+      <>
         <div
           className={`${
-            showMoreConversation &&
-            'animate__animated animate__fadeInRight w-full sm:w-[350px] bg-[#f2f3f4] py-6'
-          } relative`}
-          ref={modelRef}
+            showMoreConversation
+              ? 'absolute top-0 right-0 flex flex-row-reverse bg-blackOverlay'
+              : 'hidden xl:block xl:col-span-3 py-6 border-[#f2f3f4]'
+          } h-full w-full xl:border-l overflow-y-scroll sm:overflow-hidden scrollbar-hide font-poppins`}
         >
-          <div className='absolute top-0 left-4 flex sm:hidden'>
-            <ButtonRounded
-              className={'text-lg p-2 bg-white mt-4'}
-              icon={<MdOutlineArrowBack />}
-              onClick={
-                setShowMoreConversation &&
-                (() => setShowMoreConversation(false))
-              }
-            />
-          </div>
-          <div className='flex flex-col items-center justify-center gap-3 cursor-pointer '>
-            <div className=''>
-              <AvatarEdit
-                className={'w-20 h-20'}
-                avatarUrl={avatarUrl ?? ''}
-                setViewImage={setViewImage}
+          <div
+            className={`${
+              showMoreConversation &&
+              'animate__animated animate__fadeInRight w-full sm:w-[350px] bg-[#f2f3f4] py-6'
+            } relative`}
+            ref={modelRef}
+          >
+            <div className='absolute top-0 left-4 flex sm:hidden'>
+              <ButtonRounded
+                className={'text-lg p-2 bg-white mt-4'}
+                icon={<MdOutlineArrowBack />}
+                onClick={
+                  setShowMoreConversation &&
+                  (() => setShowMoreConversation(false))
+                }
               />
             </div>
-            <h1 className='text-2xl font-medium flex items-center justify-center gap-2 w-full'>
-              <span> {userName}</span>
-              <span
-                onClick={handleChangeNameGroup}
-                className='text-black text-lg p-1 rounded-full bg-gray-300'
-              >
-                <CiEdit />
-              </span>
-            </h1>
-
-            <div className='flex gap-10 text-lg text-[#3a393c]'>
-              <div className='relative'>
-                {conversation?.conversation_type === MessageType.GROUP ? (
-                  <div onClick={handleAddNewMember}>
-                    <ButtonRounded icon={<AiOutlinePlusCircle />} />
-                    <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
-                      Add Member
-                    </div>
-                  </div>
+            <div className='flex flex-col items-center justify-center gap-3 cursor-pointer '>
+              <div className=''>
+                <AvatarEdit
+                  className={'w-20 h-20'}
+                  avatarUrl={avatarUrl ?? ''}
+                  setViewImage={setViewImage}
+                />
+              </div>
+              <h1 className='flex items-center justify-center gap-4 w-full'>
+                {isShowRenameGroup ? (
+                  <input
+                    type='text'
+                    className={`outline-none bg-transparent`}
+                    value={newNameGroup}
+                    onChange={(e) => setNewNameGroup(e.target.value)}
+                    ref={inputRef}
+                    autoFocus
+                  />
                 ) : (
-                  <>
-                    <ButtonRounded icon={<CgProfile />} />
-                    <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
-                      Profile
-                    </div>
-                  </>
+                  <span className='text-2xl font-medium '> {userName}</span>
                 )}
-              </div>
-              <div className='relative'>
-                <ButtonRounded icon={<IoSearchSharp />} />
-                <div className='absolute -bottom-6 left-[50%] -translate-x-1/2 text-sm'>
-                  Search
+                <span
+                  onClick={handleChangeNameGroup}
+                  className='text-black text-lg p-1 rounded-full bg-gray-300'
+                >
+                  <CiEdit />
+                </span>
+              </h1>
+
+              <div className='flex gap-20 mt-2 lg:mt-0 text-lg text-[#3a393c]'>
+                <div className='relative'>
+                  {conversation?.conversation_type === MessageType.GROUP ? (
+                    <div onClick={handleAddNewMember}>
+                      <ButtonRounded icon={<AiOutlinePlusCircle />} />
+                      <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
+                        Add Member
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <ButtonRounded icon={<CgProfile />} />
+                      <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
+                        Profile
+                      </div>
+                    </>
+                  )}
                 </div>
-              </div>
-              <div className='relative'>
-                <ButtonRounded icon={<MdNotificationsNone />} />
-                <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
-                  Notification
+                <div className='relative'>
+                  <ButtonRounded icon={<MdNotificationsNone />} />
+                  <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
+                    Notification
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <ul className='mt-16 max-h-[calc(100vh-20rem)] pb-6 overflow-y-scroll'>
-            {ListDetailSetting.map((element, idx) => (
-              <li className={`${idx === 0 ? '' : 'mt-5'} px-8`} key={idx}>
-                <div className='flex items-center justify-between cursor-pointer'>
-                  <span
-                    onClick={() => handleShow(idx)}
-                    className='text-base w-full'
-                  >
-                    {element.SubMenu.title}
-                  </span>
-                  <span
-                    className={`${
-                      show.includes(idx)
-                        ? 'animate__animated animate__rotateIn'
-                        : ''
-                    }`}
-                  >
-                    {show.includes(idx) ? <BsChevronUp /> : <BsChevronDown />}
-                  </span>
-                </div>
-                <ul
-                  className={`${
-                    show.includes(idx) ? 'block' : ' hidden'
-                  } px-2 text-base font-light`}
-                >
-                  {element.List.map((item, index) => (
-                    <li
-                      className='flex items-center gap-2 mt-3 cursor-pointer'
-                      key={index}
-                      onClick={() => handleClick(item.title)}
+            <ul className='mt-16 max-h-[calc(100vh-20rem)] pb-6 overflow-y-scroll'>
+              {ListDetailSetting.map((element, idx) => (
+                <li className={`${idx === 0 ? '' : 'mt-5'} px-8`} key={idx}>
+                  <div className='flex items-center justify-between cursor-pointer'>
+                    <span
+                      onClick={() => handleShow(idx)}
+                      className='text-base w-full'
                     >
-                      <span>
-                        {item.title === 'Change emoji'
-                          ? conversation?.emoji ?? '👍'
-                          : item.icon}
-                      </span>
-                      <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
-                        {item.title}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
+                      {element.SubMenu.title}
+                    </span>
+                    <span
+                      className={`${
+                        show.includes(idx)
+                          ? 'animate__animated animate__rotateIn'
+                          : ''
+                      }`}
+                    >
+                      {show.includes(idx) ? <BsChevronUp /> : <BsChevronDown />}
+                    </span>
+                  </div>
+                  <ul
+                    className={`${
+                      show.includes(idx) ? 'block' : ' hidden'
+                    } px-2 text-base font-light`}
+                  >
+                    {element.List.map((item, index) => (
+                      <li
+                        className='flex items-center gap-2 mt-3 cursor-pointer'
+                        key={index}
+                        onClick={() => handleClick(item.title)}
+                      >
+                        <span>
+                          {item.title === 'Change emoji'
+                            ? conversation?.emoji ?? '👍'
+                            : item.icon}
+                        </span>
+                        <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
+                          {item.title}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
-      <CreateNewGroup
-        isShowCreateNewGroup={isShowAddNewMember}
-        setShowCreateNewGroup={setIsShowAddNewMember}
-        type={'add'}
-      />
-      <ChangeNickName
-        conversation={conversation}
-        isShow={isShowChangeUsername}
-        setIsShow={setIsShowChangeUsername}
-      />
-      <ChangeEmoji
-        isShow={isShowChangeEmoji}
-        setIsShow={setIsShowChangeEmoji}
-      />
-      <ChangeAvatarGroup
-        imageUrl={image}
-        setViewImage={setViewImage}
-        isShow={isShowChangeAvatarOfGroup}
-        setIsShow={setIsShowChangeAvatarOfGroup}
-      />
-    </>
-  );
-};
+        <CreateNewGroup
+          isShowCreateNewGroup={isShowAddNewMember}
+          setShowCreateNewGroup={setIsShowAddNewMember}
+          type={'add'}
+        />
+        <ChangeNickName
+          conversation={conversation}
+          isShow={isShowChangeUsername}
+          setIsShow={setIsShowChangeUsername}
+        />
+        <ChangeEmoji
+          isShow={isShowChangeEmoji}
+          setIsShow={setIsShowChangeEmoji}
+        />
+        <ChangeAvatarGroup
+          imageUrl={image}
+          setViewImage={setViewImage}
+          isShow={isShowChangeAvatarOfGroup}
+          setIsShow={setIsShowChangeAvatarOfGroup}
+        />
+        <MenagerMember
+          conversation={conversation}
+          isShow={isShowManagerMember}
+          setIsShow={setIsShowManagerMember}
+        />
+      </>
+    );
+  }
+);
 
 export default ConversationSetting;

@@ -1,7 +1,12 @@
 import { MessageRepository } from '../message/message.repository';
 import { ConversationRepository } from './conversation.repository';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { IParticipant, IUserCreated, Pagination } from '../ultils/interface';
+import {
+  IConversation,
+  IParticipant,
+  IUserCreated,
+  Pagination,
+} from '../ultils/interface';
 import {
   IDataChangeUsernameOfParticipant,
   ChangeTopic,
@@ -39,6 +44,7 @@ export class ConversationService {
         email: user.email,
         avatarUrl: user.avatarUrl,
         userName: getUsername(user),
+        enable: true,
       };
       payload.creators = [creator];
       payload.avatarUrl =
@@ -106,7 +112,7 @@ export class ConversationService {
     user: IUserCreated,
     data: PayloadDeletePaticipant,
   ) {
-    const { participantId, conversationId } = data;
+    const { participant, conversationId } = data;
     const foundConversation = await this.conversationRepository.findUserExist(
       conversationId,
       user._id,
@@ -114,29 +120,57 @@ export class ConversationService {
     if (!foundConversation)
       throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
 
-    let isValid = false;
-    for (let creator of foundConversation.creators) {
-      if (creator.userId.toString() === user._id.toString()) {
-        isValid = true;
-        break;
-      }
-      if (creator.userId.toString() === participantId.toString()) {
-        throw new HttpException(
-          'User not permission delete administrators out of group!',
-          HttpStatus.FORBIDDEN,
-        );
-      }
-    }
-    if (!isValid)
-      throw new HttpException(
-        'User not permission delete member out of group!',
-        HttpStatus.FORBIDDEN,
-      );
+    this.checkUserIsAdmin(user, foundConversation);
 
-    return await this.conversationRepository.deletePaticipantOfGroup(
-      conversationId,
-      participantId,
+    const payload = {
+      message_type: foundConversation.conversation_type,
+      message_content: `${getUsername(user)} deleted ${
+        participant.userName
+      } out of group`,
+      conversationId: conversationId,
+      message_received: foundConversation.participants,
+      message_content_type: MessageContentType.NOTIFY,
+    };
+    // Create new Message
+    const message = await this.messageRepository.createMessageConversation(
+      user,
+      payload,
     );
+    if (!message)
+      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    await foundConversation.save();
+
+    await this.conversationRepository.deletePaticipantOfGroup(
+      conversationId,
+      participant,
+    );
+
+    return {
+      participant,
+      conversation: foundConversation,
+    };
+  }
+
+  async promotedAminGroup(user: IUserCreated, data: PayloadDeletePaticipant) {
+    const { participant, conversationId } = data;
+    const foundConversation = await this.conversationRepository.findUserExist(
+      conversationId,
+      user._id,
+    );
+    if (!foundConversation)
+      throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
+
+    this.checkUserIsAdmin(user, foundConversation);
+
+    const { isReadLastMessage, ...newCreator } = participant;
+    foundConversation.creators = [...foundConversation.creators, newCreator];
+    await foundConversation.save();
+
+    return {
+      participant,
+      conversation: foundConversation
+    };
   }
 
   // Add new member
@@ -295,10 +329,29 @@ export class ConversationService {
     if (!foundConversation)
       throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
 
-    return await this.conversationRepository.renameGroup(
-      conversationId,
-      nameGroup,
+    const payload = {
+      message_type: foundConversation.conversation_type,
+      message_content: `${getUsername(user)} changed name of group`,
+      conversationId: conversationId,
+      message_received: foundConversation.participants,
+      message_content_type: MessageContentType.NOTIFY,
+    };
+    // Create new Message
+    const message = await this.messageRepository.createMessageConversation(
+      user,
+      payload,
     );
+    if (!message)
+      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    foundConversation.nameGroup = nameGroup;
+    foundConversation.lastMessage = convertMessageWithIdToString(message);
+    const responseData = await foundConversation.save();
+
+    return {
+      user,
+      conversation: responseData,
+    };
   }
 
   async changeAvatarGroup(
@@ -387,5 +440,21 @@ export class ConversationService {
     await foundConversation.save();
 
     return foundConversation;
+  }
+
+  // Private
+  async checkUserIsAdmin(user: IUserCreated, conversation: any) {
+    let isValid = false;
+    for (let creator of conversation.creators) {
+      if (creator.userId.toString() === user._id.toString() && creator.enable) {
+        isValid = true;
+        break;
+      }
+    }
+    if (!isValid)
+      throw new HttpException(
+        'User not permission delete member out of group!',
+        HttpStatus.FORBIDDEN,
+      );
   }
 }

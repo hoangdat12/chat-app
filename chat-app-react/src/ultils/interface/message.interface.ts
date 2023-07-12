@@ -48,6 +48,7 @@ export interface IConversation {
   nameGroup: string | undefined;
   updatedAt: string;
   createdAt: string;
+  creators?: IParticipant[];
   userId: string[];
   avatarUrl: string;
   collection: string;
@@ -102,6 +103,11 @@ export interface IDataCreateNewGroup {
   participants: IParticipant[];
 }
 
+export interface IDataDeleteMember {
+  conversationId: string;
+  participant: IParticipant;
+}
+
 export interface IDataAddNewMember {
   conversation_type: string;
   conversationId: string;
@@ -112,6 +118,11 @@ export interface IDataAddNewMemberResponse {
   conversationId: string;
   newMember: IParticipant[];
   lastMessage: IMessage;
+}
+
+export interface IDataDeleteMemberResponse {
+  participant: IParticipant;
+  conversation: IConversation;
 }
 
 export interface IDataChangeUsernameOfConversation {
@@ -127,4 +138,9 @@ export interface IDataChangeEmoji {
 export interface IDataChangeAvatarOfConversation {
   conversationId: string;
   file: File;
+}
+
+export interface IDataChangeNameGroup {
+  conversationId: string;
+  nameGroup: string;
 }

@@ -153,11 +153,14 @@ export class ConversationRepository {
   }
 
   // Kik user out of group
-  async deletePaticipantOfGroup(conversationId: string, participantId: string) {
+  async deletePaticipantOfGroup(
+    conversationId: string,
+    participant: IParticipant,
+  ) {
     return await this.conversationModel.findOneAndUpdate(
       {
         _id: conversationId,
-        participants: { $elemMatch: { userId: participantId } },
+        participants: { $elemMatch: { userId: participant.userId } },
       },
       {
         $set: {

@@ -11,9 +11,11 @@ import useInnerWidth from '../../../hooks/useInnterWidth';
 import {
   changeAvatarOfConversation,
   changeEmojiOfConversation,
+  changeNameOfConversation,
   changeUsernameOfParticipant,
   createNewMessageOfConversation,
   deleteLastMessage,
+  deleteMemberOfGroup,
   selectConversation,
   updateLastMessage,
 } from '../../../features/conversation/conversationSlice';
@@ -27,6 +29,7 @@ import { SocketContext } from '../../../ultils/context/Socket';
 import {
   IConversation,
   IDataChangeUsernameOfConversation,
+  IDataDeleteMemberResponse,
   IMessage,
   IUser,
   iSocketDeleteMessage,
@@ -220,6 +223,11 @@ const ConversationContent: FC<IPropConversationContent> = ({
     }
   };
 
+  // Socket received delete member userName of participant
+  const handleDeleteMember = (payload: IDataDeleteMemberResponse) => {
+    dispatch(deleteMemberOfGroup(payload));
+  };
+
   // Socket received change userName of participant
   const handleChangeUsernameOfParticipant = (
     payload: IDataChangeUsernameOfConversation
@@ -235,6 +243,11 @@ const ConversationContent: FC<IPropConversationContent> = ({
   // Socket received change avatar of participant
   const handleChangeAvatar = (payload: IConversation) => {
     dispatch(changeAvatarOfConversation(payload));
+  };
+
+  // Socket received change name group
+  const handleChangeNameGroup = (payload: IConversation) => {
+    dispatch(changeNameOfConversation(payload));
   };
 
   // Handle event Enter
@@ -272,12 +285,15 @@ const ConversationContent: FC<IPropConversationContent> = ({
     socket.on('onMessageUpdate', handleSocketUpdateMessage);
     socket.on('onMessageDelete', handleSocketDeleteMessage);
 
+    socket.on('onDeleteMemberOfGroup', handleDeleteMember);
+
     socket.on(
       'onChangeUsernameOfConversation',
       handleChangeUsernameOfParticipant
     );
     socket.on('onChangeEmojiOfConversation', handleChangeEmoji);
     socket.on('onChangeAvatarOfGroup', handleChangeAvatar);
+    socket.on('onChangeNameGroup', handleChangeNameGroup);
 
     return () => {
       socket.off('connection');
@@ -287,6 +303,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
       socket.off('onChangeUsernameOfConversation');
       socket.off('onChangeEmojiOfConversation');
       socket.off('onChangeAvatarOfGroup');
+      socket.off('onChangeNameGroup');
     };
   }, []);
 
@@ -315,7 +332,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         setFiles={setFileImageMessage}
       />
 
-      {innerWitdh < 640 && (
+      {innerWitdh < 640 && userName && (
         <ConversationSetting
           userName={userName}
           avatarUrl={avatarUrl}

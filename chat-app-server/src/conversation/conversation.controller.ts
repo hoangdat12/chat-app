@@ -142,12 +142,34 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      const response =
+      const responseData =
         await this.conversationService.deletePaticipantOfConversation(
           user,
           body,
         );
-      return new Ok(response);
+      this.eventEmiter.emit('conversaiton.participant.delete', responseData);
+      return new Ok('Delete user from group successfully!');
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('/group/participant/promoted')
+  async promotedAminGroup(
+    @Req() req: Request,
+    @Body() body: PayloadDeletePaticipant,
+  ) {
+    try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      const responseData = await this.conversationService.promotedAminGroup(
+        user,
+        body,
+      );
+      return new Ok(responseData);
     } catch (err) {
       throw err;
     }
@@ -216,12 +238,18 @@ export class ConversationController {
   @Patch('/change-name-group')
   async renameGroup(@Req() req: Request, @Body() data: RenameGroup) {
     try {
+      console.log(data);
       const errors = await validate(data);
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return new Ok(await this.conversationService.renameGroup(user, data));
+      const responseData = await this.conversationService.renameGroup(
+        user,
+        data,
+      );
+      this.eventEmiter.emit('conversation.changeNameGroup', responseData);
+      return new Ok(responseData);
     } catch (err) {
       throw err;
     }

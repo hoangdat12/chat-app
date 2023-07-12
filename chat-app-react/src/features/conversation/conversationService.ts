@@ -7,6 +7,10 @@ import {
   IDataAddNewMemberResponse,
   IDataChangeUsernameOfConversation,
   IDataChangeEmoji,
+  IDataChangeNameGroup,
+  IDataDeleteMemberResponse,
+  IDataDeleteMember,
+  IParticipant,
 } from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
@@ -44,6 +48,29 @@ const handleAddNewMember = async (
   return res.data.metaData;
 };
 
+const handleDeleteMember = async (
+  data: IDataDeleteMember
+): Promise<IResponse<IDataDeleteMemberResponse>> => {
+  const res = await myAxios.patch(
+    '/conversation/group/participant/delele',
+    data
+  );
+  return res;
+};
+
+const handlePromotedAdmin = async (
+  data: IDataDeleteMember
+): Promise<{
+  participant: IParticipant;
+  conversation: IConversation;
+}> => {
+  const res = await myAxios.patch(
+    '/conversation/group/participant/promoted',
+    data
+  );
+  return res.data.metaData;
+};
+
 const handleChangeUsername = async (
   data: IDataChangeUsernameOfConversation
 ): Promise<IDataChangeUsernameOfConversation> => {
@@ -65,13 +92,23 @@ const handleChangeAvatarOfGroup = async (
   return res.data.metaData;
 };
 
+const handleChangeNameOfGroup = async (
+  data: IDataChangeNameGroup
+): Promise<IResponse<IConversation>> => {
+  const res = await myAxios.patch('/conversation/change-name-group', data);
+  return res;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
   searchConversationByName,
   getFirstConversation,
   createNewGroup,
   handleAddNewMember,
+  handlePromotedAdmin,
+  handleDeleteMember,
   handleChangeUsername,
   handleChangeEmoji,
   handleChangeAvatarOfGroup,
+  handleChangeNameOfGroup,
 };

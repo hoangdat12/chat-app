@@ -17,6 +17,7 @@ export interface IConversation {
   nameGroup: string | undefined;
   updatedAt: string;
   createdAt: string;
+  creators?: IParticipant[];
   userId: string[];
   avatarUrl: string;
   collection: string;
@@ -50,6 +51,11 @@ export interface IMessage extends Messages {
 export interface MessagesDocument
   extends Document,
     Omit<Messages & { _id: ObjectId }, '_id'> {}
+
+export interface ISocketDeleteMember {
+  participant: IParticipant;
+  conversation: IConversation;
+}
 
 export interface IGatewayDeleteMessage {
   _id: string;

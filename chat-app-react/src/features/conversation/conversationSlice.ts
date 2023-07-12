@@ -6,6 +6,8 @@ import {
   IDataAddNewMember,
   IDataChangeEmoji,
   IDataChangeUsernameOfConversation,
+  IDataDeleteMember,
+  IDataDeleteMemberResponse,
   IPayloadReadLastMessage,
   IPayloadUpdateLastMessage,
 } from '../../ultils/interface';
@@ -64,6 +66,14 @@ export const changeAvatarOfGroup = createAsyncThunk(
   'conversation/changeAvatar',
   async (data: FormData) => {
     return await conversationService.handleChangeAvatarOfGroup(data);
+  }
+);
+
+export const handlePromotedAdmin = createAsyncThunk(
+  'conversation/promotedAdmin',
+  async (data: IDataDeleteMember) => {
+    const res = await conversationService.handlePromotedAdmin(data);
+    return res;
   }
 );
 
@@ -164,6 +174,20 @@ const conversationSlice = createSlice({
         }
       }
     },
+    deleteMemberOfGroup: (
+      state,
+      action: PayloadAction<IDataDeleteMemberResponse>
+    ) => {
+      const { conversation } = action.payload;
+      const conversationExist = state.conversations.get(conversation._id ?? '');
+      if (conversationExist) {
+        conversationExist.participants = conversationExist.participants.filter(
+          (participant) =>
+            participant.userId !== action.payload.participant.userId
+        );
+        conversationExist.lastMessage = conversation.lastMessage;
+      }
+    },
     changeUsernameOfParticipant: (
       state,
       action: PayloadAction<IDataChangeUsernameOfConversation>
@@ -201,6 +225,13 @@ const conversationSlice = createSlice({
       const conversation = state.conversations.get(action.payload._id);
       if (conversation) {
         conversation.avatarUrl = action.payload.avatarUrl;
+        conversation.lastMessage = action.payload.lastMessage;
+      }
+    },
+    changeNameOfConversation: (state, action: PayloadAction<IConversation>) => {
+      const conversation = state.conversations.get(action.payload._id);
+      if (conversation) {
+        conversation.nameGroup = action.payload.nameGroup;
         conversation.lastMessage = action.payload.lastMessage;
       }
     },
@@ -328,6 +359,29 @@ const conversationSlice = createSlice({
       .addCase(changeAvatarOfGroup.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
+      })
+
+      // Promoted participant
+      .addCase(handlePromotedAdmin.pending, (state) => {
+        state.status = 'pending';
+        state.isLoading = true;
+      })
+      .addCase(handlePromotedAdmin.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isLoading = false;
+        const conversation = state.conversations.get(
+          action.payload.conversation._id
+        );
+        if (conversation?.creators) {
+          conversation.creators = [
+            ...conversation.creators,
+            action.payload.participant,
+          ];
+        }
+      })
+      .addCase(handlePromotedAdmin.rejected, (state) => {
+        state.status = 'failed';
+        state.isLoading = false;
       });
   },
 });
@@ -339,9 +393,11 @@ export const {
   deleteLastMessage,
   readLastMessage,
   searchConversation,
+  deleteMemberOfGroup,
   changeUsernameOfParticipant,
   changeEmojiOfConversation,
   changeAvatarOfConversation,
+  changeNameOfConversation,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

@@ -101,14 +101,16 @@ const Conversation = () => {
               showMoreConversation={showMoreConversation}
               setShowMoreConversation={setShowMoreConversation}
             />
-            <ConversationSetting
-              userName={userName}
-              avatarUrl={avatarUrl}
-              status={status}
-              showMoreConversation={showMoreConversation}
-              setShowMoreConversation={setShowMoreConversation}
-              conversation={conversation}
-            />
+            {userName && (
+              <ConversationSetting
+                userName={userName}
+                avatarUrl={avatarUrl}
+                status={status}
+                showMoreConversation={showMoreConversation}
+                setShowMoreConversation={setShowMoreConversation}
+                conversation={conversation}
+              />
+            )}
           </>
         )}
       </div>
