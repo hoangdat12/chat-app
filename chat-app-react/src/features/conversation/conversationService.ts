@@ -99,6 +99,14 @@ const handleChangeNameOfGroup = async (
   return res;
 };
 
+const handleDeleteConversation = async (
+  conversationId: string
+): Promise<IConversation> => {
+  const res = await myAxios.delete(`/conversation/${conversationId}`);
+  console.log(res);
+  return res.data.metaData;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
   searchConversationByName,
@@ -111,4 +119,5 @@ export const conversationService = {
   handleChangeEmoji,
   handleChangeAvatarOfGroup,
   handleChangeNameOfGroup,
+  handleDeleteConversation,
 };

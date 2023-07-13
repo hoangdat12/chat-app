@@ -115,7 +115,9 @@ export class ConversationController {
       throw err;
     }
   }
-
+  /**
+   * Delete conversation but still join in conversation
+   */
   @Delete('/:conversationId')
   async deleteConversation(
     @Param('conversationId') conversationId: string,

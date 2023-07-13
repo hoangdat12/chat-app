@@ -52,10 +52,8 @@ const Conversation = () => {
       await ditpatch(fetchConversationOfUser(user?._id ? user?._id : ' '));
     };
 
-    if (!conversations?.size) {
-      fetchListConversationOfUser();
-    }
-  }, [conversations]);
+    fetchListConversationOfUser();
+  }, []);
 
   return (
     <Layout>

@@ -80,8 +80,12 @@ export class MessageRepository {
     return await this.messageModel
       .find({
         message_conversation: conversationId,
-        'message_received.enable': true,
-        'message_received.userId': userId.toString(),
+        message_received: {
+          $elemMatch: {
+            enable: true,
+            userId: userId.toString(),
+          },
+        },
       })
       .limit(limit)
       .skip(offset)

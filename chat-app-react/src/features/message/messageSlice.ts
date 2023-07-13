@@ -113,6 +113,9 @@ const messageSlice = createSlice({
         return true;
       });
     },
+    deleteAllMessageOfConversation: (state) => {
+      state.messages = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -132,7 +135,12 @@ const messageSlice = createSlice({
   },
 });
 
-export const { createNewMessage, deleteMessage, updateMessage, addMessage } =
-  messageSlice.actions;
+export const {
+  createNewMessage,
+  deleteMessage,
+  updateMessage,
+  addMessage,
+  deleteAllMessageOfConversation,
+} = messageSlice.actions;
 export default messageSlice.reducer;
 export const selectMessage = (state: RootState) => state.message;

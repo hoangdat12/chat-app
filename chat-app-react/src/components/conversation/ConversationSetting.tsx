@@ -17,6 +17,7 @@ import { CiEdit } from 'react-icons/ci';
 import useClickOutside from '../../hooks/useClickOutside';
 import { conversationService } from '../../features/conversation/conversationService';
 import MenagerMember from '../modal/MenagerMember';
+import Confirm from '../modal/Confirm';
 
 export interface IPropConversationSetting {
   showMoreConversation?: boolean;
@@ -46,6 +47,7 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
     const [newNameGroup, setNewNameGroup] = useState(userName);
     const [image, setViewImage] = useState<string | ArrayBuffer | null>(null);
     const [isShowManagerMember, setIsShowManagerMember] = useState(false);
+    const [isShowConfirm, setIsShowConfirm] = useState(false);
 
     const modelRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -83,6 +85,11 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
       setIsShowManagerMember(true);
     };
 
+    const handleShowConfirm = () => {
+      setShowMoreConversation(false);
+      setIsShowConfirm(true);
+    };
+
     const handleClick = (title: string) => {
       switch (title) {
         case 'Change username':
@@ -93,6 +100,9 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
           break;
         case 'Member':
           handleShowManegerMember();
+          break;
+        case 'Delete conversation':
+          handleShowConfirm();
           break;
         default:
           break;
@@ -299,6 +309,12 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
           conversation={conversation}
           isShow={isShowManagerMember}
           setIsShow={setIsShowManagerMember}
+        />
+        <Confirm
+          conversation={conversation}
+          title={'Are you sure to delete conversation?'}
+          isShow={isShowConfirm}
+          setIsShow={setIsShowConfirm}
         />
       </>
     );

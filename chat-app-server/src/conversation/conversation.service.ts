@@ -101,10 +101,9 @@ export class ConversationService {
     if (!foundConversation)
       throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
 
-    return await this.messageRepository.deleteConversation(
-      conversationId,
-      user._id,
-    );
+    await this.messageRepository.deleteConversation(conversationId, user._id);
+
+    return foundConversation;
   }
 
   // Kick user from conversation
@@ -169,7 +168,7 @@ export class ConversationService {
 
     return {
       participant,
-      conversation: foundConversation
+      conversation: foundConversation,
     };
   }
 

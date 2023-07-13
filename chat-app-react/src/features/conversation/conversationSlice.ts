@@ -77,6 +77,16 @@ export const handlePromotedAdmin = createAsyncThunk(
   }
 );
 
+export const handleDeleteConversation = createAsyncThunk(
+  'conversation/deleteConversation',
+  async (conversationId: string) => {
+    const res = await conversationService.handleDeleteConversation(
+      conversationId
+    );
+    return res;
+  }
+);
+
 const conversationSlice = createSlice({
   name: 'conversation',
   initialState,
@@ -380,6 +390,22 @@ const conversationSlice = createSlice({
         }
       })
       .addCase(handlePromotedAdmin.rejected, (state) => {
+        state.status = 'failed';
+        state.isLoading = false;
+      })
+
+      // Delete conversation
+      .addCase(handleDeleteConversation.pending, (state) => {
+        state.status = 'pending';
+        state.isLoading = true;
+      })
+      .addCase(handleDeleteConversation.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.isLoading = false;
+        console.log(action.payload._id);
+        state.conversations.delete(action.payload._id);
+      })
+      .addCase(handleDeleteConversation.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
       });

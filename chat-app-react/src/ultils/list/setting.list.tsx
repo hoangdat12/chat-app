@@ -14,7 +14,7 @@ export const ListDetailSetting = [
     },
     List: [
       { title: 'Member', icon: <BsFillPeopleFill /> },
-      { title: 'Delete conversation', icon: <AiFillDelete /> },
+      { title: 'Delete messages', icon: <AiFillDelete /> },
       { title: 'Leave group', icon: <BiLogOutCircle /> },
     ],
   },

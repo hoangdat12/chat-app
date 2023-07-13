@@ -65,7 +65,10 @@ const MenagerMember: FC<IChangeNickNameProp> = memo(
               {conversation?.creators?.map((creator) => {
                 if (!creator.enable) return;
                 return (
-                  <div className='flex items-center justify-start gap-4 py-[6px]'>
+                  <div
+                    key={creator.userId}
+                    className='flex items-center justify-start gap-4 py-[6px]'
+                  >
                     <Avatar
                       avatarUrl={creator.avatarUrl}
                       className='w-10 h-10'
