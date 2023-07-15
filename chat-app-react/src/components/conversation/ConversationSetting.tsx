@@ -18,6 +18,15 @@ import useClickOutside from '../../hooks/useClickOutside';
 import { conversationService } from '../../features/conversation/conversationService';
 import MenagerMember from '../modal/MenagerMember';
 import Confirm from '../modal/Confirm';
+import NotAllowed from '../NotAllowed';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
+import { useNavigate } from 'react-router-dom';
+import {
+  handleDeleteConversation,
+  selectConversation,
+} from '../../features/conversation/conversationSlice';
+import { deleteAllMessageOfConversation } from '../../features/message/messageSlice';
+import { ListConversationSetting } from '../../ultils/constant/setting.constant';
 
 export interface IPropConversationSetting {
   showMoreConversation?: boolean;
@@ -26,6 +35,7 @@ export interface IPropConversationSetting {
   avatarUrl: string | null;
   status?: string | null;
   conversation: IConversation | undefined;
+  isValidSendMessage: boolean;
 }
 
 const ConversationSetting: FC<IPropConversationSetting> = memo(
@@ -35,6 +45,7 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
     userName,
     avatarUrl,
     conversation,
+    isValidSendMessage,
   }) => {
     const [show, setShow] = useState<number[]>([]);
 
@@ -47,10 +58,14 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
     const [newNameGroup, setNewNameGroup] = useState(userName);
     const [image, setViewImage] = useState<string | ArrayBuffer | null>(null);
     const [isShowManagerMember, setIsShowManagerMember] = useState(false);
-    const [isShowConfirm, setIsShowConfirm] = useState(false);
+    const [isShowConfirm, setIsShowConfirm] = useState<string>('');
 
     const modelRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const { conversations } = useAppSelector(selectConversation);
 
     const handleShow = (idx: number) => {
       if (show.includes(idx)) {
@@ -85,29 +100,33 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
       setIsShowManagerMember(true);
     };
 
-    const handleShowConfirm = () => {
+    const handleShowConfirm = (title: string) => {
       setShowMoreConversation(false);
-      setIsShowConfirm(true);
+      setIsShowConfirm(title);
     };
 
     const handleClick = (title: string) => {
       switch (title) {
-        case 'Change username':
+        case ListConversationSetting.CHANGE_USERNAME:
           handleShowChangeUsername();
           break;
-        case 'Change emoji':
+        case ListConversationSetting.CHANGE_EMOJI:
           handleShowChangeEmoji();
           break;
-        case 'Member':
+        case ListConversationSetting.MEMBER:
           handleShowManegerMember();
           break;
-        case 'Delete conversation':
-          handleShowConfirm();
+        case ListConversationSetting.DELETE_MESSAGES:
+          handleShowConfirm(title);
+          break;
+        case ListConversationSetting.LEAVE_GROUP:
+          handleShowConfirm(title);
           break;
         default:
           break;
       }
     };
+
     // Change name group
     const changeNameGroup = async () => {
       if (
@@ -122,6 +141,26 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
         });
       }
       setIsShowRenameGroup(false);
+    };
+
+    // Handle delete messages
+    const handleDeleteMessages = async () => {
+      if (conversation) {
+        dispatch(handleDeleteConversation(conversation._id));
+        dispatch(deleteAllMessageOfConversation());
+        const nextConversation = Array.from(conversations.values())[0];
+        navigate(`/conversation/${nextConversation?._id ?? 1}`);
+      }
+      setIsShowConfirm('');
+    };
+
+    // Handle leave messages
+    const handleLeaveConversation = async () => {
+      console.log('Leave');
+      if (conversation) {
+        await conversationService.handleLeaveGroup(conversation?._id);
+        setIsShowConfirm('');
+      }
     };
 
     useClickOutside(inputRef, changeNameGroup, 'mousedown');
@@ -182,7 +221,8 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
                 }
               />
             </div>
-            <div className='flex flex-col items-center justify-center gap-3 cursor-pointer '>
+            <div className='relative flex flex-col items-center justify-center gap-3 cursor-pointer '>
+              <NotAllowed isValidSendMessage={!isValidSendMessage} />
               <div className=''>
                 <AvatarEdit
                   className={'w-20 h-20'}
@@ -238,10 +278,10 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
               </div>
             </div>
 
-            <ul className='mt-16 max-h-[calc(100vh-20rem)] pb-6 overflow-y-scroll'>
+            <ul className='mt-16 max-h-[calc(100vh-20rem)] pb-12 overflow-y-scroll'>
               {ListDetailSetting.map((element, idx) => (
                 <li className={`${idx === 0 ? '' : 'mt-5'} px-8`} key={idx}>
-                  <div className='flex items-center justify-between cursor-pointer'>
+                  <div className='relative flex items-center justify-between cursor-pointer'>
                     <span
                       onClick={() => handleShow(idx)}
                       className='text-base w-full'
@@ -258,25 +298,38 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
                       {show.includes(idx) ? <BsChevronUp /> : <BsChevronDown />}
                     </span>
                   </div>
+
                   <ul
                     className={`${
                       show.includes(idx) ? 'block' : ' hidden'
-                    } px-2 text-base font-light`}
+                    } relative px-2 text-base font-light`}
                   >
+                    {element.SubMenu.title ===
+                      ListConversationSetting.CUSTOME_CONVERSATION && (
+                      <NotAllowed isValidSendMessage={!isValidSendMessage} />
+                    )}
+
                     {element.List.map((item, index) => (
-                      <li
-                        className='flex items-center gap-2 mt-3 cursor-pointer'
-                        key={index}
-                        onClick={() => handleClick(item.title)}
-                      >
-                        <span>
-                          {item.title === 'Change emoji'
-                            ? conversation?.emoji ?? '👍'
-                            : item.icon}
-                        </span>
-                        <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
-                          {item.title}
-                        </span>
+                      <li className='relative' key={index}>
+                        {(item.title === ListConversationSetting.LEAVE_GROUP ||
+                          item.title === ListConversationSetting.MEMBER) && (
+                          <NotAllowed
+                            isValidSendMessage={!isValidSendMessage}
+                          />
+                        )}
+                        <div
+                          onClick={() => handleClick(item.title)}
+                          className='flex items-center gap-2 mt-3 cursor-pointer'
+                        >
+                          <span>
+                            {item.title === ListConversationSetting.CHANGE_EMOJI
+                              ? conversation?.emoji ?? '👍'
+                              : item.icon}
+                          </span>
+                          <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
+                            {item.title}
+                          </span>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -285,37 +338,54 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
             </ul>
           </div>
         </div>
-        <CreateNewGroup
-          isShowCreateNewGroup={isShowAddNewMember}
-          setShowCreateNewGroup={setIsShowAddNewMember}
-          type={'add'}
-        />
-        <ChangeNickName
-          conversation={conversation}
-          isShow={isShowChangeUsername}
-          setIsShow={setIsShowChangeUsername}
-        />
-        <ChangeEmoji
-          isShow={isShowChangeEmoji}
-          setIsShow={setIsShowChangeEmoji}
-        />
-        <ChangeAvatarGroup
-          imageUrl={image}
-          setViewImage={setViewImage}
-          isShow={isShowChangeAvatarOfGroup}
-          setIsShow={setIsShowChangeAvatarOfGroup}
-        />
-        <MenagerMember
-          conversation={conversation}
-          isShow={isShowManagerMember}
-          setIsShow={setIsShowManagerMember}
-        />
-        <Confirm
-          conversation={conversation}
-          title={'Are you sure to delete conversation?'}
-          isShow={isShowConfirm}
-          setIsShow={setIsShowConfirm}
-        />
+        {isShowAddNewMember && (
+          <CreateNewGroup
+            isShowCreateNewGroup={isShowAddNewMember}
+            setShowCreateNewGroup={setIsShowAddNewMember}
+            type={'add'}
+          />
+        )}
+        {isShowChangeUsername && (
+          <ChangeNickName
+            conversation={conversation}
+            isShow={isShowChangeUsername}
+            setIsShow={setIsShowChangeUsername}
+          />
+        )}
+        {isShowChangeEmoji && (
+          <ChangeEmoji
+            isShow={isShowChangeEmoji}
+            setIsShow={setIsShowChangeEmoji}
+          />
+        )}
+        {isShowChangeAvatarOfGroup && (
+          <ChangeAvatarGroup
+            imageUrl={image}
+            setViewImage={setViewImage}
+            isShow={isShowChangeAvatarOfGroup}
+            setIsShow={setIsShowChangeAvatarOfGroup}
+          />
+        )}
+        {isShowManagerMember && (
+          <MenagerMember
+            conversation={conversation}
+            isShow={isShowManagerMember}
+            setIsShow={setIsShowManagerMember}
+            isValidSendMessage={isValidSendMessage}
+          />
+        )}
+        {isShowConfirm !== '' && (
+          <Confirm
+            title={'Are you sure to delete conversation?'}
+            isShow={isShowConfirm}
+            setIsShow={setIsShowConfirm}
+            handleSave={
+              isShowConfirm === ListConversationSetting.DELETE_MESSAGES
+                ? handleDeleteMessages
+                : handleLeaveConversation
+            }
+          />
+        )}
       </>
     );
   }

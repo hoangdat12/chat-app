@@ -142,11 +142,49 @@ export class ConversationService {
 
     await this.conversationRepository.deletePaticipantOfGroup(
       conversationId,
-      participant,
+      participant.userId,
     );
 
     return {
       participant,
+      conversation: foundConversation,
+    };
+  }
+
+  // Leave from conversation
+  async leaveConversation(user: IUserCreated, conversationId: string) {
+    const foundConversation = await this.conversationRepository.findUserExist(
+      conversationId,
+      user._id,
+    );
+    if (!foundConversation)
+      throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
+
+    const payload = {
+      message_type: foundConversation.conversation_type,
+      message_content: `${getUsername(user)} leave group`,
+      conversationId: conversationId,
+      message_received: foundConversation.participants,
+      message_content_type: MessageContentType.NOTIFY,
+    };
+    // Create new Message
+    const message = await this.messageRepository.createMessageConversation(
+      user,
+      payload,
+    );
+    if (!message)
+      throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    foundConversation.lastMessage = convertMessageWithIdToString(message);
+    await foundConversation.save();
+
+    await this.conversationRepository.deletePaticipantOfGroup(
+      conversationId,
+      user._id,
+    );
+
+    return {
+      user,
       conversation: foundConversation,
     };
   }

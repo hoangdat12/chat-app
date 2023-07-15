@@ -13,9 +13,11 @@ import {
   changeEmojiOfConversation,
   changeNameOfConversation,
   changeUsernameOfParticipant,
+  createConversation,
   createNewMessageOfConversation,
   deleteLastMessage,
   deleteMemberOfGroup,
+  leaveGroup,
   selectConversation,
   updateLastMessage,
 } from '../../../features/conversation/conversationSlice';
@@ -30,6 +32,7 @@ import {
   IConversation,
   IDataChangeUsernameOfConversation,
   IDataDeleteMemberResponse,
+  IDataUserLeaveGroupResponse,
   IMessage,
   IUser,
   iSocketDeleteMessage,
@@ -80,6 +83,26 @@ const ConversationContent: FC<IPropConversationContent> = ({
     conversation
   ) as IInforConversation;
   const innerWitdh = useInnerWidth();
+
+  const userPermissionChat = useCallback(
+    (userId: string | undefined, conversation: IConversation | undefined) => {
+      if (userId && conversation) {
+        for (let participant of conversation?.participants) {
+          if (participant.userId === userId && participant.enable) {
+            return true;
+          }
+        }
+        return false;
+      } else return false;
+    },
+    [conversationId]
+  );
+  const isValid = userPermissionChat(user?._id, conversation);
+
+  // Socket received create new group
+  const handleCreateConversation = (payload: IConversation) => {
+    dispatch(createConversation(payload));
+  };
 
   // Send message
   const handleSendMessage = async () => {
@@ -250,6 +273,11 @@ const ConversationContent: FC<IPropConversationContent> = ({
     dispatch(changeNameOfConversation(payload));
   };
 
+  // Socket received user leave group
+  const handleUserLeaveGroup = (payload: IDataUserLeaveGroupResponse) => {
+    dispatch(leaveGroup(payload));
+  };
+
   // Handle event Enter
   useEffect(() => {
     if (messageValue !== '') {
@@ -285,7 +313,10 @@ const ConversationContent: FC<IPropConversationContent> = ({
     socket.on('onMessageUpdate', handleSocketUpdateMessage);
     socket.on('onMessageDelete', handleSocketDeleteMessage);
 
+    socket.on('createConversation', handleCreateConversation);
+
     socket.on('onDeleteMemberOfGroup', handleDeleteMember);
+    socket.on('onUserLeaveGroup', handleUserLeaveGroup);
 
     socket.on(
       'onChangeUsernameOfConversation',
@@ -300,6 +331,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
       socket.off('onMessage');
       socket.off('onMessageUpdate');
       socket.off('onMessageDelete');
+      socket.off('onUserLeaveGroup');
       socket.off('onChangeUsernameOfConversation');
       socket.off('onChangeEmojiOfConversation');
       socket.off('onChangeAvatarOfGroup');
@@ -330,6 +362,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         setImages={setImages}
         files={fileImageMessage}
         setFiles={setFileImageMessage}
+        isValidSendMessage={isValid}
       />
 
       {innerWitdh < 640 && userName && (
@@ -340,6 +373,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
           showMoreConversation={showMoreConversation}
           setShowMoreConversation={setShowMoreConversation}
           conversation={conversation}
+          isValidSendMessage={isValid}
         />
       )}
     </div>

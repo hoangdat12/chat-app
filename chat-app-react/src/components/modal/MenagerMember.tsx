@@ -11,8 +11,12 @@ import ButtonOptions from '../button/ButtonOptions';
 
 const user = getUserLocalStorageItem();
 
-const MenagerMember: FC<IChangeNickNameProp> = memo(
-  ({ conversation, isShow, setIsShow }) => {
+export interface IPropMenagerMember extends IChangeNickNameProp {
+  isValidSendMessage: boolean;
+}
+
+const MenagerMember: FC<IPropMenagerMember> = memo(
+  ({ conversation, isShow, setIsShow, isValidSendMessage }) => {
     const [showOptions, setShowOptions] = useState<number | null>(null);
     const modelRef = useRef<HTMLDivElement | null>(null);
     const dispatch = useAppDispatch();
@@ -25,13 +29,11 @@ const MenagerMember: FC<IChangeNickNameProp> = memo(
 
     const handleKickUserFromGroup = async (participant: IParticipant) => {
       if (conversation) {
-        const res = await conversationService.handleDeleteMember({
+        await conversationService.handleDeleteMember({
           conversationId: conversation?._id,
           participant,
         });
-        if (res.status === 200) {
-          handleCloseModel();
-        }
+        handleCloseModel();
       }
     };
 
@@ -94,14 +96,16 @@ const MenagerMember: FC<IChangeNickNameProp> = memo(
                         className='w-10 h-10'
                       />
                       <h1 className='min-w-[200px]'>{participant.userName}</h1>
-                      <ButtonOptions
-                        showOptions={showOptions}
-                        setShowOptions={setShowOptions}
-                        handleKickUserFromGroup={handleKickUserFromGroup}
-                        handlePromoted={handlePromoted}
-                        index={idx}
-                        participant={participant}
-                      />
+                      {isValidSendMessage && (
+                        <ButtonOptions
+                          showOptions={showOptions}
+                          setShowOptions={setShowOptions}
+                          handleKickUserFromGroup={handleKickUserFromGroup}
+                          handlePromoted={handlePromoted}
+                          index={idx}
+                          participant={participant}
+                        />
+                      )}
                     </div>
                   );
                 })}

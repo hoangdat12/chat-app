@@ -6,54 +6,59 @@ import { MdVideoLibrary } from 'react-icons/md';
 import { VscTextSize } from 'react-icons/vsc';
 import { BiLogOutCircle } from 'react-icons/bi';
 
+import { ListConversationSetting } from '../../ultils/constant/setting.constant';
+
 export const ListDetailSetting = [
   {
     SubMenu: {
-      title: 'Chat Detail',
+      title: ListConversationSetting.CHAT_DETAIL,
       icon: <BsChevronDown />,
     },
     List: [
-      { title: 'Member', icon: <BsFillPeopleFill /> },
-      { title: 'Delete messages', icon: <AiFillDelete /> },
-      { title: 'Leave group', icon: <BiLogOutCircle /> },
+      { title: ListConversationSetting.MEMBER, icon: <BsFillPeopleFill /> },
+      {
+        title: ListConversationSetting.DELETE_MESSAGES,
+        icon: <AiFillDelete />,
+      },
+      { title: ListConversationSetting.LEAVE_GROUP, icon: <BiLogOutCircle /> },
     ],
   },
   {
     SubMenu: {
-      title: 'Custome conversation',
+      title: ListConversationSetting.CUSTOME_CONVERSATION,
       icon: <BsChevronDown />,
     },
     List: [
       {
-        title: 'Change theme',
+        title: ListConversationSetting.CHANGE_THEME,
         icon: <FaPushed />,
       },
       {
-        title: 'Change emoji',
+        title: ListConversationSetting.CHANGE_EMOJI,
         icon: <AiOutlineLike />,
       },
       {
-        title: 'Change username',
+        title: ListConversationSetting.CHANGE_USERNAME,
         icon: <VscTextSize />,
       },
       {
-        title: 'Search in conversation',
+        title: ListConversationSetting.SEARCH_IN_CONVERSATION,
         icon: <IoSearchSharp />,
       },
     ],
   },
   {
     SubMenu: {
-      title: 'Shared',
+      title: ListConversationSetting.SHARED,
       icon: <BsChevronDown />,
     },
     List: [
       {
-        title: 'File',
+        title: ListConversationSetting.FILE,
         icon: <AiFillFileImage />,
       },
       {
-        title: 'Video',
+        title: ListConversationSetting.VIDEO,
         icon: <MdVideoLibrary />,
       },
     ],

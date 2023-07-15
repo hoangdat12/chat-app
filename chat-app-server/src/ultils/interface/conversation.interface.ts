@@ -57,6 +57,11 @@ export interface ISocketDeleteMember {
   conversation: IConversation;
 }
 
+export interface ISocketLeaveMember {
+  conversation: IConversation;
+  user: IUserCreated;
+}
+
 export interface IGatewayDeleteMessage {
   _id: string;
   participants: IParticipant[];

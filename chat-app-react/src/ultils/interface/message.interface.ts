@@ -125,6 +125,11 @@ export interface IDataDeleteMemberResponse {
   conversation: IConversation;
 }
 
+export interface IDataUserLeaveGroupResponse {
+  conversation: IConversation;
+  user: IUser;
+}
+
 export interface IDataChangeUsernameOfConversation {
   conversationId: string;
   newUsernameOfParticipant: IParticipant;

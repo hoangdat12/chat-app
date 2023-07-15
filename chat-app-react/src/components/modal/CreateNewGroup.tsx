@@ -3,7 +3,6 @@ import Search from '../search/Search';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
   addFriendToGroup,
-  createConversation,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
 import { getUserLocalStorageItem } from '../../ultils';
@@ -20,7 +19,7 @@ import {
 import { IFriendResponse } from '../../ultils/interface/friend.interface';
 import { friendService } from '../../features/friend/friendService';
 import Loading from '../button/Loading';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export interface IPropCreateNewGroup {
   isShowCreateNewGroup: boolean;
@@ -49,7 +48,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
 
     const modelRef = useRef<HTMLDivElement>(null);
     const { conversationId } = useParams();
-
+    const navigate = useNavigate();
     const debounceValue = useDebounce(searchValue);
 
     const dispatch = useAppDispatch();
@@ -102,13 +101,13 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
         participants: [creator, ...participantsGroup],
       };
       const res = await conversationService.createNewGroup(data);
+      setShowListFriend(false);
+      setListUserAddGroup([]);
+      setGroupName('');
+      setMember(listUserAddGroup.length + 1);
+      setShowCreateNewGroup(false);
       if (res.status === 201) {
-        dispatch(createConversation(res.data.metaData));
-        setShowListFriend(false);
-        setListUserAddGroup([]);
-        setGroupName('');
-        setMember(listUserAddGroup.length + 1);
-        setShowCreateNewGroup(false);
+        navigate(`/conversation/${res.data.metaData._id}`);
       }
     };
 

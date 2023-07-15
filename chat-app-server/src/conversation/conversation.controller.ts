@@ -30,6 +30,7 @@ import { Ok } from '../ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '../ultils/constant/multer.config';
+import { MessageType } from 'src/ultils/constant';
 
 @Controller('conversation')
 export class ConversationController {
@@ -49,9 +50,14 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return new Ok(
-        await this.conversationService.createConversation(user, body),
+      const responseData = await this.conversationService.createConversation(
+        user,
+        body,
       );
+      if (responseData.conversation_type === MessageType.GROUP) {
+        this.eventEmiter.emit('conversation.create', responseData);
+      }
+      return new Ok(responseData);
     } catch (err) {
       throw err;
     }
@@ -151,6 +157,24 @@ export class ConversationController {
         );
       this.eventEmiter.emit('conversaiton.participant.delete', responseData);
       return new Ok('Delete user from group successfully!');
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('/group/participant/leave/:conversationId')
+  async leaveConversation(
+    @Req() req: Request,
+    @Param('conversationId') conversationId: string,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      const responseData = await this.conversationService.leaveConversation(
+        user,
+        conversationId,
+      );
+      this.eventEmiter.emit('conversaiton.participant.leave', responseData);
+      return new Ok('Leave group successfully!');
     } catch (err) {
       throw err;
     }

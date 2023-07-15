@@ -20,6 +20,7 @@ import {
   ISocketChangeEmoji,
   ISocketChangeUsername,
   ISocketDeleteMember,
+  ISocketLeaveMember,
   iSocketDeleteMessage,
 } from '../ultils/interface';
 import { ISocketAddFriend } from 'src/ultils/interface/friend.interface';
@@ -86,12 +87,30 @@ export class MessagingGateway implements OnModuleInit {
     }
   }
 
+  @OnEvent('conversation.create')
+  handleCreateGroup(payload: IConversation) {
+    for (let participant of payload.participants) {
+      const participantSocket = this.sessions.getUserSocket(participant.userId);
+      if (participantSocket)
+        participantSocket.emit('createConversation', payload);
+    }
+  }
+
   @OnEvent('conversaiton.participant.delete')
   handleDeleteMemberOfGroup(payload: ISocketDeleteMember) {
     for (let participant of payload.conversation.participants) {
       const participantSocket = this.sessions.getUserSocket(participant.userId);
       if (participantSocket)
         participantSocket.emit('onDeleteMemberOfGroup', payload);
+    }
+  }
+
+  @OnEvent('conversaiton.participant.leave')
+  handleUserLeaveGroup(payload: ISocketLeaveMember) {
+    for (let participant of payload.conversation.participants) {
+      const participantSocket = this.sessions.getUserSocket(participant.userId);
+      if (participantSocket)
+        participantSocket.emit('onUserLeaveGroup', payload);
     }
   }
 

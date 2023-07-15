@@ -15,6 +15,7 @@ import myAxios from '../../ultils/myAxios';
 import useInnerWidth from '../../hooks/useInnterWidth';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
 import { IInforConversation } from '../../components/conversation/ConversationContent/HeaderContent';
+import { IConversation } from '../../ultils/interface';
 
 const Conversation = () => {
   const [showListConversationSM, setShowListConversationSM] = useState(false);
@@ -34,6 +35,21 @@ const Conversation = () => {
     user,
     conversation
   ) as IInforConversation;
+
+  const userPermissionChat = useCallback(
+    (userId: string | undefined, conversation: IConversation | undefined) => {
+      if (userId && conversation) {
+        for (let participant of conversation.participants) {
+          if (participant.userId === userId && participant.enable) {
+            return true;
+          }
+        }
+        return false;
+      } else return false;
+    },
+    [conversationId]
+  );
+  const isValid = userPermissionChat(user?._id, conversation);
 
   // Show list conversation with reponsive for sm
   const handleShowListConversation = () => {
@@ -107,6 +123,7 @@ const Conversation = () => {
                 showMoreConversation={showMoreConversation}
                 setShowMoreConversation={setShowMoreConversation}
                 conversation={conversation}
+                isValidSendMessage={isValid}
               />
             )}
           </>

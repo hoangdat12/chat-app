@@ -60,6 +60,10 @@ const ConversationList: FC<IPropConversationList> = ({
     }
   }, [searchValue]);
 
+  useEffect(() => {
+    if (conversationId) setActiveAfterSendMessage(conversationId);
+  }, [conversationId]);
+
   // Search
   useEffect(() => {
     const handleSearchConversation = async () => {

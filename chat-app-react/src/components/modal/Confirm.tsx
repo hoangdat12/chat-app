@@ -1,50 +1,25 @@
-import { FC, useRef } from 'react';
+import { FC, memo, useRef } from 'react';
 import Button from '../button/Button';
-import { IChangeNickNameProp } from './ChangeNickName';
 import useClickOutside from '../../hooks/useClickOutside';
-import { useAppDispatch, useAppSelector } from '../../app/hook';
-import {
-  handleDeleteConversation,
-  selectConversation,
-} from '../../features/conversation/conversationSlice';
-import { useNavigate } from 'react-router-dom';
-import { deleteAllMessageOfConversation } from '../../features/message/messageSlice';
 
-export interface IPropConfirm extends IChangeNickNameProp {
+export interface IPropConfirm {
   title: string;
+  handleSave: () => void;
+  isShow: string;
+  setIsShow: (value: string) => void;
 }
 
-const Confirm: FC<IPropConfirm> = ({
-  conversation,
-  title,
-  isShow,
-  setIsShow,
-}) => {
+const Confirm: FC<IPropConfirm> = memo(({ title, setIsShow, handleSave }) => {
   const confirmRef = useRef<HTMLDivElement | null>(null);
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const { conversations } = useAppSelector(selectConversation);
   const handleClose = () => {
-    setIsShow(false);
-  };
-
-  const handleSave = async () => {
-    if (conversation) {
-      dispatch(handleDeleteConversation(conversation._id));
-      dispatch(deleteAllMessageOfConversation());
-      const nextConversation = Array.from(conversations.values())[0];
-      navigate(`/conversation/${nextConversation?._id ?? 1}`);
-    }
-    setIsShow(false);
+    setIsShow('');
   };
 
   useClickOutside(confirmRef, handleClose, 'mousedown');
 
   return (
     <div
-      className={`${
-        isShow ? 'flex' : 'hidden'
-      } fixed top-0 left-0 bottom-0 right-0 items-center justify-center w-screen h-screen bg-blackOverlay z-[1000]`}
+      className={`flex fixed top-0 left-0 bottom-0 right-0 items-center justify-center w-screen h-screen bg-blackOverlay z-[1000]`}
     >
       <div
         ref={confirmRef}
@@ -78,6 +53,6 @@ const Confirm: FC<IPropConfirm> = ({
       </div>
     </div>
   );
-};
+});
 
 export default Confirm;

@@ -37,7 +37,9 @@ const getFirstConversation = async (): Promise<IConversation> => {
   return res.data.metaData;
 };
 
-const createNewGroup = async (data: IDataCreateNewGroup) => {
+const createNewGroup = async (
+  data: IDataCreateNewGroup
+): Promise<IResponse<IConversation>> => {
   return await myAxios.post('/conversation', data);
 };
 
@@ -103,7 +105,15 @@ const handleDeleteConversation = async (
   conversationId: string
 ): Promise<IConversation> => {
   const res = await myAxios.delete(`/conversation/${conversationId}`);
-  console.log(res);
+  return res.data.metaData;
+};
+
+const handleLeaveGroup = async (
+  conversationId: string
+): Promise<IConversation> => {
+  const res = await myAxios.patch(
+    `/conversation/group/participant/leave/${conversationId}`
+  );
   return res.data.metaData;
 };
 
@@ -120,4 +130,5 @@ export const conversationService = {
   handleChangeAvatarOfGroup,
   handleChangeNameOfGroup,
   handleDeleteConversation,
+  handleLeaveGroup,
 };

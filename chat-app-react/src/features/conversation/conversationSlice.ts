@@ -8,6 +8,7 @@ import {
   IDataChangeUsernameOfConversation,
   IDataDeleteMember,
   IDataDeleteMemberResponse,
+  IDataUserLeaveGroupResponse,
   IPayloadReadLastMessage,
   IPayloadUpdateLastMessage,
 } from '../../ultils/interface';
@@ -191,11 +192,26 @@ const conversationSlice = createSlice({
       const { conversation } = action.payload;
       const conversationExist = state.conversations.get(conversation._id ?? '');
       if (conversationExist) {
-        conversationExist.participants = conversationExist.participants.filter(
-          (participant) =>
-            participant.userId !== action.payload.participant.userId
-        );
-        conversationExist.lastMessage = conversation.lastMessage;
+        for (let participant of conversationExist.participants) {
+          if (participant.userId === action.payload.participant.userId) {
+            participant.enable = false;
+            conversationExist.lastMessage = conversation.lastMessage;
+            return;
+          }
+        }
+      }
+    },
+    leaveGroup: (state, action: PayloadAction<IDataUserLeaveGroupResponse>) => {
+      const { conversation } = action.payload;
+      const conversationExist = state.conversations.get(conversation._id ?? '');
+      if (conversationExist) {
+        for (let participant of conversationExist.participants) {
+          if (participant.userId === action.payload.user._id) {
+            participant.enable = false;
+            conversationExist.lastMessage = conversation.lastMessage;
+            return;
+          }
+        }
       }
     },
     changeUsernameOfParticipant: (
@@ -420,6 +436,7 @@ export const {
   readLastMessage,
   searchConversation,
   deleteMemberOfGroup,
+  leaveGroup,
   changeUsernameOfParticipant,
   changeEmojiOfConversation,
   changeAvatarOfConversation,

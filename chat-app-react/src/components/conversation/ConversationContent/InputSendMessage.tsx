@@ -20,6 +20,7 @@ export interface IPropInputSendMessage {
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
   files: FileList | null;
   setFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
+  isValidSendMessage: boolean;
 }
 
 const InputSendMessage: FC<IPropInputSendMessage> = memo(
@@ -33,6 +34,7 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
     setImages,
     files,
     setFiles,
+    isValidSendMessage,
   }) => {
     const [showEmoji, setShowEmoji] = useState(false);
     const [, setCurrentEmoji] = useState<any>(null);
@@ -61,7 +63,17 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
     };
 
     return (
-      <div className='relative flex items-center gap-3 sm:gap-4 min-h-[4rem] sm:min-h-[5rem] px-2 sm:px-6 '>
+      <div
+        className={`relative ${
+          !isValidSendMessage && 'opacity-50'
+        } flex items-center gap-3 border-t sm:gap-4 min-h-[4rem] sm:min-h-[5rem] px-2 sm:px-6`}
+      >
+        <div
+          className={`absolute top-0 left-0 right-0 bottom-0 ${
+            !isValidSendMessage ? 'flex' : 'hidden'
+          } cursor-not-allowed z-[100]`}
+        ></div>
+
         <div className='flex gap-2 text-blue-500'>
           <ButtonFile
             className={'text-base p-1 sm:text-[22px] sm:p-2'}
@@ -99,7 +111,7 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
                   <img src={image} alt='' className='w-full object-cover' />
                   <span
                     onClick={() => handleDeleteImage(image)}
-                    className='absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 p-1 bg-gray-50 rounded-full cursor-pointer'
+                    className={`absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 p-1 bg-gray-50 rounded-full`}
                   >
                     <AiOutlineClose />
                   </span>
