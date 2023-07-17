@@ -1,5 +1,4 @@
 import { FC, memo, useContext, useEffect } from 'react';
-import { UserAddFriend } from '../box/UserBox';
 import Button from '../button/Button';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { confirmFriend, refuseFriend } from '../../features/friend/friendSlice';
@@ -14,6 +13,7 @@ import {
   receivedNotify,
   selectNotify,
 } from '../../features/notify/notifySlice';
+import { Notify } from '../notify/Notify';
 
 export interface INotificationProps {
   showNotification: boolean;
@@ -76,22 +76,22 @@ const Notification: FC<INotificationProps> = memo(
         <div
           className={`${
             !showNotification && 'hidden'
-          } absolute top-[130%] right-0 min-h-[400px] min-w-[300px] rounded-md rounded-tr-none bg-gray-50 duration-300 cursor-pointer shadow-default `}
+          } absolute top-[130%] right-0 h-[500px] min-w-[340px] rounded-md rounded-tr-none bg-gray-50 duration-300 shadow-default `}
         >
           <>
             {isLoading ? (
-              <div className='flex items-center justify-center w-full min-h-[360px]'>
+              <div className='flex items-center justify-center w-full h-[464px]'>
                 <Loading />
               </div>
             ) : (
-              <div className='min-h-[360px] border-b'>
+              <div className='h-[464px] border-b overflow-y-scroll overflow-x-hidden'>
                 {notifies &&
                   notifies.map((notify) => (
                     <div
                       key={notify._id}
                       className='px-4 py-4 hover:bg-white duration-300 min-h-[90px] border-b'
                     >
-                      <UserAddFriend
+                      <Notify
                         notify={notify}
                         handleConfirm={() =>
                           handleConfirm(notify.notify_friend)
@@ -105,7 +105,7 @@ const Notification: FC<INotificationProps> = memo(
                   ))}
               </div>
             )}
-            <div className='flex items-center justify-center h-[40px]'>
+            <div className='flex items-center justify-center h-[36px]'>
               <Button
                 className={'w-full h-full'}
                 text={'More'}

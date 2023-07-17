@@ -12,7 +12,6 @@ import { FC, useState } from 'react';
 
 import Avatar from '../../avatars/Avatar';
 import useInnerWidth from '../../../hooks/useInnterWidth';
-// import Search from '../../search/Search';
 import CreateNewGroup from '../../modal/CreateNewGroup';
 import Notification from '../../modal/Notification';
 import { IUser } from '../../../ultils/interface';
@@ -24,10 +23,7 @@ import { userService } from '../../../features/user/userService';
 import Loading from '../../button/Loading';
 import { getUsername } from '../../../ultils';
 import { useAppDispatch, useAppSelector } from '../../../app/hook';
-import {
-  getTotalNotifyAddFriend,
-  selectFriend,
-} from '../../../features/friend/friendSlice';
+import { readNotify, selectNotify } from '../../../features/notify/notifySlice';
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -60,7 +56,8 @@ const Header: FC<IPropHeader> = memo(
     const innerWidth = useInnerWidth();
 
     const dispatch = useAppDispatch();
-    const { totalNotifyAddFriend: totalNotify } = useAppSelector(selectFriend);
+    const { numberNotifyUnRead: totalNotify, notifies } =
+      useAppSelector(selectNotify);
     const debounceValue = useDebounce(searchValue, 500);
 
     // For responsive
@@ -92,12 +89,10 @@ const Header: FC<IPropHeader> = memo(
     // Show all notify
     const handleShowNotify = () => {
       setShowNotification(!showNotification);
+      if (totalNotify !== 0) {
+        dispatch(readNotify(notifies[0]._id));
+      }
     };
-
-    // Get totalNotify
-    useEffect(() => {
-      dispatch(getTotalNotifyAddFriend());
-    }, []);
 
     // For responsive
     useEffect(() => {
@@ -213,10 +208,12 @@ const Header: FC<IPropHeader> = memo(
                 </div>
                 <div
                   className={`absolute right-0 -top-[50%] ${
-                    totalNotify === '0' && 'hidden'
+                    totalNotify === 0 && 'hidden'
                   } flex items-center justify-center translate-y-1/2 translate-x-1/2 min-w-[22px] min-h-[22px] bg-red-500 rounded-full`}
                 >
-                  <span className='text-sm text-white'>{totalNotify}</span>
+                  <span className='text-sm text-white'>
+                    {totalNotify > 5 ? `${totalNotify}+` : totalNotify}
+                  </span>
                 </div>
                 <Notification
                   showNotification={showNotification}
