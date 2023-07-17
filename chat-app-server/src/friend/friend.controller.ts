@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Req,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, Query } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { IUserCreated } from '../ultils/interface';
 import { IFriend } from '../ultils/interface/friend.interface';
@@ -139,12 +129,14 @@ export class FriendController {
       const user = req.user as IUserCreated;
       const data = await this.friendService.addFriend(user, friend);
       // add friend success
+      const { notify, ...responseData } = data;
+      // Add friend
       if (data.status === 'Cancel') {
-        this.eventEmitter.emit('friend.received.add', { user, friend });
+        this.eventEmitter.emit('notify.received', { notify });
       } else if (data.status === 'Add Friend') {
-        this.eventEmitter.emit('friend.user.cancel', { user, friend });
+        this.eventEmitter.emit('notify.delete', { notify });
       }
-      return new Ok(data);
+      return new Ok(responseData);
     } catch (error) {
       throw error;
     }
@@ -154,6 +146,7 @@ export class FriendController {
   async confirmFriend(@Req() req: Request, @Body('friend') friend: IFriend) {
     try {
       const user = req.user as IUserCreated;
+
       return new Ok(await this.friendService.confirmFriend(user, friend));
     } catch (error) {
       throw error;

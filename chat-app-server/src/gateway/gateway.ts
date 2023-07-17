@@ -21,6 +21,7 @@ import {
   ISocketChangeUsername,
   ISocketDeleteMember,
   ISocketLeaveMember,
+  ISocketReceivedNotify,
   iSocketDeleteMessage,
 } from '../ultils/interface';
 import { ISocketAddFriend } from 'src/ultils/interface/friend.interface';
@@ -165,17 +166,31 @@ export class MessagingGateway implements OnModuleInit {
     }
   }
 
-  @OnEvent('friend.received.add')
-  handleSendConfirmToFriend(payload: ISocketAddFriend) {
-    const { user, friend } = payload;
-    const friendSocket = this.sessions.getUserSocket(friend.userId);
-    if (friendSocket) friendSocket.emit('onAddFriend', user);
+  // @OnEvent('friend.received.add')
+  // handleSendConfirmToFriend(payload: ISocketAddFriend) {
+  //   const { user, friend } = payload;
+  //   const friendSocket = this.sessions.getUserSocket(friend.userId);
+  //   if (friendSocket) friendSocket.emit('onAddFriend', user);
+  // }
+
+  // @OnEvent('friend.user.cancel')
+  // handleUserCancelAddFriend(payload: ISocketAddFriend) {
+  //   const { user, friend } = payload;
+  //   const friendSocket = this.sessions.getUserSocket(friend.userId);
+  //   if (friendSocket) friendSocket.emit('onCancelFriend', user);
+  // }
+
+  @OnEvent('notify.received')
+  handleReceivedNotify(payload: ISocketReceivedNotify) {
+    const { user_id } = payload.notify;
+    const userSocket = this.sessions.getUserSocket(user_id);
+    if (userSocket) userSocket.emit('receivedNotify', payload.notify);
   }
 
-  @OnEvent('friend.user.cancel')
-  handleUserCancelAddFriend(payload: ISocketAddFriend) {
-    const { user, friend } = payload;
-    const friendSocket = this.sessions.getUserSocket(friend.userId);
-    if (friendSocket) friendSocket.emit('onCancelFriend', user);
+  @OnEvent('notify.delete')
+  handleDeleteNotify(payload: ISocketReceivedNotify) {
+    const { user_id } = payload.notify;
+    const userSocket = this.sessions.getUserSocket(user_id);
+    if (userSocket) userSocket.emit('deleteNotify', payload.notify);
   }
 }

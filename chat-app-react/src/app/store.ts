@@ -5,6 +5,7 @@ import authReducer from '../features/auth/authSlice';
 import conversationReducer from '../features/conversation/conversationSlice';
 import messageReducer from '../features/message/messageSlice';
 import friendReducer from '../features/friend/friendSlice';
+import notifyReducer from '../features/notify/notifySlice';
 
 enableMapSet();
 export const store = configureStore({
@@ -13,6 +14,7 @@ export const store = configureStore({
     conversation: conversationReducer,
     message: messageReducer,
     friend: friendReducer,
+    notify: notifyReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

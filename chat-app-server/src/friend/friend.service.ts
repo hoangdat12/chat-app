@@ -4,12 +4,15 @@ import { IFriend } from '../ultils/interface/friend.interface';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { FriendRepository } from './friend.repository';
 import { getUsername } from '../ultils';
+import { NotifyService } from '../notify/notify.service';
+import { NotifyType } from '../ultils/constant/notify.constant';
 
 @Injectable()
 export class FriendService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly friendRepository: FriendRepository,
+    private readonly notifyService: NotifyService,
   ) {}
   async create(user: IUserCreated) {
     return await this.friendRepository.create(user);
@@ -68,16 +71,46 @@ export class FriendService {
     );
     // Un Confirm
     if (waitConfirm) {
+      // Delete Notify
+      const notify = await this.notifyService.deleteNotifyAddFriend(
+        friend.userId,
+        user._id,
+      );
+
       return {
         status: 'Add Friend',
         data: await this.friendRepository.cancelRequest(user, friend),
+        notify,
       };
     }
 
+    // Create notify
+    const userNotify = {
+      userId: user._id,
+      userName: getUsername(user),
+      avatarUrl: user.avatarUrl,
+    };
+    const data = {
+      notifyType: NotifyType.ADD_FRIEND,
+      ownerNotify: { userId: friend.userId },
+      notify_friend: {
+        ...userNotify,
+        email: user.email,
+      },
+      notifyLink: null,
+      post: null,
+    };
+    const notify = await this.notifyService.createNotify(userNotify, data);
+    if (!notify)
+      throw new HttpException(
+        'Server Error!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     // Add Friend
     return {
       status: 'Cancel',
       data: await this.friendRepository.addFriend(user, friend),
+      notify,
     };
   }
 
@@ -109,6 +142,9 @@ export class FriendService {
       friend,
     );
 
+    // Delete Notify
+    await this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
+
     await Promise.all([
       confirmeFriendPromiseWithUser,
       confirmeFriendPromiseWithFriend,
@@ -129,6 +165,9 @@ export class FriendService {
         'Server Error!',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+
+    // Delete Notify
+    await this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
 
     return friend;
   }

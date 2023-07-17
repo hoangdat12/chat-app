@@ -90,15 +90,15 @@ export class UserController {
   async getConversationOfUser(
     @Req() req: Request,
     @Param('userId') userId: string,
-    @Query('page') page: number,
-    @Query('limit') limit: number,
-    @Query('sortBy') sortBy: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '50',
+    @Query('sortBy') sortBy: string = 'ctime',
   ) {
     const user = req.user as IUserCreated;
     const pagination = {
-      page: page || 1,
-      limit: limit || 50,
-      sortBy: sortBy || 'ctime',
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sortBy: sortBy,
     };
     const conversations = await this.userService.getConversation(
       user,

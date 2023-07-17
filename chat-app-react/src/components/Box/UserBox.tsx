@@ -1,7 +1,8 @@
-import { FC, MouseEventHandler } from 'react';
+import { FC, MouseEventHandler, useCallback } from 'react';
 import Avatar, { AvatarOnline } from '../avatars/Avatar';
 import Button from '../button/Button';
 import { IFriend } from '../../ultils/interface/friend.interface';
+import { INotify } from '../../ultils/interface';
 
 export interface IUserBoxProp {
   avatarUrl: string;
@@ -10,8 +11,7 @@ export interface IUserBoxProp {
 }
 
 export interface IUserAddFriendProp {
-  avatarUrl: string;
-  userName: string;
+  notify: INotify;
   handleConfirm: (userAddFriend: IFriend) => void;
   handleDelete: (userAddFriend: IFriend) => void;
   handleViewProfile: MouseEventHandler<HTMLDivElement>;
@@ -38,8 +38,7 @@ const UserBox: FC<IUserBoxProp> = ({ avatarUrl, userName, status }) => {
 };
 
 export const UserAddFriend: FC<IUserAddFriendProp> = ({
-  avatarUrl,
-  userName,
+  notify,
   handleConfirm,
   handleDelete,
   handleViewProfile,
@@ -48,13 +47,11 @@ export const UserAddFriend: FC<IUserAddFriendProp> = ({
     <div className='flex gap-3'>
       <Avatar
         onClick={handleViewProfile}
-        avatarUrl={avatarUrl}
+        avatarUrl={notify.notify_image}
         className={`h-14 w-14 md:h-11 md:w-11`}
       />
       <div className='text-black font-poppins'>
-        <h1 onClick={handleViewProfile} className='text-lg w-full'>
-          {userName}
-        </h1>
+        <FormatTitleNotify title={notify.notify_content} />
         <div className='flex gap-3 mt-1 font-normal'>
           <Button
             text={'Confirm'}
@@ -80,6 +77,24 @@ export const UserAddFriend: FC<IUserAddFriendProp> = ({
       </div>
     </div>
   );
+};
+
+export interface IPropFormatTitleNotify {
+  title: string;
+}
+
+export const FormatTitleNotify: FC<IPropFormatTitleNotify> = ({ title }) => {
+  const regex = /\*\*(.*?)\*\*/g;
+  const titleFormatted = useCallback(() => {
+    return title.split(regex).map((part, index) => {
+      // If the part is enclosed in ** **, apply bold style
+      if (index % 2 === 1) {
+        return <b key={index}>{part}</b>;
+      }
+      return part;
+    });
+  }, [title, regex]);
+  return <h1 className='text-lg w-full'>{titleFormatted()}</h1>;
 };
 
 export default UserBox;

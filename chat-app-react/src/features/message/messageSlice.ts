@@ -49,6 +49,7 @@ const messageSlice = createSlice({
           myMessage: user._id === action.payload.message_sender_by.userId,
           timeSendMessage: getTimeSendMessage(action.payload.createdAt),
         };
+        return;
       }
       const senderId = action.payload.message_sender_by.userId;
 
@@ -125,6 +126,7 @@ const messageSlice = createSlice({
       })
       .addCase(fetchMessageOfConversation.fulfilled, (state, action) => {
         state.messages = action.payload;
+        console.log('action.payload::: ', action.payload);
         state.isLoading = false;
         state.status = 'idle';
       })

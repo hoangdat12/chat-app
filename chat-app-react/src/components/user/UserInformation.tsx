@@ -50,7 +50,7 @@ const UserInformation: FC<IUserInformationProp> = ({
             background={'bg-blue-500'}
             color={'text-white'}
             Icons={
-              statusFriend === StatusFriend.FRIEND ? (
+              isOwner ? undefined : statusFriend === StatusFriend.FRIEND ? (
                 <FaUserCheck />
               ) : statusFriend === StatusFriend.UNFRIENDED ? (
                 <FaUserPlus />
@@ -58,11 +58,17 @@ const UserInformation: FC<IUserInformationProp> = ({
                 <RiUserSharedLine />
               )
             }
-            onClick={handleClickAddFriend}
+            onClick={isOwner ? undefined : handleClickAddFriend}
           />
           <Button
             className={'min-w-[120px]'}
-            text={isOwner ? 'Edit Profile' : 'Follow'}
+            text={
+              isOwner
+                ? 'Edit Profile'
+                : statusFriend === StatusFriend.FRIEND
+                ? 'Chat now'
+                : 'Follow'
+            }
             paddingY={'py-1'}
             fontSize={'sm:text-lg'}
           />

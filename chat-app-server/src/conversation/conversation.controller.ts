@@ -67,16 +67,16 @@ export class ConversationController {
   async findConversationByName(
     @Req() req: Request,
     @Query('q') keyword: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
     @Query('sortBy') sortBy: string = 'ctime',
   ) {
     try {
       const user = req.user as IUserCreated;
       const pagination = {
-        page,
-        limit,
-        sortBy,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy: sortBy,
       };
       return new Ok(
         await this.conversationService.findByName(user, keyword, pagination),
@@ -100,16 +100,16 @@ export class ConversationController {
   async getMessageOfConversation(
     @Req() req: Request,
     @Param('conversationId') conversationId: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 50,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '50',
     @Query('sortBy') sortBy: string = 'ctime',
   ) {
     try {
       const user = req.user as IUserCreated;
       const pagination = {
-        page,
-        limit,
-        sortBy,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy: sortBy,
       };
       const response = await this.conversationService.getMessageOfConversation(
         user,

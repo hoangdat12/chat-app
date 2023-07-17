@@ -2,20 +2,18 @@ import { FC, memo, useContext, useEffect } from 'react';
 import { UserAddFriend } from '../box/UserBox';
 import Button from '../button/Button';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
-import {
-  cancelRequestAddFriend,
-  confirmFriend,
-  getUnconfirmedFriend,
-  receivedAddFriend,
-  refuseFriend,
-  selectFriend,
-} from '../../features/friend/friendSlice';
+import { confirmFriend, refuseFriend } from '../../features/friend/friendSlice';
 import Loading from '../button/Loading';
 import { IFriend } from '../../ultils/interface/friend.interface';
 import { SocketContext } from '../../ultils/context/Socket';
-import { IUser } from '../../ultils/interface';
-import { getUsername } from '../../ultils';
+import { INotify } from '../../ultils/interface';
 import { useNavigate } from 'react-router-dom';
+import {
+  deleteNotify,
+  getAllNotify,
+  receivedNotify,
+  selectNotify,
+} from '../../features/notify/notifySlice';
 
 export interface INotificationProps {
   showNotification: boolean;
@@ -24,10 +22,11 @@ export interface INotificationProps {
 
 const Notification: FC<INotificationProps> = memo(
   ({ showNotification, setShowNotification }) => {
-    const { unconfirmed, isLoading } = useAppSelector(selectFriend);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const socket = useContext(SocketContext);
+
+    const { notifies, isLoading } = useAppSelector(selectNotify);
 
     // Confirm add friend
     const handleConfirm = async (userAddFriend: IFriend) => {
@@ -46,36 +45,29 @@ const Notification: FC<INotificationProps> = memo(
     };
 
     // Socket received request add friend
-    const handleReceivedAddRequest = (data: IUser) => {
-      const userAddFriend = {
-        userId: data._id,
-        email: data.email,
-        userName: getUsername(data),
-        avatarUrl: data.avatarUrl,
-      };
-      dispatch(receivedAddFriend(userAddFriend));
+    const handleReceivedNotify = (data: INotify) => {
+      dispatch(receivedNotify(data));
     };
 
     // Socket received Friend cancel request
-    const handleCacncelFriend = (data: IUser) => {
-      dispatch(cancelRequestAddFriend({ userId: data._id }));
+    const handleDeleteNotify = (data: INotify) => {
+      dispatch(deleteNotify(data));
     };
 
     // Get list request add friend
     useEffect(() => {
-      dispatch(getUnconfirmedFriend());
+      dispatch(getAllNotify());
     }, []);
-
     useEffect(() => {
       socket.on('connection', (data: any) => {
         console.log(data);
       });
-      socket.on('onAddFriend', handleReceivedAddRequest);
-      socket.on('onCancelFriend', handleCacncelFriend);
+      socket.on('receivedNotify', handleReceivedNotify);
+      socket.on('deleteNotify', handleDeleteNotify);
 
       return () => {
-        socket.off('connection');
-        socket.off('onAddFriend');
+        socket.off('receivedNotify');
+        socket.off('deleteNotify');
       };
     }, []);
 
@@ -93,19 +85,20 @@ const Notification: FC<INotificationProps> = memo(
               </div>
             ) : (
               <div className='min-h-[360px] border-b'>
-                {unconfirmed &&
-                  Array.from(unconfirmed.values()).map((userAddFriend) => (
+                {notifies &&
+                  notifies.map((notify) => (
                     <div
-                      key={userAddFriend.userId}
+                      key={notify._id}
                       className='px-4 py-4 hover:bg-white duration-300 min-h-[90px] border-b'
                     >
                       <UserAddFriend
-                        avatarUrl={userAddFriend.avatarUrl}
-                        userName={userAddFriend.userName}
-                        handleConfirm={() => handleConfirm(userAddFriend)}
-                        handleDelete={() => handleDelete(userAddFriend)}
+                        notify={notify}
+                        handleConfirm={() =>
+                          handleConfirm(notify.notify_friend)
+                        }
+                        handleDelete={() => handleDelete(notify.notify_friend)}
                         handleViewProfile={() =>
-                          handleViewProfile(userAddFriend.userId)
+                          handleViewProfile(notify.notify_friend.userId)
                         }
                       />
                     </div>

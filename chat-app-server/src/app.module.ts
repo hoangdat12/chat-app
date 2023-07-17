@@ -19,6 +19,7 @@ import { ConversationModule } from './conversation/conversation.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { FriendModule } from './friend/friend.module';
+import { NotifyModule } from './notify/notify.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { FriendModule } from './friend/friend.module';
     ConversationModule,
     GatewayModule,
     FriendModule,
+    NotifyModule,
   ],
   controllers: [],
   providers: [],
