@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { IMessage, IParticipant, IUserCreated, Pagination } from './interface';
+import * as _ from 'lodash';
 
 export const getUsername = (user: IUserCreated) => {
   return `${user?.firstName} ${user?.lastName}`;
@@ -69,4 +70,8 @@ export const getMessageNotify = (
       } others to the group`
     );
   }
+};
+
+export const objectNotContainNull = (obj: any) => {
+  return _.pickBy(obj, (value) => value !== null);
 };
