@@ -6,6 +6,10 @@ import CreatePostModel from '../modal/CreatePostModel';
 const CreateFeed = () => {
   const [show, setShow] = useState(false);
 
+  const setShowModelCreatePost = () => {
+    setShow(true);
+  };
+
   return (
     <div className='w-full p-3 rounded bg-white'>
       <div className='flex justify-between gap-3 '>
@@ -22,13 +26,14 @@ const CreateFeed = () => {
             id=''
             className='w-full outline-none'
             placeholder='What are you think?'
+            onClick={setShowModelCreatePost}
           />
-          <span className='p-1 cursor-pointer'>
+          <span onClick={setShowModelCreatePost} className='p-1 cursor-pointer'>
             <AiOutlineFileImage />
           </span>
         </div>
       </div>
-      <CreatePostModel />
+      {show && <CreatePostModel setShow={setShow} />}
     </div>
   );
 };

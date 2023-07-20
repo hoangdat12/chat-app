@@ -126,7 +126,6 @@ const messageSlice = createSlice({
       })
       .addCase(fetchMessageOfConversation.fulfilled, (state, action) => {
         state.messages = action.payload;
-        console.log('action.payload::: ', action.payload);
         state.isLoading = false;
         state.status = 'idle';
       })

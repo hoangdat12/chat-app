@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { IUserCreated, Pagination } from '../ultils/interface';
-import { DataCreatePost, IDataUpdatePost } from './post.dtop';
+import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { PostRepository } from './post.repository';
 import { AuthRepository } from '../auth/repository/auth.repository';
 
@@ -20,10 +20,14 @@ export class PostService {
     return await this.postReposotpory.findByUserId(userId, pagination);
   }
 
-  async createPost(user: IUserCreated, data: DataCreatePost) {
-    if (!data.post_content && !data.post_image)
+  async createPost(
+    user: IUserCreated,
+    data: DataCreatePost,
+    post_image: string,
+  ) {
+    if (!data.post_content && !post_image)
       throw new HttpException('Missing request value!', HttpStatus.BAD_REQUEST);
-    return await this.postReposotpory.create(user, data);
+    return await this.postReposotpory.create(user, data, post_image);
   }
 
   async deletePost(user: IUserCreated, postId: string) {

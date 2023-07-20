@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 
 import Avatar from '../avatars/Avatar';
 import Button from '../button/Button';
@@ -7,8 +7,15 @@ import { IFriend, PostMode } from '../../ultils/interface';
 import useClickOutside from '../../hooks/useClickOutside';
 import CreatePostWith from '../feed/CreatePostWith';
 import OptionCreatePost from '../feed/OptionCreatePost';
+import { PostType } from '../../ultils/constant';
+import { useAppDispatch } from '../../app/hook';
+import { createPost } from '../../features/post/postSlice';
 
-const CreatePostModel = () => {
+export interface IPropCreatePostModel {
+  setShow: (value: boolean) => void;
+}
+
+const CreatePostModel: FC<IPropCreatePostModel> = ({ setShow }) => {
   const [postModeDefault, setPostModeDefault] = useState<PostMode>(postMode[0]);
   const [showChangePostMode, setShowChangePostMode] = useState(false);
   const [postContent, setPostContent] = useState('');
@@ -19,7 +26,10 @@ const CreatePostModel = () => {
   const modalRef = useRef<HTMLDivElement | null>(null);
   const postModeRef = useRef<HTMLDivElement | null>(null);
 
+  const dispatch = useAppDispatch();
+
   useClickOutside(postModeRef, () => setShowChangePostMode(false), 'mousedown');
+  useClickOutside(modalRef, () => setShow(false), 'mousedown');
 
   const handleChangePostMode = (mode: PostMode) => {
     setPostModeDefault(mode);
@@ -31,7 +41,25 @@ const CreatePostModel = () => {
   };
 
   const handleSelectEmoji = (emoji: any) => {
-    setPostContent((prev) => `${prev ?? ''} ${emoji.native}`);
+    setPostContent((prev) => `${prev ?? ''}${emoji.native}`);
+  };
+
+  const handleCreatePost = async () => {
+    if (file || postContent !== '') {
+      const formData = new FormData();
+      const data = {
+        post_content: postContent,
+        post_type: PostType.POST,
+        post_mode: postModeDefault.title.toLowerCase(),
+      };
+      if (file) formData.append('file', file);
+      formData.append('data', JSON.stringify(data));
+      dispatch(createPost(formData));
+      window.URL.revokeObjectURL(previewPicture ?? '');
+      setPostContent('');
+      setFile(null);
+      setShow(false);
+    }
   };
 
   useEffect(() => {
@@ -54,6 +82,7 @@ const CreatePostModel = () => {
         className='relative flex flex-col gap-2 w-[60%] lg:w-[40%] p-4 bg-white animate__animated animate__fadeInDown sm:rounded-md'
       >
         <h1 className='text-2xl text-center'>Create new Post</h1>
+
         <div className='flex gap-3 items-center'>
           <Avatar
             avatarUrl={
@@ -99,6 +128,7 @@ const CreatePostModel = () => {
             </div>
           </div>
         </div>
+
         {previewPicture ? (
           <div>
             <input
@@ -150,6 +180,7 @@ const CreatePostModel = () => {
           border={'border-none'}
           color={'text-white'}
           hover={'hover:bg-blue-700 duration-300'}
+          onClick={handleCreatePost}
         />
       </div>
     </div>

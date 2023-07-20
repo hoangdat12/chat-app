@@ -8,22 +8,37 @@ import {
   Patch,
   Get,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { Request } from 'express';
 import { IUserCreated } from '../ultils/interface';
-import { DataCreatePost, IDataUpdatePost } from './post.dtop';
+import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { Ok } from '../ultils/response';
+import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { multerOptions } from '../ultils/constant';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
-  async createPost(@Req() req: Request, @Body() body: DataCreatePost) {
+  @UseInterceptors(FileInterceptor('file', multerOptions))
+  async createPost(
+    @Req() req: Request,
+    @Body('data') data: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     try {
+      const body = JSON.parse(data) as DataCreatePost;
+      const post_image = `http://localhost:8080/assets/${file.filename}`;
       const user = req.user as IUserCreated;
-      const responseData = await this.postService.createPost(user, body);
+      const responseData = await this.postService.createPost(
+        user,
+        body,
+        post_image,
+      );
       return new Ok(responseData);
     } catch (err) {
       throw err;

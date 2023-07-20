@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from '../schema/post.model';
 import { IUserCreated, Pagination } from '../ultils/interface';
-import { DataCreatePost, IDataUpdatePost } from './post.dtop';
+import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { PostMode, PostType } from '../ultils/constant';
 import { objectNotContainNull } from '../ultils';
 
@@ -32,10 +32,9 @@ export class PostRepository {
       .exec();
   }
 
-  async create(user: IUserCreated, data: DataCreatePost) {
+  async create(user: IUserCreated, data: DataCreatePost, post_image: string) {
     const {
       post_content,
-      post_image,
       post_mode = PostMode.PUBLIC,
       post_type = PostType.POST,
     } = data;
