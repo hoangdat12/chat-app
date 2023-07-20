@@ -1,5 +1,36 @@
+import { AiOutlineFileImage } from 'react-icons/Ai';
+import Avatar from '../avatars/Avatar';
+import { useState } from 'react';
+import CreatePostModel from '../modal/CreatePostModel';
+
 const CreateFeed = () => {
-  return <div>CreateFeed</div>;
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className='w-full p-3 rounded bg-white'>
+      <div className='flex justify-between gap-3 '>
+        <Avatar
+          avatarUrl={
+            'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
+          }
+          className='w-12 h-12'
+        />
+        <div className='flex items-center w-full'>
+          <input
+            type='text'
+            name=''
+            id=''
+            className='w-full outline-none'
+            placeholder='What are you think?'
+          />
+          <span className='p-1 cursor-pointer'>
+            <AiOutlineFileImage />
+          </span>
+        </div>
+      </div>
+      <CreatePostModel />
+    </div>
+  );
 };
 
 export default CreateFeed;

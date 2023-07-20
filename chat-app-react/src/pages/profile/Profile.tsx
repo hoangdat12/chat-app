@@ -115,6 +115,12 @@ export const FriendAndPost: FC<IFriendAndPostProp> = ({ userId, isOwner }) => {
   return (
     <>
       <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] md:px-4 xl:px-12 lg:grid grid-cols-3 lg:gap-6'>
+        <div className='mt-6 lg:mt-0 p-4 lg:col-span-2 '>
+          <h1 className='text-xl lg:text-3xl font-medium'>Feeds</h1>
+          <div className='mt-6 lg:mt-10'>
+            <Feed isOwner={isOwner} />
+          </div>
+        </div>
         <div className='p-4 lg:col-span-1 '>
           <h1 className='text-xl lg:text-3xl font-medium'>Friends</h1>
           <div className='grid grid-cols-12 mt-4 lg:mt-10 gap-2 md:gap-4'>
@@ -137,13 +143,6 @@ export const FriendAndPost: FC<IFriendAndPostProp> = ({ userId, isOwner }) => {
             className='flex items-center justify-center mt-4'
           >
             <Button text={'Show more'} border={'border-none'} />
-          </div>
-        </div>
-
-        <div className='mt-6 lg:mt-0 p-4 lg:col-span-2 '>
-          <h1 className='text-xl lg:text-3xl font-medium'>Feeds</h1>
-          <div className='mt-6 lg:mt-10'>
-            <Feed isOwner={isOwner} />
           </div>
         </div>
       </div>

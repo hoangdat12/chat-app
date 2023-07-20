@@ -31,6 +31,9 @@ export class Post {
 
   @Prop({ default: 0 })
   post_share_num: string;
+
+  @Prop({ default: [] })
+  post_tag: IUserLikePost[];
 }
 
 const PostSchema = SchemaFactory.createForClass(Post);

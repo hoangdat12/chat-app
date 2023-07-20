@@ -5,6 +5,7 @@ export * from './auth.interface';
 export * from './friend.interface';
 export * from './notify.interface';
 export * from './user.interface';
+export * from './post.interface';
 
 export interface IResponse<T> extends AxiosResponse {
   data: {

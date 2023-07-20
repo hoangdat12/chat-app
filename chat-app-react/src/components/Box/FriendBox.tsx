@@ -1,9 +1,12 @@
 import { FC } from 'react';
 import AvatarSquare from '../avatars/AvatarSquare';
+import { AvatarOnline } from '../avatars/Avatar';
 
 export interface IFriendBoxProp {
   avatarUrl: string;
   userName: string;
+  status?: string;
+  className?: string;
   width?: string;
   height?: string;
   fontSize?: string;
@@ -27,6 +30,24 @@ const FriendBox: FC<IFriendBoxProp> = ({
       <h1 className={`${fontSize ?? 'text-base'} ${margin ?? 'mt-2'}`}>
         {userName}
       </h1>
+    </div>
+  );
+};
+
+export const FriendBoxCircle: FC<IFriendBoxProp> = ({
+  userName,
+  avatarUrl,
+  className,
+  status,
+}) => {
+  return (
+    <div className='flex gap-2 items-center'>
+      <AvatarOnline
+        avatarUrl={avatarUrl}
+        className={className}
+        status={status}
+      />
+      <p className='text-base'>{userName}</p>
     </div>
   );
 };
