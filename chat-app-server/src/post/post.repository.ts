@@ -15,7 +15,10 @@ export class PostRepository {
   ) {}
 
   async findById(postId: string) {
-    return (await this.postModel.findById({ _id: postId })).populate('user');
+    return await this.postModel
+      .findById({ _id: postId })
+      .populate('user')
+      .lean();
   }
 
   async findByUserId(userId: string, pagiantion: Pagination) {
@@ -45,11 +48,12 @@ export class PostRepository {
       {
         $match: {
           user: objectIdUserId,
+          $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
         },
       },
       {
         $lookup: {
-          from: 'User', // Replace 'users' with the actual name of the collection containing user data
+          from: 'User',
           localField: 'user',
           foreignField: '_id',
           as: 'userObj',
@@ -97,6 +101,63 @@ export class PostRepository {
       },
     ]);
     return posts;
+  }
+
+  async findPostSaveOfUser(
+    user: IUserCreated,
+    postUserId: string,
+    pagiantion: Pagination,
+  ) {
+    const { limit, page, sortBy } = pagiantion;
+    const offset = (page - 1) * limit;
+    const objectIdUserId = new mongoose.Types.ObjectId(postUserId);
+
+    return await this.postModel.aggregate([
+      {
+        $match: {
+          user: objectIdUserId,
+          post_type: PostType.SAVE,
+        },
+      },
+      {
+        $lookup: {
+          from: 'User',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userObj',
+        },
+      },
+      {
+        $addFields: {
+          user: { $arrayElemAt: ['$userObj', 0] },
+          liked: {
+            $anyElementTrue: {
+              $map: {
+                input: '$post_likes',
+                as: 'like',
+                in: {
+                  $eq: ['$$like.userId', user._id],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          userObj: 0,
+        },
+      },
+      {
+        $sort: sortBy === 'ctime' ? { createdAt: -1 } : { createdAt: 1 },
+      },
+      {
+        $skip: offset,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
   }
 
   async create(user: IUserCreated, data: DataCreatePost, post_image: string) {

@@ -7,18 +7,44 @@ import { RiEarthFill } from 'react-icons/ri';
 import { FaRegBookmark } from 'react-icons/fa';
 import { MdReportProblem } from 'react-icons/md';
 import useClickOutside from '../../hooks/useClickOutside';
+import { PostMode, PostType } from '../../ultils/constant';
+import { postService } from '../../features/post/postService';
 
 export interface IPropPostOwner {
   post: IPost;
   isOwner: boolean;
   shared?: boolean;
+  saved?: boolean;
 }
 
-const PostOwner: FC<IPropPostOwner> = ({ post, isOwner, shared = false }) => {
+const PostOwner: FC<IPropPostOwner> = ({
+  post,
+  isOwner,
+  shared = false,
+  saved = false,
+}) => {
   const [showOptions, setShowOptions] = useState(false);
   const optionRef = useRef<HTMLUListElement | null>(null);
 
   const handleShowOptions = () => {
+    setShowOptions(false);
+  };
+
+  const handleClickShowMore = () => {
+    setShowOptions(true);
+  };
+
+  const handleSavePost = async () => {
+    if (saved) {
+      const formData = new FormData();
+      const data = {
+        post_type: PostType.SAVE,
+        post_mode: PostMode.PRIVATE,
+        post_share: post.post_type === PostType.POST ? post : post.post_share,
+      };
+      formData.append('data', JSON.stringify(data));
+      await postService.createNewPost(formData);
+    }
     setShowOptions(false);
   };
 
@@ -43,20 +69,27 @@ const PostOwner: FC<IPropPostOwner> = ({ post, isOwner, shared = false }) => {
         </div>
         {!shared && (
           <div className='relative'>
-            <span onClick={() => setShowOptions(!showOptions)}>
+            <span className='cursor-pointer' onClick={handleClickShowMore}>
               <CgMoreVertical />
             </span>
             <ul
-              className={`absolute top-more-feed right-0 ${
+              className={`absolute right-0 ${
                 !showOptions && 'hidden'
-              } w-[132px] h-24 bg-white rounded-lg overflow-hidden shadow-default`}
+              } w-[132px] ${
+                saved ? 'bottom-8' : 'h-24 top-more-feed'
+              } bg-white rounded-lg overflow-hidden shadow-default`}
               ref={optionRef}
             >
-              <li className='h-12 flex items-center justify-center gap-2 hover:bg-gray-50'>
+              <li
+                onClick={handleSavePost}
+                className={`h-12 ${
+                  saved ? 'hidden' : 'flex'
+                } items-center justify-center gap-2 hover:bg-gray-50 cursor-pointer`}
+              >
                 <FaRegBookmark />
                 <span>Save post</span>
               </li>
-              <li className='h-12 flex items-center justify-center gap-2 hover:bg-gray-50'>
+              <li className='h-12 flex items-center justify-center gap-2 hover:bg-gray-50 cursor-pointer'>
                 <span className='text-red-500'>
                   <MdReportProblem />
                 </span>

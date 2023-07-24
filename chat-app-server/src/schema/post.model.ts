@@ -30,7 +30,7 @@ export class Post {
   post_likes_num: number;
 
   @Prop({ default: 0 })
-  post_share_num: string;
+  post_share_num: number;
 
   @Prop({ default: [] })
   post_tag: IUserLikePost[];

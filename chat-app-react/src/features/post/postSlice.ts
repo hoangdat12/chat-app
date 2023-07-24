@@ -4,12 +4,14 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { postService } from './postService';
 
 export interface IInitialStatePost {
+  save: IPost[];
   posts: IPost[];
   isLoading: boolean;
   status: 'idle' | 'pending' | 'succeeded' | 'failed';
 }
 
 const initialState: IInitialStatePost = {
+  save: [],
   posts: [],
   isLoading: false,
   status: 'idle',
@@ -49,7 +51,7 @@ const postSlice = createSlice({
       .addCase(createPost.fulfilled, (state, action) => {
         state.isLoading = false;
         state.status = 'idle';
-        state.posts = [...state.posts, action.payload.data.metaData];
+        state.posts = [action.payload.data.metaData, ...state.posts];
       })
       .addCase(createPost.rejected, (state) => {
         state.isLoading = false;

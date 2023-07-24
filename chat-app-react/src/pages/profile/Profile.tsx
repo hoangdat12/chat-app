@@ -1,10 +1,10 @@
 import FriendBox from '../../components/box/FriendBox';
 import Button from '../../components/button/Button';
 import Layout from '../../components/layout/Layout';
-import { FC, useEffect, useState } from 'react';
+import { FC, memo, useEffect, useState } from 'react';
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import myAxios from '../../ultils/myAxios';
-import { IResponse, IUser } from '../../ultils/interface';
+import { IPost, IResponse, IUser } from '../../ultils/interface';
 import { getUserLocalStorageItem, getUsername } from '../../ultils';
 import { friendService } from '../../features/friend/friendService';
 import { ICheckFriendResponse } from '../../ultils/interface/friend.interface';
@@ -13,6 +13,9 @@ import ListFriend from '../friend/ListFriend';
 import { useAppDispatch } from '../../app/hook';
 import { getPostOfUser } from '../../features/post/postSlice';
 import ListFeed from '../../components/feed/ListFeed';
+import { postService } from '../../features/post/postService';
+import Feed from '../../components/feed/Feed';
+import Loading from '../../components/button/Loading';
 
 const userLocalstorage = getUserLocalStorageItem();
 
@@ -123,71 +126,126 @@ const Profile = () => {
 
 export enum modeViewProfilePost {
   FEEDS = 'Feeds',
-  SAVES = 'Save',
+  SAVE = 'Save',
 }
 
-export const FriendAndPost: FC<IFriendAndPostProp> = ({ userId }) => {
-  const navigate = useNavigate();
-  const [active, setActive] = useState('Feeds');
+export const FriendAndPost: FC<IFriendAndPostProp> = memo(
+  ({ userId, isOwner }) => {
+    const navigate = useNavigate();
+    const [active, setActive] = useState('Feeds');
+    const [postSaves, setPostSaves] = useState<IPost[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-  const handleClickModeView = (mode: string) => {
-    setActive(mode);
-  };
+    const handleClickModeView = async (mode: string) => {
+      setActive(mode);
+      if (
+        mode === modeViewProfilePost.SAVE &&
+        userId &&
+        postSaves.length === 0
+      ) {
+        const res = await postService.getPostSaveOfUser(userId);
+        setPostSaves(res.data.metaData);
+      }
+    };
 
-  return (
-    <>
-      <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] md:px-4 xl:px-12 md:grid grid-cols-3 '>
-        <div className='mt-4 lg:mt-0 py-4 px-4 md:col-span-2'>
-          <div className='flex gap-4 items-end'>
-            {(
-              Object.keys(
-                modeViewProfilePost
-              ) as (keyof typeof modeViewProfilePost)[]
-            ).map((mode) => (
-              <h1
-                onClick={() => handleClickModeView(modeViewProfilePost[mode])}
-                key={mode}
-                className={`${
-                  active === modeViewProfilePost[mode]
-                    ? 'text-xl md:text-2xl xl:text-3xl font-medium'
-                    : 'text-base md:text-md xl:text-lg'
-                } cursor-pointer`}
-              >
-                {modeViewProfilePost[mode]}
-              </h1>
-            ))}
-          </div>
-          <ListFeed />
-        </div>
-        <div className='md:col-span-1 py-4 px-4'>
-          <h1 className='text-xl md:text-2xl xl:text-3xl font-medium'>
-            Friends
-          </h1>
-          <div className='grid grid-cols-12 mt-4 gap-2'>
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div
-                key={item}
-                className='col-span-4 md:col-span-3 lg:col-span-4'
-              >
-                <FriendBox
-                  avatarUrl={
-                    'https://flowbite.com/application-ui/demo/images/users/jese-leos-2x.png'
-                  }
-                  userName={'Hoang Dat'}
-                />
+    useEffect(() => {
+      setIsLoading(true);
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+
+      return () => clearTimeout(timeout);
+    }, [active]);
+
+    return (
+      <>
+        <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] md:px-4 xl:px-12 md:grid grid-cols-3 '>
+          <div className='mt-4 lg:mt-0 py-4 px-4 md:col-span-2'>
+            <div className='flex gap-4 items-end'>
+              {isOwner ? (
+                (
+                  Object.keys(
+                    modeViewProfilePost
+                  ) as (keyof typeof modeViewProfilePost)[]
+                ).map((mode) => (
+                  <h1
+                    onClick={() =>
+                      handleClickModeView(modeViewProfilePost[mode])
+                    }
+                    key={mode}
+                    className={`${
+                      active === modeViewProfilePost[mode]
+                        ? 'text-xl md:text-2xl xl:text-3xl font-medium'
+                        : 'text-base md:text-md xl:text-lg'
+                    } cursor-pointer`}
+                  >
+                    {modeViewProfilePost[mode]}
+                  </h1>
+                ))
+              ) : (
+                <h1 className='text-xl md:text-2xl xl:text-3xl font-medium cursor-pointer'>
+                  Feeds
+                </h1>
+              )}
+            </div>
+            {isLoading ? (
+              <div className='flex items-center justify-center min-h-[300px]'>
+                <Loading />
               </div>
-            ))}
+            ) : active === modeViewProfilePost.SAVE ? (
+              <div className='flex items-center justify-center w-full min-h-[200px] md:min-h-[300px]'>
+                {postSaves.length ? (
+                  <div className='w-full mt-10'>
+                    {postSaves.map((post) => (
+                      <Feed
+                        key={post._id}
+                        post={post.post_share}
+                        postType={post.post_type}
+                        isOwner={true}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <h1 className='text-lg sm:text-2xl font-base'>
+                    You have no saved posts
+                  </h1>
+                )}
+              </div>
+            ) : (
+              <ListFeed />
+            )}
           </div>
-          <div
-            onClick={() => navigate(`/profile/${userId}/friends`)}
-            className='flex items-center justify-center mt-4'
-          >
-            <Button text={'Show more'} border={'border-none'} />
+
+          <div className='md:col-span-1 py-4 px-4'>
+            <h1 className='text-xl md:text-2xl xl:text-3xl font-medium'>
+              Friends
+            </h1>
+            <div className='grid grid-cols-12 mt-4 gap-2'>
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div
+                  key={item}
+                  className='col-span-4 md:col-span-3 lg:col-span-4'
+                >
+                  <FriendBox
+                    avatarUrl={
+                      'https://flowbite.com/application-ui/demo/images/users/jese-leos-2x.png'
+                    }
+                    userName={'Hoang Dat'}
+                  />
+                </div>
+              ))}
+            </div>
+            <div
+              onClick={() => navigate(`/profile/${userId}/friends`)}
+              className='flex items-center justify-center mt-4'
+            >
+              <Button text={'Show more'} border={'border-none'} />
+            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
-};
+      </>
+    );
+  }
+);
 
 export default Profile;

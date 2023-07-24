@@ -8,4 +8,6 @@ export interface IUserLikePost {
 
 export interface IPost extends Post {
   _id: string;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -62,7 +62,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
         post_content: postContent,
         post_type: type,
         post_mode: postModeDefault.title.toLowerCase(),
-        post_share: post,
+        post_share: post?.post_type === PostType.POST ? post : post?.post_share,
       };
       if (file) formData.append('file', file);
       formData.append('data', JSON.stringify(data));

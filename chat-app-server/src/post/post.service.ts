@@ -24,6 +24,7 @@ export class PostService {
     const foundUser = await this.userRepository.findById(postUserId);
     if (!foundUser)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
     const posts = await this.postReposotpory.findByUserIdV2(
       user,
       postUserId,
@@ -34,6 +35,28 @@ export class PostService {
       if (post.post_type !== PostType.POST) {
         post.post_share = await this.postReposotpory.findById(post.post_share);
       }
+    }
+    return posts;
+  }
+
+  async findPostSaveOfUser(
+    user: IUserCreated,
+    postUserId: string,
+    pagination: Pagination,
+  ) {
+    if (!postUserId)
+      throw new HttpException('Missing request value!', HttpStatus.NOT_FOUND);
+    const foundUser = await this.userRepository.findById(postUserId);
+    if (!foundUser)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    const posts = await this.postReposotpory.findPostSaveOfUser(
+      user,
+      postUserId,
+      pagination,
+    );
+    for (let post of posts) {
+      post.post_share = await this.postReposotpory.findById(post.post_share);
     }
     return posts;
   }
@@ -49,21 +72,26 @@ export class PostService {
     if (!data.post_content && !post_image && data.post_type === PostType.POST)
       throw new HttpException('Missing request value!', HttpStatus.BAD_REQUEST);
 
-    const newPost = await this.postReposotpory.create(user, data, post_image);
+    let newPost = (await this.postReposotpory.create(
+      user,
+      data,
+      post_image,
+    )) as any;
+
     if (!newPost)
       throw new HttpException('Db error!', HttpStatus.INTERNAL_SERVER_ERROR);
 
     // Incre share num
     if (data.post_type === PostType.SHARE) {
-      const key = `post:${newPost._id.toString()}user:${user._id}`;
-      if (this.redisService.get(key)) {
-        return newPost;
+      const key = `post:${newPost.post_share._id.toString()}user:${user._id}`;
+      if (await this.redisService.get(key)) {
+        return this.convertObjectIdToString(newPost, user, data.post_share);
       } else {
-        await this.redisService.set(key, 'shared');
+        await this.redisService.set(key, 'shared', 600);
         await this.postReposotpory.increShareNum(data.post_share._id);
       }
     }
-    return { ...newPost };
+    return this.convertObjectIdToString(newPost, user, data.post_share);
   }
 
   async deletePost(user: IUserCreated, postId: string) {
@@ -102,5 +130,29 @@ export class PostService {
     if (quantity === -1) {
       return await this.postReposotpory.decreLikePost(user, postId, -1);
     } else return await this.postReposotpory.likePost(user, postId, 1);
+  }
+
+  // Private
+  convertObjectIdToString(
+    post: any,
+    user: IUserCreated,
+    post_share: IPost | null,
+  ): IPost {
+    return {
+      _id: post._id,
+      user,
+      post_content: post.post_content,
+      post_image: post.post_image,
+      post_likes: post.post_likes,
+      post_type: post.post_type,
+      post_mode: post.post_mode,
+      post_comments_num: post.post_comments_num,
+      post_likes_num: post.post_likes_num,
+      post_share_num: post.post_share_num,
+      post_tag: post.post_tag,
+      post_share: post_share,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+    };
   }
 }

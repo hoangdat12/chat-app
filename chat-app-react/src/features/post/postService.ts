@@ -8,6 +8,13 @@ const createNewPost = async (data: FormData): Promise<IResponse<IPost>> => {
 
 const getPostOfUser = async (userId: string): Promise<IResponse<IPost[]>> => {
   const res = await myAxios.get(`/post/${userId}`);
+  return res;
+};
+
+const getPostSaveOfUser = async (
+  userId: string
+): Promise<IResponse<IPost[]>> => {
+  const res = await myAxios.get(`/post/save/${userId}`);
   console.log(res);
   return res;
 };
@@ -28,6 +35,7 @@ const checkLikePost = async (postId: string): Promise<IResponse<IPost>> => {
 export const postService = {
   createNewPost,
   getPostOfUser,
+  getPostSaveOfUser,
   likePost,
   checkLikePost,
 };

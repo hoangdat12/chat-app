@@ -15,32 +15,40 @@ export interface IFeedProp {
   isOwner: boolean;
   post: IPost;
   shared?: boolean;
+  postType?: string;
 }
 
 export interface IPropPostLikeShareComment {
   post: IPost;
 }
 
-const Feed: FC<IFeedProp> = memo(({ isOwner, post, shared = false }) => {
-  return (
-    <>
-      <div className='bg-gray-100 p-4 rounded-lg'>
-        <PostOwner post={post} isOwner={isOwner} shared={shared} />
-        <div className='mt-6'>
-          <p className='text-[#678]'>{post.post_content}</p>
-          <div className='bg-black flex items-center justify-center rounded overflow-hidden gap-2 mt-4 border'>
-            <img
-              src={post.post_image}
-              alt=''
-              className='max-h-[50vh] min-h-[250px] max-w-[80vh] min-w-[200px]'
-            />
+const Feed: FC<IFeedProp> = memo(
+  ({ isOwner, post, shared = false, postType = PostType.POST }) => {
+    return (
+      <>
+        <div className='bg-gray-100 p-4 rounded-lg'>
+          <PostOwner
+            post={post}
+            isOwner={isOwner}
+            shared={shared}
+            saved={postType === PostType.SAVE}
+          />
+          <div className='mt-6'>
+            <p className='text-[#678]'>{post.post_content}</p>
+            <div className='bg-black flex items-center justify-center rounded overflow-hidden gap-2 mt-4 border'>
+              <img
+                src={post.post_image}
+                alt=''
+                className='max-h-[50vh] min-h-[250px] max-w-[80vh] min-w-[200px]'
+              />
+            </div>
           </div>
+          {!shared && <PostLikeShareComment post={post} />}
         </div>
-        {!shared && <PostLikeShareComment post={post} />}
-      </div>
-    </>
-  );
-});
+      </>
+    );
+  }
+);
 
 export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
   post,

@@ -73,6 +73,32 @@ export class PostController {
     }
   }
 
+  @Get('/save/:userId')
+  async findPostSaveOfUser(
+    @Req() req: Request,
+    @Param('userId') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('sortBy') sortBy: string = 'ctime',
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      const pagination = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy,
+      };
+      const responseData = await this.postService.findPostSaveOfUser(
+        user,
+        userId,
+        pagination,
+      );
+      return new Ok(responseData);
+    } catch (err) {
+      throw err;
+    }
+  }
+
   @Delete('/:postId')
   async deletePost(@Req() req: Request, @Param('postId') postId: string) {
     try {

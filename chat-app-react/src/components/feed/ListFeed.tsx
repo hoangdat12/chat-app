@@ -12,7 +12,7 @@ const ListFeed = () => {
         return post.post_type === PostType.POST ? (
           <Feed key={post._id} isOwner={true} post={post} />
         ) : (
-          <PostShared isOwner={true} post={post} />
+          <PostShared key={post._id} isOwner={true} post={post} />
         );
       })}
     </div>
