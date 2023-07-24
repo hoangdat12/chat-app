@@ -32,7 +32,9 @@ export class PostController {
   ) {
     try {
       const body = JSON.parse(data) as DataCreatePost;
-      const post_image = `http://localhost:8080/assets/${file.filename}`;
+      const post_image = file
+        ? `http://localhost:8080/assets/${file.filename}`
+        : null;
       const user = req.user as IUserCreated;
       const responseData = await this.postService.createPost(
         user,
@@ -47,18 +49,21 @@ export class PostController {
 
   @Get('/:userId')
   async findPostOfUser(
+    @Req() req: Request,
     @Param('userId') userId: string,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
     @Query('sortBy') sortBy: string = 'ctime',
   ) {
     try {
+      const user = req.user as IUserCreated;
       const pagination = {
         page: parseInt(page),
         limit: parseInt(limit),
         sortBy,
       };
       const responseData = await this.postService.findPostByUserId(
+        user,
         userId,
         pagination,
       );
@@ -91,6 +96,25 @@ export class PostController {
         user,
         postId,
         body,
+      );
+      return new Ok(responseData);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Post('/like/:postId')
+  async likePost(
+    @Req() req: Request,
+    @Param('postId') postId: string,
+    @Body('quantity') quantity: number,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      const responseData = await this.postService.likePost(
+        user,
+        postId,
+        quantity,
       );
       return new Ok(responseData);
     } catch (err) {

@@ -10,6 +10,7 @@ import myAxios from '../../ultils/myAxios';
 
 const getFriendOfUser = async (): Promise<IFriendResponse[]> => {
   const res = await myAxios.get('/friend/friends');
+  console.log(res);
   return res.data.metaData;
 };
 

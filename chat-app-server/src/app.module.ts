@@ -21,6 +21,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { FriendModule } from './friend/friend.module';
 import { NotifyModule } from './notify/notify.module';
 import { PostModule } from './post/post.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { PostModule } from './post/post.module';
     }),
 
     PassportModule.register({ session: true }),
+    RedisModule,
     AuthModule,
     UserModule,
     MessageModule,

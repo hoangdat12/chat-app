@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { PostMode, PostType } from '../ultils/constant';
-import { IUserCreated, IUserLikePost } from '../ultils/interface';
+import { IPost, IUserCreated, IUserLikePost } from '../ultils/interface';
 import mongoose from 'mongoose';
 
 @Schema({ collection: 'Post', timestamps: true })
@@ -34,6 +34,9 @@ export class Post {
 
   @Prop({ default: [] })
   post_tag: IUserLikePost[];
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Post' })
+  post_share: IPost;
 }
 
 const PostSchema = SchemaFactory.createForClass(Post);

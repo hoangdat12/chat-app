@@ -55,9 +55,7 @@ const Home = () => {
         <div className='xl:col-span-6 col-span-8 px-6 xl:px-10 pt-6 overflow-y-auto scrollbar-hide'>
           <div className='max-h-[calc(100vh-76px-5rem)] h-[calc(100vh-76px-5rem)] flex flex-col items-center gap-4 '>
             <CreateFeed />
-            <div className='p-3 bg-white'>
-              <Feed isOwner={false} />
-            </div>
+            <div className='p-3 bg-white'>{/* <Feed isOwner={false} /> */}</div>
           </div>
         </div>
 

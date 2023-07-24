@@ -1,6 +1,5 @@
 import FriendBox from '../../components/box/FriendBox';
 import Button from '../../components/button/Button';
-import Feed from '../../components/feed/Feed';
 import Layout from '../../components/layout/Layout';
 import { FC, useEffect, useState } from 'react';
 import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
@@ -11,6 +10,9 @@ import { friendService } from '../../features/friend/friendService';
 import { ICheckFriendResponse } from '../../ultils/interface/friend.interface';
 import UserInformation from '../../components/user/UserInformation';
 import ListFriend from '../friend/ListFriend';
+import { useAppDispatch } from '../../app/hook';
+import { getPostOfUser } from '../../features/post/postSlice';
+import ListFeed from '../../components/feed/ListFeed';
 
 const userLocalstorage = getUserLocalStorageItem();
 
@@ -39,6 +41,9 @@ const Profile = () => {
   const [isOwner, setIsOwner] = useState(false);
   const [statusFriend, setStatusFriend] = useState('');
   const { userId } = useParams();
+
+  const dispatch = useAppDispatch();
+
   // Add friend
   const handleClickAddFriend = async () => {
     if (user) {
@@ -85,6 +90,12 @@ const Profile = () => {
     }
   }, [userId]);
 
+  useEffect(() => {
+    if (userId) {
+      dispatch(getPostOfUser(userId));
+    }
+  }, [userId]);
+
   return (
     <Layout>
       <div className='relative justify-center items-center pb-20'>
@@ -110,20 +121,49 @@ const Profile = () => {
   );
 };
 
-export const FriendAndPost: FC<IFriendAndPostProp> = ({ userId, isOwner }) => {
+export enum modeViewProfilePost {
+  FEEDS = 'Feeds',
+  SAVES = 'Save',
+}
+
+export const FriendAndPost: FC<IFriendAndPostProp> = ({ userId }) => {
   const navigate = useNavigate();
+  const [active, setActive] = useState('Feeds');
+
+  const handleClickModeView = (mode: string) => {
+    setActive(mode);
+  };
+
   return (
     <>
-      <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] md:px-4 xl:px-12 lg:grid grid-cols-3 lg:gap-6'>
-        <div className='mt-6 lg:mt-0 p-4 lg:col-span-2 '>
-          <h1 className='text-xl lg:text-3xl font-medium'>Feeds</h1>
-          <div className='mt-6 lg:mt-10'>
-            <Feed isOwner={isOwner} />
+      <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] md:px-4 xl:px-12 md:grid grid-cols-3 '>
+        <div className='mt-4 lg:mt-0 py-4 px-4 md:col-span-2'>
+          <div className='flex gap-4 items-end'>
+            {(
+              Object.keys(
+                modeViewProfilePost
+              ) as (keyof typeof modeViewProfilePost)[]
+            ).map((mode) => (
+              <h1
+                onClick={() => handleClickModeView(modeViewProfilePost[mode])}
+                key={mode}
+                className={`${
+                  active === modeViewProfilePost[mode]
+                    ? 'text-xl md:text-2xl xl:text-3xl font-medium'
+                    : 'text-base md:text-md xl:text-lg'
+                } cursor-pointer`}
+              >
+                {modeViewProfilePost[mode]}
+              </h1>
+            ))}
           </div>
+          <ListFeed />
         </div>
-        <div className='p-4 lg:col-span-1 '>
-          <h1 className='text-xl lg:text-3xl font-medium'>Friends</h1>
-          <div className='grid grid-cols-12 mt-4 lg:mt-10 gap-2 md:gap-4'>
+        <div className='md:col-span-1 py-4 px-4'>
+          <h1 className='text-xl md:text-2xl xl:text-3xl font-medium'>
+            Friends
+          </h1>
+          <div className='grid grid-cols-12 mt-4 gap-2'>
             {[1, 2, 3, 4, 5, 6].map((item) => (
               <div
                 key={item}

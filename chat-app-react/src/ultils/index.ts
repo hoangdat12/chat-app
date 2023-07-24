@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { MessageType } from './constant/message.constant';
 import { IConversation, IUser } from './interface';
 
@@ -110,6 +111,11 @@ export const getNameAndAvatarOfConversation = (
     });
   }
   return result;
+};
+
+export const getTimeCreatePost = (createdAt: string) => {
+  const date = new Date(createdAt);
+  return format(date, "d MMMM 'at' hh:mm a");
 };
 
 export const clearLocalStorage = () => {

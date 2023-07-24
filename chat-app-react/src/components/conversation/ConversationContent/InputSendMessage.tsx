@@ -20,7 +20,7 @@ export interface IPropInputSendMessage {
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
   files: FileList | null;
   setFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
-  isValidSendMessage: boolean;
+  isValidSendMessage?: boolean;
 }
 
 const InputSendMessage: FC<IPropInputSendMessage> = memo(

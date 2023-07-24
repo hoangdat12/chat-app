@@ -8,17 +8,20 @@ import data from '@emoji-mart/data';
 
 import useClickOutside from '../../hooks/useClickOutside';
 import { IFriend } from '../../ultils/interface';
+import { PostType } from '../../ultils/constant';
 
 export interface IPropOptionCreatePost {
   handleChangeImage: (e: any) => void;
   handleSelectEmoji: (emoji: any) => void;
   setListFriendTag: Dispatch<SetStateAction<IFriend[]>>;
+  type: string;
 }
 
 const OptionCreatePost: FC<IPropOptionCreatePost> = ({
   handleChangeImage,
   handleSelectEmoji,
   setListFriendTag,
+  type,
 }) => {
   const [showTagFriend, setShowTagFriend] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -31,16 +34,18 @@ const OptionCreatePost: FC<IPropOptionCreatePost> = ({
     <div className='flex items-center gap-2 py-2 px-4 bg-gray-100 rounded'>
       <span className='text-lg cursor-pointer'>Add your post</span>
 
-      <div className='relative flex cursor-pointer'>
-        <span className='text-2xl ml-4 text-green-500'>
-          <IoMdImages />
-        </span>
-        <input
-          onChange={(e) => handleChangeImage(e)}
-          type='file'
-          className='absolute top-0 left-0 right-0 bottom-0 cursor-pointer opacity-0'
-        />
-      </div>
+      {type === PostType.POST && (
+        <div className='relative flex cursor-pointer'>
+          <span className='text-2xl ml-4 text-green-500'>
+            <IoMdImages />
+          </span>
+          <input
+            onChange={(e) => handleChangeImage(e)}
+            type='file'
+            className='absolute top-0 left-0 right-0 bottom-0 cursor-pointer opacity-0'
+          />
+        </div>
+      )}
 
       <span className='relative'>
         <span

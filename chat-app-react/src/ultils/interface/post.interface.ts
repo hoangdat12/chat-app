@@ -19,6 +19,8 @@ export interface IPost {
   post_tag: FriendTag[];
   createdAt: string;
   updatedAt: string;
+  liked?: boolean;
+  post_share: IPost;
 }
 
 export interface FriendTag {
@@ -31,4 +33,9 @@ export interface IDataCreatePost {
   post_content: string;
   post_type: string;
   post_mode: string;
+}
+
+export interface IDataLikePost {
+  postId: string;
+  quantity: number;
 }

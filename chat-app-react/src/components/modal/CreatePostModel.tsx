@@ -2,39 +2,45 @@ import { FC, useEffect, useRef, useState } from 'react';
 
 import Avatar from '../avatars/Avatar';
 import Button from '../button/Button';
-import { postMode } from '../../ultils/list/post.list';
-import { IFriend, PostMode } from '../../ultils/interface';
+import {
+  IFriend,
+  IPost,
+  PostMode as PostModeType,
+} from '../../ultils/interface';
 import useClickOutside from '../../hooks/useClickOutside';
 import CreatePostWith from '../feed/CreatePostWith';
 import OptionCreatePost from '../feed/OptionCreatePost';
 import { PostType } from '../../ultils/constant';
 import { useAppDispatch } from '../../app/hook';
 import { createPost } from '../../features/post/postSlice';
+import PostMode from '../feed/PostMode';
+import { postMode } from '../../ultils/list/post.list';
 
 export interface IPropCreatePostModel {
   setShow: (value: boolean) => void;
+  type?: string;
+  post?: IPost;
 }
 
-const CreatePostModel: FC<IPropCreatePostModel> = ({ setShow }) => {
-  const [postModeDefault, setPostModeDefault] = useState<PostMode>(postMode[0]);
-  const [showChangePostMode, setShowChangePostMode] = useState(false);
+const CreatePostModel: FC<IPropCreatePostModel> = ({
+  setShow,
+  type = PostType.POST,
+  post = null,
+}) => {
   const [postContent, setPostContent] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [previewPicture, setPreviewPicture] = useState<string | null>(null);
   const [listFriendTag, setListFriendTag] = useState<IFriend[]>([]);
+  const [postModeDefault, setPostModeDefault] = useState<PostModeType>(
+    postMode[0]
+  );
+  const [showChangePostMode, setShowChangePostMode] = useState(false);
 
   const modalRef = useRef<HTMLDivElement | null>(null);
-  const postModeRef = useRef<HTMLDivElement | null>(null);
 
   const dispatch = useAppDispatch();
 
-  useClickOutside(postModeRef, () => setShowChangePostMode(false), 'mousedown');
   useClickOutside(modalRef, () => setShow(false), 'mousedown');
-
-  const handleChangePostMode = (mode: PostMode) => {
-    setPostModeDefault(mode);
-    setShowChangePostMode(false);
-  };
 
   const handleChangeImage = (e: any) => {
     setFile(e.target.files[0]);
@@ -44,13 +50,19 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({ setShow }) => {
     setPostContent((prev) => `${prev ?? ''}${emoji.native}`);
   };
 
+  const handleChangePostMode = (mode: PostModeType) => {
+    setPostModeDefault(mode);
+    setShowChangePostMode(false);
+  };
+
   const handleCreatePost = async () => {
-    if (file || postContent !== '') {
+    if (file || postContent !== '' || type !== PostType.POST) {
       const formData = new FormData();
       const data = {
         post_content: postContent,
-        post_type: PostType.POST,
+        post_type: type,
         post_mode: postModeDefault.title.toLowerCase(),
+        post_share: post,
       };
       if (file) formData.append('file', file);
       formData.append('data', JSON.stringify(data));
@@ -79,9 +91,11 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({ setShow }) => {
     >
       <div
         ref={modalRef}
-        className='relative flex flex-col gap-2 w-[60%] lg:w-[40%] p-4 bg-white animate__animated animate__fadeInDown sm:rounded-md'
+        className='relative flex flex-col gap-2 w-[90%] sm:w-[60%] lg:w-[40%] p-4 bg-white animate__animated animate__fadeInDown sm:rounded-md'
       >
-        <h1 className='text-2xl text-center'>Create new Post</h1>
+        <h1 className='text-2xl text-center'>
+          {type === PostType.POST ? 'Create new Post' : `Share Post`}
+        </h1>
 
         <div className='flex gap-3 items-center'>
           <Avatar
@@ -106,25 +120,13 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({ setShow }) => {
                 <span className='text-sm'>{postModeDefault.title}</span>
               </div>
 
-              <div
-                ref={postModeRef}
-                className={`absolute top-7 left-0 ${
-                  !showChangePostMode && 'hidden'
-                } min-w-[120px] rounded shadow-default bg-white`}
-              >
-                {postMode.map((mode) => (
-                  <div
-                    key={mode.title}
-                    onClick={() => handleChangePostMode(mode)}
-                    className='flex items-center justify-start p-2 gap-1 cursor-pointer hover:bg-gray-50 duration-300'
-                  >
-                    <span className='text-lg'>
-                      <mode.Icon />
-                    </span>
-                    <span className='text-sm'>{mode.title}</span>
-                  </div>
-                ))}
-              </div>
+              {showChangePostMode && (
+                <PostMode
+                  setShowChangePostMode={setShowChangePostMode}
+                  handleChangePostMode={handleChangePostMode}
+                  position={'top-7 left-0'}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -160,7 +162,11 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({ setShow }) => {
             cols={25}
             rows={9}
             className='w-full p-2 mt-2 outline-none'
-            placeholder='What are you think ...?'
+            placeholder={
+              type === PostType.POST
+                ? 'What are you think ...?'
+                : 'What are you think about Post...?'
+            }
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}
           ></textarea>
@@ -170,6 +176,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({ setShow }) => {
           handleChangeImage={handleChangeImage}
           handleSelectEmoji={handleSelectEmoji}
           setListFriendTag={setListFriendTag}
+          type={type}
         />
 
         <Button
