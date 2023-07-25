@@ -1,10 +1,9 @@
 import Avatar, { AvatarOnline } from '../components/avatars/Avatar';
-import Feed from '../components/feed/Feed';
 import Layout from '../components/layout/Layout';
 import { AiOutlineSearch } from 'react-icons/Ai';
 
 import happyBirthday from '../assets/happyBirthday.png';
-import CreateFeed from '../components/feed/CreateFeed';
+import CreateFeed, { ModeCreateFeed } from '../components/feed/CreateFeed';
 
 const Home = () => {
   return (
@@ -54,7 +53,7 @@ const Home = () => {
 
         <div className='xl:col-span-6 col-span-8 px-6 xl:px-10 pt-6 overflow-y-auto scrollbar-hide'>
           <div className='max-h-[calc(100vh-76px-5rem)] h-[calc(100vh-76px-5rem)] flex flex-col items-center gap-4 '>
-            <CreateFeed />
+            <CreateFeed mode={ModeCreateFeed.CREATE} />
             <div className='p-3 bg-white'>{/* <Feed isOwner={false} /> */}</div>
           </div>
         </div>

@@ -112,4 +112,9 @@ export class UserController {
     };
     return new Ok<any>(data, 'success!');
   }
+
+  @Get('/bug/fix')
+  async fixBug(@Req() req: Request) {
+    return await this.userService.fixBug();
+  }
 }

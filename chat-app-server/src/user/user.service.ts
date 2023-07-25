@@ -65,4 +65,8 @@ export class UserService {
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
     return userExist;
   }
+
+  async fixBug() {
+    return await this.authRepository.updateAll();
+  }
 }

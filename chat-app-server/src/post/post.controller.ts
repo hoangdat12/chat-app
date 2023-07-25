@@ -10,6 +10,8 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { Request } from 'express';
@@ -122,6 +124,30 @@ export class PostController {
         user,
         postId,
         body,
+      );
+      return new Ok(responseData);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('/change-mode/:postId')
+  async changePostMode(
+    @Req() req: Request,
+    @Param('postId') postId: string,
+    @Body('post_mode') post_mode: string,
+  ) {
+    try {
+      if (!post_mode)
+        throw new HttpException(
+          'Missing request value!',
+          HttpStatus.BAD_REQUEST,
+        );
+      const user = req.user as IUserCreated;
+      const responseData = await this.postService.changePostMode(
+        user,
+        postId,
+        post_mode,
       );
       return new Ok(responseData);
     } catch (err) {

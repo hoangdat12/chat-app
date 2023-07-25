@@ -81,8 +81,11 @@ export class PostService {
     if (!newPost)
       throw new HttpException('Db error!', HttpStatus.INTERNAL_SERVER_ERROR);
 
+    if (data.post_type === PostType.POST) {
+      await this.userRepository.updateQuantityPost(user._id, 1);
+    }
     // Incre share num
-    if (data.post_type === PostType.SHARE) {
+    else if (data.post_type === PostType.SHARE) {
       const key = `post:${newPost.post_share._id.toString()}user:${user._id}`;
       if (await this.redisService.get(key)) {
         return this.convertObjectIdToString(newPost, user, data.post_share);
@@ -101,6 +104,10 @@ export class PostService {
 
     if (user._id !== foundPost.user._id)
       throw new HttpException('User not permission!', HttpStatus.BAD_REQUEST);
+
+    if (foundPost.post_type === PostType.POST) {
+      await this.userRepository.updateQuantityPost(user._id, -1);
+    }
 
     return await this.postReposotpory.delete(user._id, postId);
   }
@@ -124,12 +131,26 @@ export class PostService {
       );
 
     const foundPost = await this.postReposotpory.findById(postId);
-
     if (!foundPost)
       throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
+
     if (quantity === -1) {
       return await this.postReposotpory.decreLikePost(user, postId, -1);
     } else return await this.postReposotpory.likePost(user, postId, 1);
+  }
+
+  async changePostMode(user: IUserCreated, postId: string, post_mode: string) {
+    const foundPost = await this.postReposotpory.findById(postId);
+    if (!foundPost)
+      throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
+    if (foundPost.user._id.toString() !== user._id)
+      throw new HttpException('You not permission!', HttpStatus.BAD_REQUEST);
+
+    return await this.postReposotpory.changePostMode(
+      user._id,
+      postId,
+      post_mode,
+    );
   }
 
   // Private

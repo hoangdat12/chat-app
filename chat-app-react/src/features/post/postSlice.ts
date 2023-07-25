@@ -1,6 +1,10 @@
 import { RootState } from '../../app/store';
-import { IDataLikePost, IPost } from '../../ultils/interface';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import {
+  IDataChangePostMode,
+  IDataLikePost,
+  IPost,
+} from '../../ultils/interface';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { postService } from './postService';
 
 export interface IInitialStatePost {
@@ -38,10 +42,21 @@ export const likePost = createAsyncThunk(
   }
 );
 
+export const changePostMode = createAsyncThunk(
+  'post/changeMode',
+  async (data: IDataChangePostMode) => {
+    return await postService.changePostMode(data);
+  }
+);
+
 const postSlice = createSlice({
   name: 'post',
   initialState,
-  reducers: {},
+  reducers: {
+    getPost: (state, action: PayloadAction<IPost[]>) => {
+      state.posts = [...state.posts, ...action.payload];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createPost.pending, (state) => {
@@ -89,10 +104,29 @@ const postSlice = createSlice({
       .addCase(likePost.rejected, (state) => {
         state.isLoading = false;
         state.status = 'failed';
+      })
+
+      .addCase(changePostMode.pending, (state) => {
+        state.isLoading = true;
+        state.status = 'pending';
+      })
+      .addCase(changePostMode.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.status = 'idle';
+        for (let post of state.posts) {
+          if (post._id === action.payload.data.metaData._id) {
+            post.post_mode = action.payload.data.metaData.post_mode;
+            return;
+          }
+        }
+      })
+      .addCase(changePostMode.rejected, (state) => {
+        state.isLoading = false;
+        state.status = 'failed';
       });
   },
 });
 
-export const {} = postSlice.actions;
+export const { getPost } = postSlice.actions;
 export default postSlice.reducer;
 export const selectPost = (state: RootState) => state.post;

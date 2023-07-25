@@ -44,12 +44,21 @@ export class PostRepository {
     const { limit, page, sortBy } = pagiantion;
     const offset = (page - 1) * limit;
     const objectIdUserId = new mongoose.Types.ObjectId(postUserId);
+    const match =
+      user._id === postUserId
+        ? {
+            user: objectIdUserId,
+            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
+          }
+        : {
+            user: objectIdUserId,
+            post_mode: PostMode.PUBLIC,
+            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
+          };
+
     const posts = await this.postModel.aggregate([
       {
-        $match: {
-          user: objectIdUserId,
-          $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
-        },
+        $match: match,
       },
       {
         $lookup: {
@@ -248,6 +257,22 @@ export class PostRepository {
         $inc: {
           post_share_num: 1,
         },
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+  }
+
+  async changePostMode(userId: string, postId: string, post_mode: string) {
+    return await this.postModel.findOneAndUpdate(
+      {
+        user: userId,
+        _id: postId,
+      },
+      {
+        post_mode: post_mode,
       },
       {
         new: true,

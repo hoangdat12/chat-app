@@ -21,7 +21,7 @@ const PostMode: FC<IPropPostMode> = ({
   return (
     <div
       ref={postModeRef}
-      className={`absolute ${position} min-w-[120px] rounded shadow-default bg-white`}
+      className={`absolute ${position} min-w-[120px] p-[1px] rounded shadow-default bg-white z-10`}
     >
       {postMode.map((mode, idx) => (
         <div

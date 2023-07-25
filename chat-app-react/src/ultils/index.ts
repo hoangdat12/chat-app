@@ -114,8 +114,21 @@ export const getNameAndAvatarOfConversation = (
 };
 
 export const getTimeCreatePost = (createdAt: string) => {
-  const date = new Date(createdAt);
-  return format(date, "d MMMM 'at' hh:mm a");
+  const currentDate = new Date();
+  const createdDate = new Date(createdAt);
+  const timeDifferenceInSeconds = Math.floor(
+    (currentDate.getTime() - createdDate.getTime()) / 1000
+  );
+  const timeDifferenceInHours = Math.floor(timeDifferenceInSeconds / 3600);
+  if (timeDifferenceInHours >= 24) {
+    return format(createdDate, "d MMMM 'at' hh:mm a");
+  } else if (timeDifferenceInHours >= 1 && timeDifferenceInHours < 24) {
+    return `${timeDifferenceInHours} hours ago`;
+  } else if (timeDifferenceInSeconds < 3600 && timeDifferenceInSeconds >= 60) {
+    return `${Math.floor(timeDifferenceInSeconds / 60)} minutes ago`;
+  } else {
+    return `${Math.floor(timeDifferenceInSeconds)} seconds ago`;
+  }
 };
 
 export const clearLocalStorage = () => {

@@ -1,4 +1,9 @@
-import { IPost, IResponse } from '../../ultils/interface';
+import {
+  IDataChangePostMode,
+  IPagination,
+  IPost,
+  IResponse,
+} from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
 const createNewPost = async (data: FormData): Promise<IResponse<IPost>> => {
@@ -6,8 +11,14 @@ const createNewPost = async (data: FormData): Promise<IResponse<IPost>> => {
   return res;
 };
 
-const getPostOfUser = async (userId: string): Promise<IResponse<IPost[]>> => {
-  const res = await myAxios.get(`/post/${userId}`);
+const getPostOfUser = async (
+  userId: string,
+  pagiantion?: IPagination
+): Promise<IResponse<IPost[]>> => {
+  const { page = 1, limit = 10, sortedBy = 'ctime' } = pagiantion || {};
+  const res = await myAxios.get(
+    `/post/${userId}?page=${page}&limit=${limit}&sortBy=${sortedBy}`
+  );
   return res;
 };
 
@@ -32,10 +43,20 @@ const checkLikePost = async (postId: string): Promise<IResponse<IPost>> => {
   return res;
 };
 
+const changePostMode = async (
+  data: IDataChangePostMode
+): Promise<IResponse<IPost>> => {
+  const { postId, post_mode } = data;
+  const res = await myAxios.patch(`/post/change-mode/${postId}`, { post_mode });
+  console.log(res);
+  return res;
+};
+
 export const postService = {
   createNewPost,
   getPostOfUser,
   getPostSaveOfUser,
   likePost,
   checkLikePost,
+  changePostMode,
 };

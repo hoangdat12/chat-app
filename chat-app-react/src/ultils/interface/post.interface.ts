@@ -39,3 +39,8 @@ export interface IDataLikePost {
   postId: string;
   quantity: number;
 }
+
+export interface IDataChangePostMode {
+  postId: string;
+  post_mode: string;
+}

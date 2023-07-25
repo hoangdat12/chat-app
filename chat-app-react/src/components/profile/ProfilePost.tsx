@@ -1,0 +1,168 @@
+import { FC, memo, useEffect, useRef, useState } from 'react';
+import { IPost, IUser } from '../../ultils/interface';
+import { postService } from '../../features/post/postService';
+import Loading from '../button/Loading';
+import Feed from '../feed/Feed';
+import ListFeed from '../feed/ListFeed';
+import CreateFeed, { ModeCreateFeed } from '../feed/CreateFeed';
+import { getUserLocalStorageItem, getUsername } from '../../ultils';
+import { getPost } from '../../features/post/postSlice';
+import { useAppDispatch } from '../../app/hook';
+
+export enum modeViewProfilePost {
+  FEEDS = 'Feeds',
+  SAVE = 'Save',
+}
+
+export interface IPropProfilePost {
+  userId: string | undefined;
+  user?: IUser | null;
+}
+
+const userLocal = getUserLocalStorageItem();
+
+const ProfilePost: FC<IPropProfilePost> = memo(({ userId, user }) => {
+  const [active, setActive] = useState('Feeds');
+  const [postSaves, setPostSaves] = useState<IPost[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const bottomOfListRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [endPost, setEndPost] = useState(false);
+  const [isLoadingCallApi, setIsLoadingCallApi] = useState(false);
+
+  const dispatch = useAppDispatch();
+
+  const handleClickModeView = async (mode: string) => {
+    setActive(mode);
+    if (mode === modeViewProfilePost.SAVE && userId && postSaves.length === 0) {
+      const res = await postService.getPostSaveOfUser(userId);
+      setPostSaves(res.data.metaData);
+    }
+  };
+  const fetchPosts = async () => {
+    try {
+      if (userId && !endPost) {
+        setIsLoadingCallApi(true);
+        const pagination = {
+          limit: 10,
+          page: currentPage + 1,
+          sortedBy: 'ctime',
+        };
+        const res = await postService.getPostOfUser(userId, pagination);
+        if (res.data.metaData.length === 0) {
+          setEndPost(true);
+        }
+        if (res.status === 200) {
+          dispatch(getPost(res.data.metaData));
+        } else {
+          setEndPost(true);
+        }
+        setIsLoadingCallApi(false);
+        setCurrentPage((prev) => prev + 1);
+        console.log('Call');
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [active]);
+
+  const handleScroll = () => {
+    if (
+      bottomOfListRef.current &&
+      bottomOfListRef.current.getBoundingClientRect().bottom <= 670
+    ) {
+      fetchPosts();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [endPost]);
+
+  return (
+    <div ref={bottomOfListRef} className={`flex flex-col gap-6 md:col-span-2`}>
+      <div className='flex flex-col items-center bg-gray-100 py-4 px-4 rounded-md'>
+        <CreateFeed
+          mode={
+            userId === userLocal._id
+              ? ModeCreateFeed.CREATE
+              : ModeCreateFeed.WRITE_TIME
+          }
+          placeHolder={
+            userId === userLocal._id
+              ? undefined
+              : `Write on 's timeline ${getUsername(user ?? null)}`
+          }
+          user={user}
+        />
+        <div className='flex gap-4 items-center mt-4 w-full'>
+          {userId === userLocal._id ? (
+            (
+              Object.keys(
+                modeViewProfilePost
+              ) as (keyof typeof modeViewProfilePost)[]
+            ).map((mode) => (
+              <h1
+                onClick={() => handleClickModeView(modeViewProfilePost[mode])}
+                key={mode}
+                className={`${
+                  active === modeViewProfilePost[mode]
+                    ? 'text-lg md:text-xl xl:text-2xl font-medium'
+                    : 'text-base md:text-base xl:text-md'
+                } cursor-pointer`}
+              >
+                {modeViewProfilePost[mode]}
+              </h1>
+            ))
+          ) : (
+            <div className='flex justify-start w-full text-lg md:text-xl xl:text-2xl font-medium cursor-pointer'>
+              Feeds
+            </div>
+          )}
+        </div>
+      </div>
+      {isLoading ? (
+        <div className='flex items-center justify-center min-h-[300px]'>
+          <Loading />
+        </div>
+      ) : active === modeViewProfilePost.SAVE ? (
+        <div className='flex items-center justify-center w-full min-h-[200px] md:min-h-[300px]'>
+          {postSaves.length ? (
+            <div className='w-full'>
+              {postSaves.map((post) => (
+                <Feed
+                  key={post._id}
+                  post={post.post_share}
+                  postType={post.post_type}
+                  isOwner={true}
+                />
+              ))}
+            </div>
+          ) : (
+            <h1 className='text-lg sm:text-2xl font-base'>
+              You have no saved posts
+            </h1>
+          )}
+        </div>
+      ) : (
+        <ListFeed />
+      )}
+      {isLoadingCallApi && (
+        <div className='flex justify-center w-full'>...Loading</div>
+      )}
+    </div>
+  );
+});
+export default ProfilePost;

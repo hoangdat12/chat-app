@@ -28,6 +28,21 @@ export class User {
 
   @Prop({ default: 'email' })
   loginWith: string;
+
+  @Prop({ default: 0 })
+  friends?: number;
+
+  @Prop({ default: 0 })
+  viewer?: number;
+
+  @Prop({ default: 0 })
+  total_post?: number;
+
+  @Prop({ default: 'Student' })
+  job?: string;
+
+  @Prop({ default: 'Viet Nam' })
+  address?: string;
 }
 
 const UserSchema = SchemaFactory.createForClass(User);

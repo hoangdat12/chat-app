@@ -96,4 +96,44 @@ export class AuthRepository {
   async create(data: UserRegister) {
     return await this.userModel.create(data);
   }
+
+  async updateAll() {
+    return await this.userModel.updateMany({
+      friends: 0,
+      viewer: 0,
+      total_post: 0,
+      job: 'Student',
+      address: 'Viet Nam',
+    });
+  }
+
+  async updateQuantityPost(userId: string, quantity: number) {
+    if (quantity !== 1 && quantity !== -1) return;
+
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: userId,
+      },
+      {
+        $inc: {
+          total_post: quantity,
+        },
+      },
+    );
+  }
+
+  async increQuantityFriend(userId: string, quantity: number) {
+    if (quantity !== 1 && quantity !== -1) return;
+
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: userId,
+      },
+      {
+        $inc: {
+          friends: quantity,
+        },
+      },
+    );
+  }
 }

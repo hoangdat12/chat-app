@@ -7,7 +7,7 @@ import PostShared from './PostShared';
 const ListFeed = () => {
   const { posts } = useAppSelector(selectPost);
   return (
-    <div className='mt-4 flex flex-col gap-8'>
+    <div className='flex flex-col gap-8'>
       {posts.map((post) => {
         return post.post_type === PostType.POST ? (
           <Feed key={post._id} isOwner={true} post={post} />

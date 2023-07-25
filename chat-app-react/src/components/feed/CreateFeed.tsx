@@ -1,9 +1,21 @@
 import { AiOutlineFileImage } from 'react-icons/Ai';
 import Avatar from '../avatars/Avatar';
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import CreatePostModel from '../modal/CreatePostModel';
+import { IUser } from '../../ultils/interface';
 
-const CreateFeed = () => {
+export interface IPropCreateFeed {
+  mode: string;
+  placeHolder?: string;
+  user?: IUser | null;
+}
+
+export enum ModeCreateFeed {
+  CREATE = 'Create',
+  WRITE_TIME = 'Write time',
+}
+
+const CreateFeed: FC<IPropCreateFeed> = ({ mode, placeHolder, user }) => {
   const [show, setShow] = useState(false);
 
   const setShowModelCreatePost = () => {
@@ -25,7 +37,7 @@ const CreateFeed = () => {
             name=''
             id=''
             className='w-full outline-none'
-            placeholder='What are you think?'
+            placeholder={placeHolder ?? 'What are you think?'}
             onClick={setShowModelCreatePost}
           />
           <span onClick={setShowModelCreatePost} className='p-1 cursor-pointer'>
@@ -33,7 +45,14 @@ const CreateFeed = () => {
           </span>
         </div>
       </div>
-      {show && <CreatePostModel setShow={setShow} />}
+      {show && (
+        <CreatePostModel
+          mode={mode}
+          placeHolder={placeHolder}
+          user={user}
+          setShow={setShow}
+        />
+      )}
     </div>
   );
 };

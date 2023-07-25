@@ -15,8 +15,10 @@ import { useAppDispatch } from '../../app/hook';
 import { createPost } from '../../features/post/postSlice';
 import PostMode from '../feed/PostMode';
 import { postMode } from '../../ultils/list/post.list';
+import { IPropCreateFeed, ModeCreateFeed } from '../feed/CreateFeed';
+import { getUsername } from '../../ultils';
 
-export interface IPropCreatePostModel {
+export interface IPropCreatePostModel extends IPropCreateFeed {
   setShow: (value: boolean) => void;
   type?: string;
   post?: IPost;
@@ -26,6 +28,9 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
   setShow,
   type = PostType.POST,
   post = null,
+  placeHolder,
+  mode,
+  user,
 }) => {
   const [postContent, setPostContent] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -83,6 +88,22 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
     }
   }, [file]);
 
+  useEffect(() => {
+    if (
+      mode === ModeCreateFeed.WRITE_TIME &&
+      listFriendTag.length === 0 &&
+      user
+    ) {
+      const friend = {
+        userId: user._id,
+        userName: getUsername(user),
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      };
+      setListFriendTag([friend]);
+    }
+  }, [mode]);
+
   return (
     <div
       className={`fixed top-0 left-0 bottom-0 right-0 w-screen ${
@@ -138,7 +159,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
               name=''
               id=''
               className='w-full outline-none mb-2 px-3 py-2 whitespace-pre-wrap overflow-x-auto border rounded-md'
-              placeholder='What are you think?'
+              placeholder={placeHolder ?? 'What are you think ...?'}
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
             />
@@ -163,9 +184,10 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
             rows={9}
             className='w-full p-2 mt-2 outline-none'
             placeholder={
-              type === PostType.POST
+              placeHolder ??
+              (type === PostType.POST
                 ? 'What are you think ...?'
-                : 'What are you think about Post...?'
+                : 'What are you think about Post...?')
             }
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}

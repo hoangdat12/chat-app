@@ -145,6 +145,9 @@ export class FriendService {
     // Delete Notify
     await this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
 
+    // Update quantity Friend
+    await this.authRepository.increQuantityFriend(user._id, 1);
+
     await Promise.all([
       confirmeFriendPromiseWithUser,
       confirmeFriendPromiseWithFriend,
@@ -170,6 +173,20 @@ export class FriendService {
     await this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
 
     return friend;
+  }
+
+  async deleteFriend(user: IUserCreated, friend: IFriend) {
+    const isValidFriend = await this.friendRepository.checkUserIsFriend(
+      user,
+      friend.userId,
+    );
+
+    if (!isValidFriend) return;
+
+    // Update quantity Friend
+    await this.authRepository.increQuantityFriend(user._id, -1);
+
+    return await this.friendRepository.deleteFriend(user._id, friend.userId);
   }
 
   async findFriend(

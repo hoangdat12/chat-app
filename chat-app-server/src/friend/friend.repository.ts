@@ -322,4 +322,24 @@ export class FriendRepository {
       },
     ]);
   }
+
+  async deleteFriend(userId: string, friendId: string) {
+    return await this.friendModel.findOneAndUpdate(
+      {
+        user: userId,
+        'friends.userId': friendId,
+      },
+      {
+        $pull: {
+          friends: {
+            userId: friendId,
+          },
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+  }
 }

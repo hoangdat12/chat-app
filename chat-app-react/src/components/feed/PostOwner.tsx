@@ -1,20 +1,28 @@
 import Avatar from '../avatars/Avatar';
 import { IPost } from '../../ultils/interface';
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { getTimeCreatePost, getUsername } from '../../ultils';
 import { CgMoreVertical } from 'react-icons/cg';
-import { RiEarthFill } from 'react-icons/ri';
 import { FaRegBookmark } from 'react-icons/fa';
 import { MdReportProblem } from 'react-icons/md';
 import useClickOutside from '../../hooks/useClickOutside';
-import { PostMode, PostType } from '../../ultils/constant';
+import { PostMode as PostModeType, PostType } from '../../ultils/constant';
 import { postService } from '../../features/post/postService';
+import PostMode from './PostMode';
+import { postMode } from '../../ultils/list/post.list';
+import { useAppDispatch } from '../../app/hook';
+import { changePostMode } from '../../features/post/postSlice';
 
 export interface IPropPostOwner {
   post: IPost;
   isOwner: boolean;
   shared?: boolean;
   saved?: boolean;
+}
+
+export interface IPostMode {
+  title: string;
+  Icon: any;
 }
 
 const PostOwner: FC<IPropPostOwner> = ({
@@ -24,7 +32,11 @@ const PostOwner: FC<IPropPostOwner> = ({
   saved = false,
 }) => {
   const [showOptions, setShowOptions] = useState(false);
+  const [showChangePostMode, setShowChangePostMode] = useState(false);
+  const [modeDefault, setModeDefault] = useState<IPostMode | null>(null);
   const optionRef = useRef<HTMLUListElement | null>(null);
+
+  const dispatch = useAppDispatch();
 
   const handleShowOptions = () => {
     setShowOptions(false);
@@ -39,7 +51,7 @@ const PostOwner: FC<IPropPostOwner> = ({
       const formData = new FormData();
       const data = {
         post_type: PostType.SAVE,
-        post_mode: PostMode.PRIVATE,
+        post_mode: PostModeType.PRIVATE,
         post_share: post.post_type === PostType.POST ? post : post.post_share,
       };
       formData.append('data', JSON.stringify(data));
@@ -48,7 +60,38 @@ const PostOwner: FC<IPropPostOwner> = ({
     setShowOptions(false);
   };
 
+  const handleShowPostMode = async () => {
+    if (isOwner) {
+      setShowChangePostMode(true);
+    }
+  };
+
+  const handleChangePostMode = async (mode: IPostMode) => {
+    if (mode.title !== modeDefault?.title) {
+      setModeDefault(mode);
+      if (modeDefault) {
+        const data = {
+          postId: post._id,
+          post_mode: modeDefault.title,
+        };
+        dispatch(changePostMode(data));
+      }
+    }
+    setShowChangePostMode(false);
+  };
+
   useClickOutside<HTMLUListElement>(optionRef, handleShowOptions, 'mousedown');
+
+  useEffect(() => {
+    if (modeDefault === null) {
+      for (let mode of postMode) {
+        if (mode.title === post.post_mode) {
+          setModeDefault(mode);
+          return;
+        }
+      }
+    }
+  }, [post]);
 
   return (
     <div>
@@ -57,10 +100,17 @@ const PostOwner: FC<IPropPostOwner> = ({
           <Avatar avatarUrl={post?.user?.avatarUrl} className={'w-12 h-12'} />
           <div>
             <h1 className='text-base'>{getUsername(post?.user)}</h1>
-            <div className='flex gap-1 items-center'>
-              <span>
-                <RiEarthFill />
+            <div className='relative flex gap-1 items-center'>
+              <span onClick={handleShowPostMode} className='cursor-pointer'>
+                {modeDefault && <modeDefault.Icon />}
               </span>
+              {isOwner && showChangePostMode && (
+                <PostMode
+                  setShowChangePostMode={setShowChangePostMode}
+                  handleChangePostMode={handleChangePostMode}
+                  position={'top-6 left-0'}
+                />
+              )}
               <p className='text-sm text-[#678]'>
                 {getTimeCreatePost(post.createdAt)}
               </p>
