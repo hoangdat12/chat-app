@@ -3,17 +3,20 @@ import { AiOutlineHeart, AiFillHeart } from 'react-icons/Ai';
 import { MdComment } from 'react-icons/md';
 import { IoIosShareAlt } from 'react-icons/io';
 
-import { IPost } from '../../ultils/interface';
+import { IComment, IPost } from '../../ultils/interface';
 import Comment from '../comment/Comment';
 import { useAppDispatch } from '../../app/hook';
 import { likePost } from '../../features/post/postSlice';
 import CreatePostModel from '../modal/CreatePostModel';
 import { PostType } from '../../ultils/constant';
 import PostOwner from './PostOwner';
+import { ModeCreateFeed } from './CreateFeed';
+import { commentService } from '../../features/comment/commentService';
 
 export interface IFeedProp {
   isOwner: boolean;
   post: IPost;
+  background?: string;
   shared?: boolean;
   postType?: string;
 }
@@ -23,10 +26,10 @@ export interface IPropPostLikeShareComment {
 }
 
 const Feed: FC<IFeedProp> = memo(
-  ({ isOwner, post, shared = false, postType = PostType.POST }) => {
+  ({ isOwner, post, background, shared = false, postType = PostType.POST }) => {
     return (
       <>
-        <div className='bg-gray-100 p-4 rounded-lg'>
+        <div className={`${background ?? 'bg-gray-100'} p-4 rounded-lg`}>
           <PostOwner
             post={post}
             isOwner={isOwner}
@@ -57,10 +60,21 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
   const [quantityLike, setQuantityLike] = useState(post.post_likes_num);
   const [showComment, setShowComment] = useState(false);
   const [showShareModel, setShowShareModel] = useState(false);
+  const [comments, setComments] = useState<IComment[] | null>(null);
+  const [remainComment, setRemainComment] = useState<number | null>(null);
 
   const dispatch = useAppDispatch();
 
-  const handleShowComment = () => {
+  const handleShowComment = async () => {
+    if (!showComment && comments === null) {
+      const data = {
+        comment_post_id: post._id,
+        parentCommentId: null,
+      };
+      const res = await commentService.getListComment(data);
+      setComments(res.data.metaData.comments);
+      setRemainComment(res.data.metaData.remainComment);
+    }
     setShowComment(!showComment);
   };
 
@@ -108,7 +122,7 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
           >
             <IoIosShareAlt />
             <div className='text-sm'>
-              <span className='pr-1'>{post.post_comments_num}</span>
+              <span className='pr-1'>{post.post_share_num}</span>
               <span>Share</span>
             </div>
           </div>
@@ -117,12 +131,20 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
               setShow={setShowShareModel}
               type={PostType.SHARE}
               post={post}
+              mode={ModeCreateFeed.CREATE}
             />
           )}
         </div>
       </div>
 
-      {showComment && <Comment />}
+      {showComment && (
+        <Comment
+          comments={comments}
+          setComments={setComments}
+          remainComment={remainComment}
+          postId={post._id}
+        />
+      )}
     </>
   );
 };

@@ -13,7 +13,7 @@ const user = getUserLocalStorageItem();
 export const selectNav1 = [
   {
     display: 'NewsFeed',
-    path: '/home',
+    path: '/',
     icons: <AiOutlineHome />,
   },
   {

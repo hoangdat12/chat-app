@@ -14,6 +14,7 @@ export interface IButtonProp {
   hover?: string;
   onClick?: any;
   Icons?: JSX.Element;
+  textSize?: string;
 }
 
 const Button: FC<IButtonProp> = ({
@@ -30,6 +31,7 @@ const Button: FC<IButtonProp> = ({
   className,
   onClick,
   Icons,
+  textSize,
 }) => {
   return (
     <button
@@ -49,7 +51,7 @@ const Button: FC<IButtonProp> = ({
       onClick={onClick}
     >
       {Icons}
-      <p>{text}</p>
+      <p className={textSize}>{text}</p>
     </button>
   );
 };

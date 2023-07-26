@@ -1,4 +1,4 @@
-import { FC, memo, useEffect } from 'react';
+import { FC, memo } from 'react';
 import { IoIosMore } from 'react-icons/io';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { IMessage } from '../../ultils/interface';
@@ -14,6 +14,7 @@ import {
 import { messageService } from '../../features/message/messageService';
 import { convertMessageObjectIdToString } from '../../ultils';
 import { MessageContentType } from '../../ultils/constant/message.constant';
+import useEnterListener from '../../hooks/useEnterEvent';
 
 export interface IPropOptionMessage {
   showItem: boolean;
@@ -89,32 +90,22 @@ const OptionMessage: FC<IPropOptionMessage> = memo(
       } else return null;
     };
 
-    useEffect(() => {
-      if (updateMessageValue !== '') {
-        const enterEvent = async (e: any) => {
-          if (e.key === 'Enter' || e.keyCode === 13) {
-            if (updateMessageValue !== message.message_content) {
-              const { message_content, ...payload } = message;
-              const updateMessage = await handleEditMessage({
-                ...payload,
-                message_content: updateMessageValue,
-              });
-              if (updateMessage) {
-                setUpdateMessage(false);
-              }
-            } else {
-              setUpdateMessage(false);
-            }
-          }
-        };
-
-        document.addEventListener('keydown', enterEvent);
-
-        return () => {
-          document.removeEventListener('keydown', enterEvent);
-        };
+    const handleUpdateMessage = async () => {
+      if (updateMessageValue !== message.message_content) {
+        const { message_content, ...payload } = message;
+        const updateMessage = await handleEditMessage({
+          ...payload,
+          message_content: updateMessageValue,
+        });
+        if (updateMessage) {
+          setUpdateMessage(false);
+        }
+      } else {
+        setUpdateMessage(false);
       }
-    }, [updateMessageValue]);
+    };
+
+    useEnterListener(handleUpdateMessage, updateMessageValue);
 
     return (
       <>

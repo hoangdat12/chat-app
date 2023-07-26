@@ -10,5 +10,6 @@ import { RedisModule } from '../redis/redis.module';
   imports: [MongooseModule.forFeature([PostModel]), RedisModule],
   providers: [PostService, PostRepository],
   controllers: [PostController],
+  exports: [PostRepository],
 })
 export class PostModule {}

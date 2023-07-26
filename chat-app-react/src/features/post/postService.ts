@@ -52,10 +52,16 @@ const changePostMode = async (
   return res;
 };
 
+const getPostOfFriend = async () => {
+  const res = await myAxios.get('/post/friends');
+  return res;
+};
+
 export const postService = {
   createNewPost,
   getPostOfUser,
   getPostSaveOfUser,
+  getPostOfFriend,
   likePost,
   checkLikePost,
   changePostMode,

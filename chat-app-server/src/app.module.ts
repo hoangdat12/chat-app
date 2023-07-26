@@ -22,6 +22,7 @@ import { FriendModule } from './friend/friend.module';
 import { NotifyModule } from './notify/notify.module';
 import { PostModule } from './post/post.module';
 import { RedisModule } from './redis/redis.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { RedisModule } from './redis/redis.module';
     FriendModule,
     NotifyModule,
     PostModule,
+    CommentModule,
   ],
   controllers: [],
   providers: [],

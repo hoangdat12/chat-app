@@ -153,6 +153,10 @@ export class PostService {
     );
   }
 
+  async getPostOfFriend(user: IUserCreated, pagination: Pagination) {
+    return await this.postReposotpory.getPostOfFriend(user, pagination);
+  }
+
   // Private
   convertObjectIdToString(
     post: any,

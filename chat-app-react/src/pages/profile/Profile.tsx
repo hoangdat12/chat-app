@@ -134,7 +134,7 @@ export const FriendAndPost: FC<IFriendAndPostProp> = memo(
     const elementRef = useRef<HTMLDivElement>(null);
     return (
       <>
-        <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] px-8 md:px-4 xl:px-32 md:grid grid-cols-3 gap-6 flex flex-col-reverse md:flex-col'>
+        <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] px-3 sm:px-8 md:px-4 xl:px-32 md:grid grid-cols-3 gap-6 flex flex-col-reverse md:flex-col'>
           <ProfilePost userId={userId} user={user} />
           <div
             ref={elementRef}

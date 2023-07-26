@@ -70,6 +70,14 @@ export class PostRepository {
       },
       // {
       //   $lookup: {
+      //     from: 'Comment',
+      //     localField: '_id',
+      //     foreignField: 'comment_post_id',
+      //     as: 'commentsArr',
+      //   },
+      // },
+      // {
+      //   $lookup: {
       //     from: 'Post',
       //     localField: 'post_share',
       //     foreignField: '_id',
@@ -90,13 +98,14 @@ export class PostRepository {
               },
             },
           },
+          // comments: { $slice: ['$commentsArr', 5] },
           // post_share: { $arrayElemAt: ['$post_share_obj', 0] },
         },
       },
       {
         $project: {
           userObj: 0,
-          // post_share_obj: 0,
+          // commentsArr: 0
         },
       },
       {
@@ -273,6 +282,27 @@ export class PostRepository {
       },
       {
         post_mode: post_mode,
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+  }
+
+  async getPostOfFriend(user: IUserCreated, pagination: Pagination) {
+    return this.postModel.find({});
+  }
+
+  async increQuantityCommentNum(postId: string) {
+    return this.postModel.findOneAndUpdate(
+      {
+        _id: postId,
+      },
+      {
+        $inc: {
+          post_comments_num: 1,
+        },
       },
       {
         new: true,

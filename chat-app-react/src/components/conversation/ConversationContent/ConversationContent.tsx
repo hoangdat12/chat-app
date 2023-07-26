@@ -45,6 +45,7 @@ import MessageContent from './MessageContent';
 import { MessageContentType } from '../../../ultils/constant/message.constant';
 import { getUserNameAndAvatarUrl } from '../../../ultils';
 import ConversationSetting from '../ConversationSetting';
+import useEnterListener from '../../../hooks/useEnterEvent';
 
 export interface IPropConversationContent {
   user: IUser | null;
@@ -279,21 +280,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
   };
 
   // Handle event Enter
-  useEffect(() => {
-    if (messageValue !== '') {
-      const enterEvent = (e: any) => {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-          handleSendMessage();
-        }
-      };
-
-      document.addEventListener('keydown', enterEvent);
-
-      return () => {
-        document.removeEventListener('keydown', enterEvent);
-      };
-    }
-  }, [messageValue]);
+  useEnterListener(handleSendMessage, messageValue);
 
   // Get message of conversation
   useEffect(() => {
