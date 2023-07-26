@@ -1,11 +1,17 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
 import Avatar from '../avatars/Avatar';
-import { FC, memo, useEffect, useState } from 'react';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import OptionDeleteAndUpdate from '../options/OptionDeleteAndUpdate';
-import { IComment } from '../../ultils/interface';
-import { getUsername } from '../../ultils';
+import {
+  IComment,
+  IDataDeleteComment,
+  IDataUpdateComment,
+} from '../../ultils/interface';
+import { getTimeComment, getUsername } from '../../ultils';
 import { commentService } from '../../features/comment/commentService';
-import { CommentInput } from './Comment';
+import CommentInput from './CommentInput';
+import useClickOutside from '../../hooks/useClickOutside';
+import useEnterListener from '../../hooks/useEnterEvent';
 
 export interface IPropCommentContent {
   comments: IComment[] | null;
@@ -42,7 +48,11 @@ export const Content: FC<IPropComment> = memo(
   ({ comment, sizeAvatar, space }) => {
     const [showOption, setShowOption] = useState<boolean>(false);
     const [isReply, setIsReply] = useState(false);
+    const [updateContent, setUpdateContent] = useState('');
+    const [isUpdate, setIsUpdate] = useState(false);
     const [childComments, setChildComments] = useState<IComment[] | null>(null);
+
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
       const handleGetListComment = async () => {
@@ -60,27 +70,101 @@ export const Content: FC<IPropComment> = memo(
       setShowOption(true);
     };
 
-    const handleDeleteComment = () => {};
+    const handleShowUpdate = () => {
+      setUpdateContent(comment.comment_content);
+      setIsUpdate(true);
+      setShowOption(false);
+      inputRef?.current?.focus();
+    };
 
-    const handleUpdateComment = () => {};
+    const handleDeleteComment = async () => {
+      const data: IDataDeleteComment = {
+        comment_id: comment._id,
+        comment_post_id: comment.comment_post_id,
+      };
+      const res = await commentService.deleteComment(data);
+      console.log(res);
+      if (res.status === 200) {
+        comment.comment_content = updateContent;
+      }
+      setShowOption(false);
+    };
+
+    const handleUpdateComment = async () => {
+      const data: IDataUpdateComment = {
+        comment_content: updateContent.trim(),
+        comment_id: comment._id,
+        comment_post_id: comment.comment_post_id,
+      };
+      const res = await commentService.updateComment(data);
+      if (res.status === 200) {
+        setChildComments(null);
+      }
+      setIsUpdate(false);
+    };
 
     const handleLikeComment = () => {};
 
+    useEffect(() => {
+      if (isUpdate) {
+        inputRef?.current?.focus();
+        console.log('focus');
+      }
+    }, [isUpdate]);
+
+    useClickOutside(inputRef, () => setIsUpdate(false), 'mousedown');
+
+    useEnterListener(
+      handleUpdateComment,
+      updateContent.trim(),
+      updateContent.trim() !== comment.comment_content.trim()
+    );
+
     return (
-      <div>
-        <div className={`flex ${space ?? 'gap-3'} hover-parent py-1`}>
+      <div className='flex flex-col'>
+        <div className={`flex ${space ?? 'gap-3'} py-1`}>
           <Avatar
             avatarUrl={comment.comment_user_id.avatarUrl}
             className={sizeAvatar ?? 'w-10 h-10'}
           />
           <div className='max-w-[80%]'>
-            <div className='gap-2 px-3 py-2 text-sm md: text-[16px] rounded-lg bg-white'>
+            <div className='relative hover-parent px-3 py-2 text-sm rounded-lg bg-white'>
               <h1 className='flex flex-wrap whitespace-nowrap font-semibold cursor-pointer'>
                 {getUsername(comment.comment_user_id)}
               </h1>
-              <p className='text-gray-700 text-[15px]'>
-                {comment.comment_content}
-              </p>
+              {isUpdate ? (
+                <input
+                  ref={inputRef}
+                  type='text'
+                  className='outline-none border px-2 rounded'
+                  value={updateContent}
+                  onChange={(e) => setUpdateContent(e.target.value)}
+                />
+              ) : (
+                <p className='text-gray-700 text-[15px]'>
+                  {comment.comment_content}
+                </p>
+              )}
+              <div className='absolute top-0 -right-[50px] h-full hover-child hidden items-start'>
+                <div className='flex items-center h-full border-x-[20px] border-transparent'>
+                  <span
+                    onClick={handleShowOption}
+                    className='flex rounded-full cursor-pointer p-1 hover:bg-white duration-300'
+                  >
+                    <FiMoreHorizontal />
+                  </span>
+                </div>
+                <div className='relative'>
+                  {showOption && (
+                    <OptionDeleteAndUpdate
+                      position={'-top-2 left-[130%]'}
+                      handleDelete={handleDeleteComment}
+                      handleUpdate={handleShowUpdate}
+                      setShowOption={setShowOption}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
             <div className='flex gap-3 px-3 mt-1 text-xs'>
               <span
@@ -95,24 +179,10 @@ export const Content: FC<IPropComment> = memo(
               >
                 Reply
               </span>
-              <span className='cursor-pointer hover:opacity-80'>16 minus</span>
+              <span className='cursor-pointer hover:opacity-80'>
+                {getTimeComment(comment.createdAt)}
+              </span>
             </div>
-          </div>
-          <div className='relative hover-child ml-1 hidden items-start mt-2'>
-            <span
-              onClick={handleShowOption}
-              className='rounded-full cursor-pointer p-1 hover:bg-white duration-300'
-            >
-              <FiMoreHorizontal />
-            </span>
-            {showOption && (
-              <OptionDeleteAndUpdate
-                position={'-top-2 left-[130%]'}
-                handleDelete={handleDeleteComment}
-                handleUpdate={handleUpdateComment}
-                setShowOption={setShowOption}
-              />
-            )}
           </div>
         </div>
         <div className='pl-10'>

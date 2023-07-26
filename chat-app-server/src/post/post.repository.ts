@@ -294,14 +294,14 @@ export class PostRepository {
     return this.postModel.find({});
   }
 
-  async increQuantityCommentNum(postId: string) {
+  async increQuantityCommentNum(postId: string, quantity: number = 1) {
     return this.postModel.findOneAndUpdate(
       {
         _id: postId,
       },
       {
         $inc: {
-          post_comments_num: 1,
+          post_comments_num: quantity,
         },
       },
       {

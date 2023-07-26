@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
 
-const useEnterListener = (handleEnter: any, dependence: string | any) => {
+const useEnterListener = (
+  handleEnter: any,
+  dependence: string | any,
+  condition: boolean = true
+) => {
   useEffect(() => {
-    if (dependence.trim() !== '') {
+    if (dependence.trim() !== '' && condition) {
       const handleEnterEvent = (e: any) => {
         if (e.key === 'Enter' || e.keyCode === 13) {
           handleEnter();

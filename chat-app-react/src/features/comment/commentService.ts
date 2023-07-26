@@ -1,8 +1,10 @@
 import {
   IComment,
   IDataCreateComment,
+  IDataDeleteComment,
   IDataGetListComment,
   IDataGetListCommentResponse,
+  IDataUpdateComment,
   IResponse,
 } from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
@@ -25,7 +27,21 @@ const getListComment = async (
   return res;
 };
 
+const updateComment = async (data: IDataUpdateComment) => {
+  const res = await myAxios.patch('/comment', data);
+  console.log(res);
+  return res;
+};
+
+const deleteComment = async (data: IDataDeleteComment) => {
+  const res = await myAxios.delete('/comment', { data });
+  console.log(res);
+  return res;
+};
+
 export const commentService = {
   createComment,
   getListComment,
+  updateComment,
+  deleteComment,
 };

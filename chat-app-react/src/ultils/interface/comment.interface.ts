@@ -30,3 +30,12 @@ export interface IDataGetListCommentResponse {
   comments: IComment[];
   remainComment: number;
 }
+
+export interface IDataDeleteComment {
+  comment_id: string;
+  comment_post_id: string;
+}
+
+export interface IDataUpdateComment extends IDataDeleteComment {
+  comment_content: string;
+}

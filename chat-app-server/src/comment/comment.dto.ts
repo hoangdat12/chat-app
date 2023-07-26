@@ -10,3 +10,15 @@ export class DataCreateComment {
   // @IsNotEmpty()
   comment_parent_id: string | null;
 }
+
+export class DataDeleteComment {
+  @IsNotEmpty()
+  comment_post_id: string;
+  @IsNotEmpty()
+  comment_id: string;
+}
+
+export class DataUpdateComment extends DataDeleteComment {
+  @IsNotEmpty()
+  comment_content: string;
+}

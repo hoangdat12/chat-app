@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import { Post } from './post.model';
 import { User } from './user.model';
 import { CommentType } from '../ultils/constant';
+import { IUserLikePost } from 'src/ultils/interface';
 
 @Schema({ collection: 'Comments', timestamps: true })
 export class Comment {
@@ -29,6 +30,12 @@ export class Comment {
 
   @Prop({ default: false })
   isDeleted: boolean;
+
+  @Prop({ default: 0 })
+  comment_likes_num: number;
+
+  @Prop({ default: [] })
+  comment_likes: IUserLikePost[];
 }
 
 const CommentSchema = SchemaFactory.createForClass(Comment);

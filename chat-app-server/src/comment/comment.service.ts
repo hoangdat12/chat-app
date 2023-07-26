@@ -1,8 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CommentRepository } from './comment.repository';
 import { IComment, IUserCreated, Pagination } from '../ultils/interface';
-import { DataCreateComment } from './comment.dto';
+import {
+  DataCreateComment,
+  DataDeleteComment,
+  DataUpdateComment,
+} from './comment.dto';
 import { PostRepository } from '../post/post.repository';
+import { CommentType } from '../ultils/constant';
 
 @Injectable()
 export class CommentService {
@@ -29,10 +34,12 @@ export class CommentService {
         this.commentRepository.updateManyChildCommentRight(
           comment_post_id,
           rightValue,
+          2,
         ),
         this.commentRepository.updateManyChildCommentLeft(
           comment_post_id,
           rightValue,
+          2,
         ),
       ];
       await Promise.all(promises);
@@ -100,6 +107,82 @@ export class CommentService {
         comments: comments.slice(0, 11),
         remainComment: comments.length - 10,
       };
+  }
+
+  async updateComment(user: IUserCreated, data: DataUpdateComment) {
+    const { comment_id, comment_content, comment_post_id } = data;
+
+    if (comment_content.trim() === '')
+      throw new HttpException('Invalid content!', HttpStatus.BAD_REQUEST);
+
+    const foundPost = await this.postRepository.findById(comment_post_id);
+    if (!foundPost)
+      throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
+
+    const foundComment = await this.commentRepository.findById(comment_id);
+    if (!foundComment)
+      throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
+
+    if (foundComment.comment_type !== CommentType.TEXT)
+      throw new HttpException('Not valid!', HttpStatus.BAD_REQUEST);
+
+    if (foundComment.comment_user_id.toString() !== user._id)
+      throw new HttpException('You not permission!', HttpStatus.BAD_REQUEST);
+
+    foundComment.comment_content = comment_content;
+    foundComment.save();
+
+    return this.convertCommentToString(foundComment, user);
+  }
+
+  async deleteComment(user: IUserCreated, data: DataDeleteComment) {
+    const { comment_id, comment_post_id } = data;
+
+    const foundPost = await this.postRepository.findById(comment_post_id);
+    if (!foundPost)
+      throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
+
+    const foundComment = await this.commentRepository.findById(comment_id);
+    if (!foundComment)
+      throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
+
+    const leftValue = foundComment.comment_left;
+    const rightValue = foundComment.comment_right;
+    const width = rightValue - leftValue + 1;
+
+    // Delete all comment and child Comment
+    await this.commentRepository.deleteComment(
+      comment_post_id,
+      leftValue,
+      rightValue,
+    );
+
+    // Change left and right value
+    const promise = [
+      this.commentRepository.updateManyChildCommentLeft(
+        comment_post_id,
+        rightValue,
+        -width,
+      ),
+      this.commentRepository.updateManyChildCommentRight(
+        comment_post_id,
+        rightValue,
+        -width,
+      ),
+    ];
+
+    await Promise.all(promise);
+    // increment quantity comment
+    await this.postRepository.increQuantityCommentNum(
+      comment_post_id,
+      -Math.floor(width / 2),
+    );
+
+    return foundComment;
+  }
+
+  async fixBugComment() {
+    return await this.commentRepository.updateMany();
   }
 
   convertCommentToString(comment: any, user: IUserCreated) {

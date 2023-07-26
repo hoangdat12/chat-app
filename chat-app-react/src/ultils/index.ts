@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { MessageType } from './constant/message.constant';
 import { IConversation, IUser } from './interface';
 
@@ -126,6 +126,27 @@ export const getTimeCreatePost = (createdAt: string) => {
     return `${timeDifferenceInHours} hours ago`;
   } else if (timeDifferenceInSeconds < 3600 && timeDifferenceInSeconds >= 60) {
     return `${Math.floor(timeDifferenceInSeconds / 60)} minutes ago`;
+  } else {
+    return `${Math.floor(timeDifferenceInSeconds)} seconds ago`;
+  }
+};
+
+export const getTimeComment = (createdAt: string) => {
+  const currentDate = new Date();
+  const createdDate = new Date(createdAt);
+  const timeDifferenceInSeconds = Math.floor(
+    (currentDate.getTime() - createdDate.getTime()) / 1000
+  );
+  const timeDifferenceInHours = Math.floor(timeDifferenceInSeconds / 3600);
+
+  if (timeDifferenceInHours >= 24) {
+    return formatDistanceToNow(createdDate, {
+      addSuffix: true,
+    });
+  } else if (timeDifferenceInHours >= 1 && timeDifferenceInHours < 24) {
+    return `${timeDifferenceInHours} hours ago`;
+  } else if (timeDifferenceInSeconds < 3600 && timeDifferenceInSeconds >= 60) {
+    return `${Math.floor(timeDifferenceInSeconds / 60)} minus ago`;
   } else {
     return `${Math.floor(timeDifferenceInSeconds)} seconds ago`;
   }

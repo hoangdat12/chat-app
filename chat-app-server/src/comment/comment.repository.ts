@@ -36,10 +36,14 @@ export class CommentRepository {
   }
 
   async findById(commentId: string) {
-    return await this.commentModel.findById(commentId).lean();
+    return await this.commentModel.findById(commentId);
   }
 
-  async updateManyChildCommentRight(postId: string, rightValue: number) {
+  async updateManyChildCommentRight(
+    postId: string,
+    rightValue: number,
+    quantity: number,
+  ) {
     return await this.commentModel.updateMany(
       {
         comment_post_id: postId,
@@ -47,13 +51,17 @@ export class CommentRepository {
       },
       {
         $inc: {
-          comment_right: 2,
+          comment_right: quantity,
         },
       },
     );
   }
 
-  async updateManyChildCommentLeft(postId: string, rightValue: number) {
+  async updateManyChildCommentLeft(
+    postId: string,
+    rightValue: number,
+    quantity: number,
+  ) {
     return await this.commentModel.updateMany(
       {
         comment_post_id: postId,
@@ -61,7 +69,7 @@ export class CommentRepository {
       },
       {
         $inc: {
-          comment_left: 2,
+          comment_left: quantity,
         },
       },
     );
@@ -105,5 +113,22 @@ export class CommentRepository {
       .limit(limit)
       // .select({})
       .lean();
+  }
+
+  async deleteComment(postId: string, leftValue: number, rightValue: number) {
+    return await this.commentModel.deleteMany({
+      comment_post_id: postId,
+      comment_left: { $gte: leftValue, $lte: rightValue },
+    });
+  }
+
+  async updateMany() {
+    return await this.commentModel.updateMany(
+      {},
+      {
+        comment_likes_num: 0,
+        comment_likes: [],
+      },
+    );
   }
 }

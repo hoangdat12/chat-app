@@ -1,7 +1,21 @@
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Delete,
+} from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { Request } from 'express';
-import { DataCreateComment } from './comment.dto';
+import {
+  DataCreateComment,
+  DataDeleteComment,
+  DataUpdateComment,
+} from './comment.dto';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
 import { Created, Ok } from '../ultils/response';
@@ -48,5 +62,38 @@ export class CommentController {
     } catch (err) {
       throw err;
     }
+  }
+
+  @Patch()
+  async updateComment(@Req() req: Request, @Body() data: DataUpdateComment) {
+    try {
+      const errors = await validate(data);
+      if (errors.length) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      return new Ok(await this.commentService.updateComment(user, data));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Delete()
+  async deleteComment(@Req() req: Request, @Body() data: DataDeleteComment) {
+    try {
+      const errors = await validate(data);
+      if (errors.length) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      return new Ok(await this.commentService.deleteComment(user, data));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Get('/bug/fix')
+  async fixBug() {
+    return await this.commentService.fixBugComment();
   }
 }
