@@ -51,7 +51,6 @@ export class CommentService {
       if (maxRightValue) {
         rightValue = maxRightValue.comment_right + 1;
       }
-      console.log(rightValue);
     }
 
     await this.postRepository.increQuantityCommentNum(comment_post_id);
@@ -61,10 +60,12 @@ export class CommentService {
   }
 
   async getListCommentOfPost(
+    user: IUserCreated,
     postId: string,
     parentCommentId: string,
     pagination: Pagination,
   ) {
+    console.log(parentCommentId);
     const foundPost = await this.postRepository.findById(postId);
     if (!foundPost)
       throw new HttpException('Post not found!', HttpStatus.BAD_REQUEST);
@@ -72,9 +73,9 @@ export class CommentService {
     pagination.limit = pagination.limit + 10;
     let comments = [];
     let parentComment = null;
-
     if (!parentCommentId) {
-      comments = await this.commentRepository.findParentComment(
+      comments = await this.commentRepository.findParentCommentV2(
+        user,
         postId,
         pagination,
       );
@@ -84,14 +85,16 @@ export class CommentService {
       );
       if (!foundParentComment)
         throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
-
-      comments = await this.commentRepository.findChildComment(
+      console.log(foundParentComment);
+      comments = await this.commentRepository.findChildCommentV2(
+        user,
         postId,
         parentCommentId,
         foundParentComment.comment_left,
         foundParentComment.comment_right,
         pagination,
       );
+      console.log(comments);
       parentComment = foundParentComment;
     }
 
@@ -110,18 +113,12 @@ export class CommentService {
   }
 
   async updateComment(user: IUserCreated, data: DataUpdateComment) {
-    const { comment_id, comment_content, comment_post_id } = data;
+    const { comment_content } = data;
 
     if (comment_content.trim() === '')
       throw new HttpException('Invalid content!', HttpStatus.BAD_REQUEST);
 
-    const foundPost = await this.postRepository.findById(comment_post_id);
-    if (!foundPost)
-      throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
-
-    const foundComment = await this.commentRepository.findById(comment_id);
-    if (!foundComment)
-      throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
+    const foundComment = await this.checkPostAndCommentFound(data);
 
     if (foundComment.comment_type !== CommentType.TEXT)
       throw new HttpException('Not valid!', HttpStatus.BAD_REQUEST);
@@ -136,15 +133,9 @@ export class CommentService {
   }
 
   async deleteComment(user: IUserCreated, data: DataDeleteComment) {
-    const { comment_id, comment_post_id } = data;
+    const { comment_post_id } = data;
 
-    const foundPost = await this.postRepository.findById(comment_post_id);
-    if (!foundPost)
-      throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
-
-    const foundComment = await this.commentRepository.findById(comment_id);
-    if (!foundComment)
-      throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
+    const foundComment = await this.checkPostAndCommentFound(data);
 
     const leftValue = foundComment.comment_left;
     const rightValue = foundComment.comment_right;
@@ -181,8 +172,34 @@ export class CommentService {
     return foundComment;
   }
 
+  async likeComment(user: IUserCreated, data: DataDeleteComment) {
+    await this.checkPostAndCommentFound(data);
+    const isLiked = await this.commentRepository.isLiked(user, data);
+    // If isLiked then cancel like
+    if (isLiked) {
+      // Cancel like
+      return await this.commentRepository.cancelLikeComment(user, data);
+    } else {
+      // Like
+      return await this.commentRepository.likeComment(user, data);
+    }
+  }
+
   async fixBugComment() {
     return await this.commentRepository.updateMany();
+  }
+
+  async checkPostAndCommentFound(data: DataDeleteComment) {
+    const { comment_post_id, comment_id } = data;
+    const foundPost = await this.postRepository.findById(comment_post_id);
+    if (!foundPost)
+      throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
+
+    const foundComment = await this.commentRepository.findById(comment_id);
+    if (!foundComment)
+      throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
+
+    return foundComment;
   }
 
   convertCommentToString(comment: any, user: IUserCreated) {

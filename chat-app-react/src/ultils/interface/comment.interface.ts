@@ -12,6 +12,7 @@ export interface IComment {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
+  isLiked: boolean;
 }
 
 export interface IDataGetListComment {

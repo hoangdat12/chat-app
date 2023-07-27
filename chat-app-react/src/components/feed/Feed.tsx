@@ -12,6 +12,7 @@ import { PostType } from '../../ultils/constant';
 import PostOwner from './PostOwner';
 import { ModeCreateFeed } from './CreateFeed';
 import { commentService } from '../../features/comment/commentService';
+import Loading from '../button/Loading';
 
 export interface IFeedProp {
   isOwner: boolean;
@@ -62,11 +63,13 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
   const [showShareModel, setShowShareModel] = useState(false);
   const [comments, setComments] = useState<IComment[] | null>(null);
   const [remainComment, setRemainComment] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useAppDispatch();
 
   const handleShowComment = async () => {
     if (!showComment && comments === null) {
+      setIsLoading(true);
       const data = {
         comment_post_id: post._id,
         parentCommentId: null,
@@ -74,6 +77,7 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
       const res = await commentService.getListComment(data);
       setComments(res.data.metaData.comments);
       setRemainComment(res.data.metaData.remainComment);
+      setIsLoading(false);
     }
     setShowComment(!showComment);
   };
@@ -137,14 +141,20 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
         </div>
       </div>
 
-      {showComment && (
-        <Comment
-          comments={comments}
-          setComments={setComments}
-          remainComment={remainComment}
-          postId={post._id}
-        />
-      )}
+      {showComment &&
+        (isLoading ? (
+          <div className='flex items-center justify-center w-full min-h-[120px]'>
+            <Loading />
+          </div>
+        ) : (
+          <Comment
+            comments={comments}
+            setComments={setComments}
+            remainComment={remainComment}
+            postId={post._id}
+            parentComment={true}
+          />
+        ))}
     </>
   );
 };

@@ -40,6 +40,7 @@ export class CommentController {
 
   @Get('/:postId')
   async getListComment(
+    @Req() req: Request,
     @Param('postId') postId: string,
     @Query('parentCommentId') parentCommentId: string,
     @Query('page') page: string = '1',
@@ -52,8 +53,10 @@ export class CommentController {
         limit: parseInt(limit),
         sortBy,
       };
+      const user = req.user as IUserCreated;
       return new Ok(
         await this.commentService.getListCommentOfPost(
+          user,
           postId,
           parentCommentId,
           pagination,
@@ -87,6 +90,20 @@ export class CommentController {
       }
       const user = req.user as IUserCreated;
       return new Ok(await this.commentService.deleteComment(user, data));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Post('/like')
+  async likeComment(@Req() req: Request, @Body() data: DataDeleteComment) {
+    try {
+      const errors = await validate(data);
+      if (errors.length) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      return new Ok(await this.commentService.likeComment(user, data));
     } catch (err) {
       throw err;
     }

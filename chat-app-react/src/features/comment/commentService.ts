@@ -24,6 +24,7 @@ const getListComment = async (
       data.parentCommentId ? `?parentCommentId=${data.parentCommentId}` : ''
     }`
   );
+  console.log(res);
   return res;
 };
 
@@ -39,9 +40,16 @@ const deleteComment = async (data: IDataDeleteComment) => {
   return res;
 };
 
+const likeComment = async (data: IDataDeleteComment) => {
+  const res = await myAxios.post('/comment/like', data);
+  console.log(res);
+  return res;
+};
+
 export const commentService = {
   createComment,
   getListComment,
   updateComment,
   deleteComment,
+  likeComment,
 };

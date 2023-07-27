@@ -8,10 +8,11 @@ export interface IPropCommentContent {
   remainComment: number | null;
   setComments: Dispatch<SetStateAction<IComment[] | null>>;
   postId: string;
+  parentComment: boolean;
 }
 
 const Comment: FC<IPropCommentContent> = memo(
-  ({ comments, setComments, remainComment, postId }) => {
+  ({ comments, setComments, remainComment, postId, parentComment = false }) => {
     return (
       <div className='flex flex-col gap-2 mt-6'>
         <h1 className='text-lg cursor-pointer mb-2'>Comment</h1>

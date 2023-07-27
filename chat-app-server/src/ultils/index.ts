@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { IMessage, IParticipant, IUserCreated, Pagination } from './interface';
 import * as _ from 'lodash';
+import { Types } from 'mongoose';
 
 export const getUsername = (user: IUserCreated) => {
   return `${user?.firstName} ${user?.lastName}`;
@@ -74,4 +75,8 @@ export const getMessageNotify = (
 
 export const objectNotContainNull = (obj: any) => {
   return _.pickBy(obj, (value) => value !== null);
+};
+
+export const convertObjectId = (id: any) => {
+  return new Types.ObjectId(id);
 };
