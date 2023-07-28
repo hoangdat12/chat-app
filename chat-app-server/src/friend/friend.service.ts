@@ -6,6 +6,7 @@ import { FriendRepository } from './friend.repository';
 import { getUsername } from '../ultils';
 import { NotifyService } from '../notify/notify.service';
 import { NotifyType } from '../ultils/constant/notify.constant';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class FriendService {
@@ -13,6 +14,7 @@ export class FriendService {
     private readonly authRepository: AuthRepository,
     private readonly friendRepository: FriendRepository,
     private readonly notifyService: NotifyService,
+    private readonly redisService: RedisService,
   ) {}
   async create(user: IUserCreated) {
     return await this.friendRepository.create(user);
@@ -213,8 +215,72 @@ export class FriendService {
     return { ...data, totalNotify };
   }
 
-  async getListFriend(user: IUserCreated, pagination: Pagination) {
-    return await this.friendRepository.findFriendByUserId(user._id, pagination);
+  // console.log(await this.friendRepository.findAllFriendOfUser(userId));
+  // [
+  //   {
+  //     friends: [
+  //       '644d4fee5fbc1a71278fe6c0',
+  //       '644944193bcfbedbdea05a98',
+  //       '644943ee3bcfbedbdea05a8c'
+  //     ]
+  //   }
+  // ]
+  async getListFriend(
+    user: IUserCreated,
+    userId: string,
+    pagination: Pagination,
+  ) {
+    const responseData = {
+      friends: [],
+      mutualFriends: null,
+    };
+    // If user'profile or list friend equal 0 then return
+    if (user._id === userId) {
+      responseData.friends = await this.friendRepository.findByUserId(
+        userId,
+        pagination,
+      );
+      return responseData;
+    }
+
+    // If view profile
+
+    // Key of user's friend
+    const key1 = `friend:${userId}`;
+    // Check mutual friend
+    if (!(await this.redisService.has(key1))) {
+      // Not has key
+      const friends = await this.friendRepository.findAllFriendOfUser(userId);
+      if (friends.length === 0) return responseData;
+      await this.redisService.sAdd(key1, friends[0].friends, 600);
+    } else {
+      // user make the request
+      const key2 = `friend:${user._id}`;
+      // Not key
+      if (!(await this.redisService.has(key2))) {
+        const myFriends = await this.friendRepository.findAllFriendOfUser(
+          user._id,
+        );
+        if (!myFriends || myFriends[0].friends.length === 0)
+          return responseData;
+
+        await this.redisService.sAdd(key2, myFriends[0].friends);
+      }
+
+      // Get mutual Friend
+      const mutualFriendsId = await this.redisService.sInter(key1, key2);
+
+      responseData.friends = await this.friendRepository.findMutualFriends(
+        user,
+        userId,
+        mutualFriendsId,
+        pagination,
+      );
+      responseData.mutualFriends =
+        mutualFriendsId.length === 1 ? null : mutualFriendsId.length - 1;
+    }
+    console.log(responseData);
+    return responseData;
   }
 
   async getNotifyAddFriend(user: IUserCreated) {

@@ -5,9 +5,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { FriendModel } from '../schema/friend.model';
 import { FriendRepository } from './friend.repository';
 import { NotifyModule } from '../notify/notify.module';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([FriendModel]), NotifyModule],
+  imports: [
+    MongooseModule.forFeature([FriendModel]),
+    NotifyModule,
+    RedisModule,
+  ],
   controllers: [FriendController],
   providers: [FriendService, FriendRepository],
   exports: [FriendService],

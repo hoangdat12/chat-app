@@ -6,7 +6,8 @@ export interface IFriend {
 }
 
 export interface IFriendResponse {
-  friends: IFriend;
+  friends: IFriend[];
+  mutualFriends: number;
 }
 
 export interface IAddFriendResponse {

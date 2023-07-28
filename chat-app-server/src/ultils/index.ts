@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { IMessage, IParticipant, IUserCreated, Pagination } from './interface';
 import * as _ from 'lodash';
-import { Types } from 'mongoose';
+import { Types, isValidObjectId } from 'mongoose';
 
 export const getUsername = (user: IUserCreated) => {
   return `${user?.firstName} ${user?.lastName}`;
@@ -79,4 +79,9 @@ export const objectNotContainNull = (obj: any) => {
 
 export const convertObjectId = (id: any) => {
   return new Types.ObjectId(id);
+};
+
+export const isObjectId = (id: string) => {
+  if (!isValidObjectId(id))
+    throw new HttpException('Invalid userId!', HttpStatus.BAD_REQUEST);
 };

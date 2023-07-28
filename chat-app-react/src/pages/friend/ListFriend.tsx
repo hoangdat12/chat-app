@@ -11,8 +11,11 @@ const ListFriend = () => {
   const { userId } = useParams();
   const dispatch = useAppDispatch();
   const { friends } = useAppSelector(selectFriend);
+
   useEffect(() => {
-    dispatch(getFriendOfUser());
+    if (userId) {
+      dispatch(getFriendOfUser(userId));
+    }
   }, [userId]);
 
   return (

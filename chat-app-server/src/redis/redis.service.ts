@@ -5,6 +5,7 @@ import { Redis as IRedis } from 'ioredis';
 export class RedisService {
   constructor(@Inject('REDIS_CLIENT') private readonly redisClient: IRedis) {}
 
+  // STRING
   async set(key: string, value: string, ttl: number = 60) {
     const pipeline = this.redisClient.pipeline();
     pipeline.set(key, value);
@@ -16,27 +17,37 @@ export class RedisService {
     return await this.redisClient.get(key);
   }
 
-  async addToSet(key: string, members: string[], ttl: number = 60) {
+  async has(key: string) {
+    return await this.redisClient.exists(key);
+  }
+
+  // SETS
+  async sAdd(key: string, members: string[], ttl: number = 60) {
     const pipeline = this.redisClient.pipeline();
     pipeline.sadd(key, ...members);
     pipeline.expire(key, ttl + Math.random() * 10);
     await pipeline.exec();
   }
 
-  async removeToSet(key: string) {
+  async sRem(key: string) {
     return await this.redisClient.srem(key);
   }
 
-  async getMembersOfSet(key: string) {
+  // Get all value of key
+  async sMembers(key: string) {
     return await this.redisClient.smembers(key);
   }
-
-  async isMemberOfSet(key: string, member: string) {
+  // Check key is a member of sets
+  async sIsMember(key: string, member: string) {
     return await this.redisClient.sismember(key, member);
   }
-
+  // Get length
   async sCard(key: string) {
     return await this.redisClient.scard(key);
+  }
+  // Get common
+  async sInter(key1: string, key2: string) {
+    return await this.redisClient.sinter(key1, key2);
   }
 
   async ttl(key: string) {

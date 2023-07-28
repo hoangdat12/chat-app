@@ -20,6 +20,7 @@ import useDebounce from '../../hooks/useDebounce';
 import { friendService } from '../../features/friend/friendService';
 import useClickOutside from '../../hooks/useClickOutside';
 import Loading from '../button/Loading';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface IPropTagFriend {
   friend: IFriend;
@@ -30,6 +31,8 @@ export interface IPropTagFriendModel {
   setListFriendTag: Dispatch<SetStateAction<IFriend[]>>;
   setShowTagFriend: (value: boolean) => void;
 }
+
+const user = getUserLocalStorageItem();
 
 const TagFriendModel: FC<IPropTagFriendModel> = ({
   setListFriendTag,
@@ -49,7 +52,7 @@ const TagFriendModel: FC<IPropTagFriendModel> = ({
 
   useEffect(() => {
     if (!friends) {
-      dispatch(getFriendOfUser());
+      dispatch(getFriendOfUser(user._id));
     }
   }, []);
 

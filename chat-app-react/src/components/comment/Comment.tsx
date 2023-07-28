@@ -1,4 +1,4 @@
-import { IComment } from '../../ultils/interface';
+import { IComment, IPost } from '../../ultils/interface';
 import { Dispatch, FC, SetStateAction, memo } from 'react';
 import CommentContent from './CommentContent';
 import CommentInput from './CommentInput';
@@ -7,16 +7,19 @@ export interface IPropCommentContent {
   comments: IComment[] | null;
   remainComment: number | null;
   setComments: Dispatch<SetStateAction<IComment[] | null>>;
-  postId: string;
-  parentComment: boolean;
+  post: IPost;
 }
 
 const Comment: FC<IPropCommentContent> = memo(
-  ({ comments, setComments, remainComment, postId, parentComment = false }) => {
+  ({ comments, setComments, remainComment, post }) => {
     return (
       <div className='flex flex-col gap-2 mt-6'>
         <h1 className='text-lg cursor-pointer mb-2'>Comment</h1>
-        <CommentContent comments={comments} />
+        <CommentContent
+          comments={comments}
+          setComments={setComments}
+          post={post}
+        />
         <div className='flex flex-col gap-2 max-h-[340px] overflow-y-scroll mt-1'>
           <div
             className={`${
@@ -29,7 +32,7 @@ const Comment: FC<IPropCommentContent> = memo(
             </span>
           </div>
         </div>
-        <CommentInput setComments={setComments} postId={postId} />
+        <CommentInput setComments={setComments} postId={post._id} />
       </div>
     );
   }

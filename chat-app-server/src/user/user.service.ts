@@ -4,12 +4,14 @@ import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { IUserCreated, Pagination } from '../ultils/interface';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly conversationRepository: ConversationRepository,
+    private readonly redisService: RedisService,
   ) {}
 
   async getAllUser() {
@@ -21,7 +23,17 @@ export class UserService {
     return await this.authRepository.findByUserName(keyword.trim(), pagination);
   }
 
-  async getUserDetail(userId: string) {
+  async getUserDetail(user: IUserCreated, userId: string) {
+    if (user._id !== userId) {
+      const key = `user:${user._id}:profile:${userId}`;
+      // If haven't key then increment view profile
+      if (!(await this.redisService.get(key))) {
+        // Set key
+        await this.redisService.set(key, 'view');
+        // increment
+        await this.authRepository.increViewProfile(userId);
+      }
+    }
     const userExist = await this.authRepository.findById(userId);
     if (!userExist)
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND);

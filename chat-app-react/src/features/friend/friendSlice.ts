@@ -8,7 +8,7 @@ export interface IInitialStateFriend {
   unconfirmed: Map<string, IFriend> | null;
   isLoading: boolean;
   status: 'idle' | 'pending' | 'succeeded' | 'failed';
-  totalNotifyAddFriend: string;
+  mutualFriends: number | null;
 }
 
 const initialState: IInitialStateFriend = {
@@ -16,12 +16,15 @@ const initialState: IInitialStateFriend = {
   unconfirmed: null,
   isLoading: false,
   status: 'idle',
-  totalNotifyAddFriend: '0',
+  mutualFriends: null,
 };
 
-export const getFriendOfUser = createAsyncThunk('friend/friend', async () => {
-  return await friendService.getFriendOfUser();
-});
+export const getFriendOfUser = createAsyncThunk(
+  'friend/friend',
+  async (userId: string) => {
+    return await friendService.getFriendOfUser(userId);
+  }
+);
 
 export const getUnconfirmedFriend = createAsyncThunk(
   'friend/unconfirmed',
@@ -55,15 +58,6 @@ const friendSlice = createSlice({
   name: 'friend',
   initialState: initialState,
   reducers: {
-    // confirmFriend: (state, action: PayloadAction<IFriend>) => {
-    //   const newFriend = action.payload;
-    //   state.unconfirmed?.delete(newFriend.userId);
-    //   state.friends?.set(newFriend.userId, newFriend);
-    // },
-    // refuseFriend: (state, action: PayloadAction<IFriend>) => {
-    //   const refuse = action.payload;
-    //   state.unconfirmed?.delete(refuse.userId);
-    // },
     receivedAddFriend: (state, action: PayloadAction<IFriend>) => {
       const newConversationMap = new Map([
         [action.payload.userId, action.payload],
@@ -75,21 +69,12 @@ const friendSlice = createSlice({
           ...state?.unconfirmed,
         ]);
       } else state.unconfirmed = newConversationMap;
-      state.totalNotifyAddFriend = (
-        parseInt(state.totalNotifyAddFriend) + 1
-      ).toString();
     },
     cancelRequestAddFriend: (
       state,
       action: PayloadAction<{ userId: string }>
     ) => {
       state.unconfirmed?.delete(action.payload.userId);
-      state.totalNotifyAddFriend = (
-        parseInt(state.totalNotifyAddFriend) - 1
-      ).toString();
-    },
-    readAllNotify: (state) => {
-      state.totalNotifyAddFriend = '0';
     },
   },
   extraReducers: (builder) => {
@@ -103,12 +88,11 @@ const friendSlice = createSlice({
         state.status = 'idle';
         state.isLoading = false;
         const newFriend = new Map<string, IFriend>();
-
-        for (let friend of action.payload) {
-          newFriend.set(friend.friends.userId, friend.friends);
+        for (let friend of action.payload.friends) {
+          newFriend.set(friend.userId, friend);
         }
-
         state.friends = newFriend;
+        state.mutualFriends = action.payload.mutualFriends;
       })
       .addCase(getFriendOfUser.rejected, (state) => {
         state.status = 'failed';
@@ -132,26 +116,6 @@ const friendSlice = createSlice({
         state.unconfirmed = newConfirmed;
       })
       .addCase(getUnconfirmedFriend.rejected, (state) => {
-        state.status = 'failed';
-        state.isLoading = false;
-      })
-
-      // Notify
-      .addCase(getTotalNotifyAddFriend.pending, (state) => {
-        state.status = 'pending';
-        state.isLoading = true;
-      })
-      .addCase(getTotalNotifyAddFriend.fulfilled, (state, action) => {
-        state.status = 'idle';
-        state.isLoading = false;
-        const totalNotifyAddFriend = action.payload.totalNotify;
-        if (totalNotifyAddFriend > 5) {
-          state.totalNotifyAddFriend = `${totalNotifyAddFriend}+`;
-        } else {
-          state.totalNotifyAddFriend = totalNotifyAddFriend.toString();
-        }
-      })
-      .addCase(getTotalNotifyAddFriend.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
       })
@@ -198,7 +162,6 @@ export const {
   // refuseFriend,
   receivedAddFriend,
   cancelRequestAddFriend,
-  readAllNotify,
 } = friendSlice.actions;
 export default friendSlice.reducer;
 export const selectFriend = (state: RootState) => state.friend;

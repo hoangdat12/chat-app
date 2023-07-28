@@ -1,8 +1,14 @@
 import Avatar from '../avatars/Avatar';
 import { BsPersonPlusFill } from 'react-icons/bs';
 import Button from '../button/Button';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
+import {
+  getFriendOfUser,
+  selectFriend,
+} from '../../features/friend/friendSlice';
+import { IFriend } from '../../ultils/interface';
 
 export interface IPropProfileFriend {
   userId: string | undefined;
@@ -10,13 +16,31 @@ export interface IPropProfileFriend {
 
 const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
   const navigate = useNavigate();
+
+  const dispatch = useAppDispatch();
+  const { friends, mutualFriends } = useAppSelector(selectFriend);
+
+  useEffect(() => {
+    if (userId) {
+      dispatch(getFriendOfUser(userId));
+    }
+  }, [userId]);
+
   return (
     <div className='p-4 rounded-md bg-gray-100'>
-      <h1 className='text-lg md:text-xl xl:text-2xl font-medium'>Friends</h1>
+      <div className='flex justify-between items-center'>
+        <h1 className='text-lg md:text-xl xl:text-2xl font-medium'>Friends</h1>
+        <span
+          className={`${
+            !mutualFriends && 'hidden'
+          } text-sm text-gray-700 cursor-pointer`}
+        >{`${mutualFriends} Mutual`}</span>
+      </div>
       <div className='flex flex-col gap-3'>
-        {[1, 2, 3, 4].map((item) => (
-          <FriendBoxDetail key={item} />
-        ))}
+        {friends &&
+          Array.from(friends.values()).map((friend) => (
+            <FriendBoxDetail key={friend.userId} friend={friend} />
+          ))}
       </div>
       <div
         onClick={() => navigate(`/profile/${userId}/friends`)}
@@ -28,18 +52,17 @@ const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
   );
 };
 
-export const FriendBoxDetail = () => {
+export interface IPropFriendBoxDetial {
+  friend: IFriend;
+}
+
+export const FriendBoxDetail: FC<IPropFriendBoxDetial> = ({ friend }) => {
   return (
     <div className='flex items-center justify-between mt-4'>
       <div className='flex items-center gap-2'>
-        <Avatar
-          avatarUrl={
-            'https://flowbite.com/application-ui/demo/images/users/jese-leos-2x.png'
-          }
-          className='w-12 h-12'
-        />
+        <Avatar avatarUrl={friend.avatarUrl} className='w-12 h-12' />
         <div className='flex flex-col'>
-          <span className='cursor-pointer'>Hoang Dat</span>
+          <span className='cursor-pointer'>{friend.userName}</span>
           <span className='text-sm text-gray-700'>22th Birthday</span>
         </div>
       </div>

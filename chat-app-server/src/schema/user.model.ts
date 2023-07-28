@@ -29,7 +29,10 @@ export class User {
   @Prop({ default: 'email' })
   loginWith: string;
 
-  @Prop({ default: 0 })
+  @Prop({
+    default: 0,
+    validator: (value: number) => value >= 0 && value <= 1000,
+  })
   friends?: number;
 
   @Prop({ default: 0 })

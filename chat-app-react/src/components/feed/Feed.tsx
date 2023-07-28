@@ -151,8 +151,7 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
             comments={comments}
             setComments={setComments}
             remainComment={remainComment}
-            postId={post._id}
-            parentComment={true}
+            post={post}
           />
         ))}
     </>

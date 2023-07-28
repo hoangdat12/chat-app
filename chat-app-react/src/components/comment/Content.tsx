@@ -1,13 +1,26 @@
 import { FiMoreHorizontal } from 'react-icons/fi';
 import Avatar from '../avatars/Avatar';
-import { FC, memo, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  memo,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import OptionDeleteAndUpdate from '../options/OptionDeleteAndUpdate';
 import {
   IComment,
   IDataDeleteComment,
   IDataUpdateComment,
+  IPost,
 } from '../../ultils/interface';
-import { getTimeComment, getUsername } from '../../ultils';
+import {
+  getTimeComment,
+  getUserLocalStorageItem,
+  getUsername,
+} from '../../ultils';
 import { commentService } from '../../features/comment/commentService';
 import CommentInput from './CommentInput';
 import useClickOutside from '../../hooks/useClickOutside';
@@ -18,16 +31,23 @@ export interface IPropComment {
   comment: IComment;
   sizeAvatar?: string;
   space?: string;
+  setComments: Dispatch<SetStateAction<IComment[] | null>>;
+  post: IPost;
 }
 
+const user = getUserLocalStorageItem();
+
 export const Content: FC<IPropComment> = memo(
-  ({ comment, sizeAvatar, space }) => {
+  ({ comment, sizeAvatar, space, setComments, post }) => {
     const [showOption, setShowOption] = useState<boolean>(false);
     const [isReply, setIsReply] = useState(false);
     const [updateContent, setUpdateContent] = useState('');
     const [isUpdate, setIsUpdate] = useState(false);
     const [childComments, setChildComments] = useState<IComment[] | null>(null);
     const [isLiked, setIsLiked] = useState(comment.isLiked);
+    const [remainChildComment, setRemainChildComment] = useState<number | null>(
+      null
+    );
 
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -39,6 +59,7 @@ export const Content: FC<IPropComment> = memo(
       const res = await commentService.getListComment(data);
       console.log('child comment', res);
       setChildComments(res.data.metaData.comments);
+      setRemainChildComment(res.data.metaData.remainComment);
     };
 
     const handleShowOption = () => {
@@ -59,7 +80,13 @@ export const Content: FC<IPropComment> = memo(
       };
       const res = await commentService.deleteComment(data);
       if (res.status === 200) {
-        comment.comment_content = updateContent;
+        setComments((prevs) => {
+          if (prevs) {
+            return prevs.filter((prev) => prev._id !== comment._id);
+          } else {
+            return prevs;
+          }
+        });
       }
       setShowOption(false);
     };
@@ -137,14 +164,16 @@ export const Content: FC<IPropComment> = memo(
                   </span>
                 </div>
                 <div className='relative'>
-                  {showOption && (
-                    <OptionDeleteAndUpdate
-                      position={'-top-2 left-[130%]'}
-                      handleDelete={handleDeleteComment}
-                      handleUpdate={handleShowUpdate}
-                      setShowOption={setShowOption}
-                    />
-                  )}
+                  {showOption &&
+                    (user._id === comment.comment_user_id._id ||
+                      user._id === post.user._id) && (
+                      <OptionDeleteAndUpdate
+                        position={'-top-2 left-[130%]'}
+                        handleDelete={handleDeleteComment}
+                        handleUpdate={handleShowUpdate}
+                        setShowOption={setShowOption}
+                      />
+                    )}
                 </div>
               </div>
             </div>
@@ -167,6 +196,17 @@ export const Content: FC<IPropComment> = memo(
                 {getTimeComment(comment.createdAt)}
               </span>
             </div>
+            <div
+              onClick={handleGetListComment}
+              className={`${
+                (comment.comment_right - comment.comment_left === 1 ||
+                  childComments?.length === 0 ||
+                  remainChildComment === 0) &&
+                'hidden'
+              } flex justify-start text-xs cursor-pointer px-3 pt-2`}
+            >
+              Show more comment ...
+            </div>
           </div>
         </div>
         <div className='pl-10'>
@@ -188,18 +228,10 @@ export const Content: FC<IPropComment> = memo(
               comments={childComments}
               sizeAvatar={'w-8 h-8'}
               space={'gap-2'}
+              setComments={setChildComments}
+              post={post}
             />
           )}
-        </div>
-        <div
-          onClick={handleGetListComment}
-          className={`${
-            (comment.comment_right - comment.comment_left === 1 ||
-              childComments?.length === 0) &&
-            'hidden'
-          } flex justify-end text-xs cursor-pointer pr-2`}
-        >
-          Show more comment ...
         </div>
       </div>
     );

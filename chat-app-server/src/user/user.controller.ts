@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Patch,
   Query,
@@ -11,13 +13,12 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { Request } from 'express';
 import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from '../ultils/response';
 import { IUserCreated } from '../ultils/interface';
 import { multerOptions } from '../ultils/constant/multer.config';
+import { isObjectId } from '../ultils';
 
 @Controller('user')
 export class UserController {
@@ -54,9 +55,11 @@ export class UserController {
   }
 
   @Get('/:userId')
-  async getUserDetail(@Param('userId') userId: string) {
+  async getUserDetail(@Req() req: Request, @Param('userId') userId: string) {
     try {
-      return await this.userService.getUserDetail(userId);
+      isObjectId(userId);
+      const user = req.user as IUserCreated;
+      return await this.userService.getUserDetail(user, userId);
     } catch (err) {
       throw err;
     }

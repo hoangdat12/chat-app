@@ -4,7 +4,7 @@ import mongoose, { Model } from 'mongoose';
 import { User } from '../../schema/user.model';
 import { ChangeUsername, UserRegister } from '../auth.dto';
 import { IUserCreated, Pagination } from '../../ultils/interface';
-import { checkNegativeNumber } from '../../ultils';
+import { checkNegativeNumber, convertObjectId } from '../../ultils';
 
 @Injectable()
 export class AuthRepository {
@@ -132,6 +132,19 @@ export class AuthRepository {
       {
         $inc: {
           friends: quantity,
+        },
+      },
+    );
+  }
+
+  async increViewProfile(userId: string) {
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: convertObjectId(userId),
+      },
+      {
+        $inc: {
+          viewer: 1,
         },
       },
     );

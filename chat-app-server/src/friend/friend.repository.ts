@@ -38,11 +38,6 @@ export class FriendRepository {
         },
       },
       {
-        $sort: {
-          'friends.createdAt': -1,
-        },
-      },
-      {
         $skip: offset,
       },
       {
@@ -62,18 +57,15 @@ export class FriendRepository {
           },
         },
         {
-          $unwind: '$unconfirmed',
+          $unwind: '$friends',
         },
         {
           $project: {
             _id: 0,
-            unconfirmed: 1,
-          },
-        },
-        {
-          $sort: {
-            'friends.createdAt': -1,
-            'unconfirmed.createdAt': -1,
+            userId: '$friends.userId',
+            email: '$friends.email',
+            userName: '$friends.userName',
+            avatarUrl: '$friends.avatarUrl',
           },
         },
         {
@@ -86,9 +78,35 @@ export class FriendRepository {
       .exec();
   }
 
-  async findFriendByUserId(userId: string, pagination: Pagination) {
-    const { limit, page } = checkNegativeNumber(pagination);
-    const offset = (page - 1) * limit;
+  async findAllFriendOfUser(userId: string) {
+    return this.friendModel.aggregate([
+      { $match: { user: userId } },
+      {
+        $unwind: '$friends',
+      },
+      {
+        $group: {
+          _id: null,
+          friends: { $addToSet: '$friends.userId' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          friends: 1,
+        },
+      },
+    ]);
+  }
+
+  // Find friends with mutual friends at the beginning and the rest at the end
+  async findMutualFriends(
+    user: IUserCreated,
+    userId: string,
+    friendIds: string[],
+    pagination: Pagination,
+  ) {
+    const { limit } = checkNegativeNumber(pagination);
     return this.friendModel
       .aggregate([
         {
@@ -103,18 +121,128 @@ export class FriendRepository {
           $project: {
             _id: 0,
             friends: 1,
+            isMatched: {
+              $cond: {
+                if: {
+                  $and: [
+                    { $in: ['$friends.userId', friendIds] }, // Check if friends.userId is in the given array
+                    { $ne: ['$friends.userId', user._id] }, // Check if friends.userId is not equal to the user's own _id
+                  ],
+                },
+                then: true,
+                else: false,
+              },
+            },
           },
         },
         {
-          $sort: {
-            'friends.createdAt': -1,
+          $group: {
+            _id: null,
+            matchedFriends: {
+              $push: {
+                $cond: [
+                  { $eq: ['$isMatched', true] }, // Check if isMatched is true
+                  {
+                    $mergeObjects: [
+                      '$friends',
+                      { isFriend: true }, // Add the isFriend field for unmatched friends
+                    ],
+                  },
+                  '$$REMOVE',
+                ],
+              },
+            },
+            unmatchedFriends: {
+              $push: {
+                $cond: [
+                  { $eq: ['$isMatched', false] }, // Check if isMatched is false
+                  {
+                    $mergeObjects: [
+                      '$friends',
+                      { isFriend: false }, // Add the isFriend field for unmatched friends
+                    ],
+                  },
+                  '$$REMOVE',
+                ],
+              },
+            },
           },
         },
         {
-          $skip: offset,
+          $project: {
+            combinedFriends: {
+              $setUnion: ['$matchedFriends', '$unmatchedFriends'],
+            }, // Combine matched and unmatched friends
+          },
+        },
+        {
+          $unwind: '$combinedFriends', // Unwind the combined array
+        },
+        {
+          $replaceRoot: {
+            newRoot: '$combinedFriends', // Replace the root with the combined friends
+          },
         },
         {
           $limit: limit,
+        },
+      ])
+      .exec();
+  }
+
+  async findMutualFriendsByFriendIds(
+    user: IUserCreated,
+    userId: string,
+    friendIds: string[],
+  ) {
+    return await this.friendModel
+      .aggregate([
+        {
+          $match: { user: userId }, // Match friends with specified friendIds
+        },
+        {
+          $unwind: '$friends',
+        },
+        {
+          $match: {
+            'friends.userId': {
+              $and: [{ $in: friendIds }, { $ne: user._id }],
+            },
+          }, // Filter again after unwinding
+        },
+        {
+          $project: {
+            _id: 0,
+            userId: '$friends.userId',
+            email: '$friends.email',
+            userName: '$friends.userName',
+            avatarUrl: '$friends.avatarUrl',
+          },
+        },
+      ])
+      .exec();
+  }
+
+  async findFriendsNotInMutualFriendId(userId: string, friendIds: string[]) {
+    return await this.friendModel
+      .aggregate([
+        {
+          $match: { user: userId }, // Match friends with specified friendIds
+        },
+        {
+          $unwind: '$friends',
+        },
+        {
+          $match: { 'friends.userId': { $nin: friendIds } }, // Filter again after unwinding
+        },
+        {
+          $project: {
+            _id: 0,
+            userId: '$friends.userId',
+            email: '$friends.email',
+            userName: '$friends.userName',
+            avatarUrl: '$friends.avatarUrl',
+          },
         },
       ])
       .exec();

@@ -10,8 +10,8 @@ import { useAppDispatch, useAppSelector } from '../app/hook';
 import { selectPost } from '../features/post/postSlice';
 
 const Home = () => {
-  const { posts } = useAppSelector(selectPost);
-  const dispatch = useAppDispatch();
+  // const { posts } = useAppSelector(selectPost);
+  // const dispatch = useAppDispatch();
 
   // useEffect(() => {
   //   dis
@@ -31,14 +31,14 @@ const Home = () => {
             </div>
           </div>
 
-          <div className='p-3 bg-white rounded'>
+          {/* <div className='p-3 bg-white rounded'>
             <h1 className='text-gray-400 text-sm'>May are you know</h1>
             <div className='flex flex-col gap-2'>
               {[1, 2, 3, 4].map((ele) => (
                 <FriendBoxDetail key={ele} />
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className='xl:col-span-6 col-span-8 pt-6 overflow-y-auto scrollbar-hide'>
@@ -86,11 +86,11 @@ const Home = () => {
                 </span>
               </div>
             </div>
-            <div className='flex flex-col gap-2 px-2'>
+            {/* <div className='flex flex-col gap-2 px-2'>
               {[1, 2, 3, 4].map((ele) => (
                 <FriendBoxDetail key={ele} />
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

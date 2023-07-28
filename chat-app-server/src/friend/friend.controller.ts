@@ -5,6 +5,7 @@ import { IFriend } from '../ultils/interface/friend.interface';
 import { Request } from 'express';
 import { Ok } from 'src/ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { isObject } from 'lodash';
 
 @Controller('friend')
 export class FriendController {
@@ -48,21 +49,23 @@ export class FriendController {
     }
   }
 
-  @Get('/friends')
+  @Get('/friends/:userId')
   async getListFriendOfUser(
     @Req() req: Request,
+    @Param('userId') userId: string,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
     @Query('sortBy') sortBy: string = 'name',
   ) {
     try {
+      isObject(userId);
       const user = req.user as IUserCreated;
       const pagination = {
         page: parseInt(page),
         limit: parseInt(limit),
         sortBy: sortBy,
       };
-      return new Ok(await this.friendService.getListFriend(user, pagination));
+      return new Ok(await this.friendService.getListFriend(user, userId, pagination));
     } catch (error) {
       throw error;
     }

@@ -8,8 +8,8 @@ import {
 } from '../../ultils/interface/friend.interface';
 import myAxios from '../../ultils/myAxios';
 
-const getFriendOfUser = async (): Promise<IFriendResponse[]> => {
-  const res = await myAxios.get('/friend/friends');
+const getFriendOfUser = async (userId: string): Promise<IFriendResponse> => {
+  const res = await myAxios.get(`/friend/friends/${userId}`);
   console.log(res);
   return res.data.metaData;
 };

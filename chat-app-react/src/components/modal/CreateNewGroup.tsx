@@ -61,7 +61,9 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
     // Click show list friend
     const handleShowListFriend = () => {
       setShowListFriend(true);
-      dispatch(getFriendOfUser());
+      if (friends === null) {
+        dispatch(getFriendOfUser(user._id));
+      }
     };
 
     // Click close form create
