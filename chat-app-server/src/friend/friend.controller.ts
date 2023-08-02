@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Req, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Req,
+  Query,
+  Delete,
+} from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { IUserCreated } from '../ultils/interface';
 import { IFriend } from '../ultils/interface/friend.interface';
@@ -65,7 +74,9 @@ export class FriendController {
         limit: parseInt(limit),
         sortBy: sortBy,
       };
-      return new Ok(await this.friendService.getListFriend(user, userId, pagination));
+      return new Ok(
+        await this.friendService.getListFriend(user, userId, pagination),
+      );
     } catch (error) {
       throw error;
     }
@@ -145,6 +156,16 @@ export class FriendController {
     }
   }
 
+  @Delete('/:friendId')
+  async deleteFriend(@Req() req: Request, @Param('friendId') friendId: string) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(await this.friendService.deleteFriend(user, friendId));
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Post('/confirm')
   async confirmFriend(@Req() req: Request, @Body('friend') friend: IFriend) {
     try {
@@ -173,6 +194,20 @@ export class FriendController {
       return new Ok(await this.friendService.getNotifyAddFriend(user));
     } catch (error) {
       throw error;
+    }
+  }
+
+  @Get('/all/:userId')
+  async getAllFriendOfUser(
+    @Req() req: Request,
+    @Param('userId') userId: string,
+  ) {
+    try {
+      console.log('Call');
+      const user = req.user as IUserCreated;
+      return new Ok(await this.friendService.getAllFriendOfUser(user, userId));
+    } catch (err) {
+      throw err;
     }
   }
 }

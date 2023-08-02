@@ -15,6 +15,7 @@ export interface IButtonProp {
   onClick?: any;
   Icons?: JSX.Element;
   textSize?: string;
+  ref?: any;
 }
 
 const Button: FC<IButtonProp> = ({
@@ -32,9 +33,11 @@ const Button: FC<IButtonProp> = ({
   onClick,
   Icons,
   textSize,
+  ref,
 }) => {
   return (
     <button
+      ref={ref}
       className={`
       ${className}
       ${background} 

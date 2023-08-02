@@ -69,6 +69,11 @@ export class FriendRepository {
           },
         },
         {
+          $addFields: {
+            isFriend: true,
+          },
+        },
+        {
           $skip: offset,
         },
         {
@@ -85,15 +90,12 @@ export class FriendRepository {
         $unwind: '$friends',
       },
       {
-        $group: {
-          _id: null,
-          friends: { $addToSet: '$friends.userId' },
-        },
-      },
-      {
         $project: {
           _id: 0,
-          friends: 1,
+          userId: '$friends.userId',
+          email: '$friends.email',
+          userName: '$friends.userName',
+          avatarUrl: '$friends.avatarUrl',
         },
       },
     ]);
@@ -125,8 +127,8 @@ export class FriendRepository {
               $cond: {
                 if: {
                   $and: [
-                    { $in: ['$friends.userId', friendIds] }, // Check if friends.userId is in the given array
-                    { $ne: ['$friends.userId', user._id] }, // Check if friends.userId is not equal to the user's own _id
+                    { $in: ['$friends.userId', friendIds] },
+                    { $ne: ['$friends.userId', user._id] },
                   ],
                 },
                 then: true,
@@ -172,15 +174,15 @@ export class FriendRepository {
           $project: {
             combinedFriends: {
               $setUnion: ['$matchedFriends', '$unmatchedFriends'],
-            }, // Combine matched and unmatched friends
+            },
           },
         },
         {
-          $unwind: '$combinedFriends', // Unwind the combined array
+          $unwind: '$combinedFriends',
         },
         {
           $replaceRoot: {
-            newRoot: '$combinedFriends', // Replace the root with the combined friends
+            newRoot: '$combinedFriends',
           },
         },
         {
@@ -190,11 +192,7 @@ export class FriendRepository {
       .exec();
   }
 
-  async findMutualFriendsByFriendIds(
-    user: IUserCreated,
-    userId: string,
-    friendIds: string[],
-  ) {
+  async findMutualFriendsByFriendIds(userId: string, friendIds: string[]) {
     return await this.friendModel
       .aggregate([
         {
@@ -204,11 +202,7 @@ export class FriendRepository {
           $unwind: '$friends',
         },
         {
-          $match: {
-            'friends.userId': {
-              $and: [{ $in: friendIds }, { $ne: user._id }],
-            },
-          }, // Filter again after unwinding
+          $match: { 'friends.userId': { $in: friendIds } }, // Filter again after unwinding
         },
         {
           $project: {
@@ -387,8 +381,8 @@ export class FriendRepository {
 
   async checkUserIsFriend(user: IUserCreated, friendId: string) {
     return await this.friendModel.findOne({
-      user: friendId,
-      'friends.userId': user._id,
+      user: user._id,
+      'friends.userId': friendId,
     });
   }
 

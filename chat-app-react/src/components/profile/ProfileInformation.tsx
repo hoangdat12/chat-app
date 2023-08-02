@@ -9,9 +9,10 @@ import { getUsername } from '../../ultils';
 
 export interface IPropProfileInformation {
   user: IUser | null;
+  isOwner: boolean;
 }
 
-const ProfileInformation: FC<IPropProfileInformation> = ({ user }) => {
+const ProfileInformation: FC<IPropProfileInformation> = ({ user, isOwner }) => {
   return (
     <div className='p-4 rounded-md bg-gray-100'>
       <div className='flex items-center justify-between pb-2 border-b border-gray-300'>
@@ -59,9 +60,11 @@ const ProfileInformation: FC<IPropProfileInformation> = ({ user }) => {
               <p className='text-xs text-gray-500'>Social Network</p>
             </span>
           </div>
-          <span className='text-xl cursor-pointer'>
-            <RiPencilFill />
-          </span>
+          {isOwner && (
+            <span className='text-xl cursor-pointer'>
+              <RiPencilFill />
+            </span>
+          )}
         </div>
 
         <div className='flex gap-2 items-center justify-between mt-2'>
@@ -74,9 +77,11 @@ const ProfileInformation: FC<IPropProfileInformation> = ({ user }) => {
               <p className='text-xs text-gray-500'>Social Network</p>
             </span>
           </div>
-          <span className='text-xl cursor-pointer'>
-            <RiPencilFill />
-          </span>
+          {isOwner && (
+            <span className='text-xl cursor-pointer'>
+              <RiPencilFill />
+            </span>
+          )}
         </div>
       </div>
     </div>

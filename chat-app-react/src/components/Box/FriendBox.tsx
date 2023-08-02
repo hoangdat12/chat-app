@@ -11,6 +11,7 @@ export interface IFriendBoxProp {
   height?: string;
   fontSize?: string;
   margin?: string;
+  onClick?: any;
 }
 
 const FriendBox: FC<IFriendBoxProp> = ({
@@ -20,9 +21,10 @@ const FriendBox: FC<IFriendBoxProp> = ({
   height,
   fontSize,
   margin,
+  onClick,
 }) => {
   return (
-    <div className='flex flex-col flex-wrap'>
+    <div onClick={onClick} className='flex flex-col flex-wrap'>
       <AvatarSquare
         avatarUrl={avatarUrl}
         className={`${width ?? 'w-full'} ${height ?? 'h-full'}`}

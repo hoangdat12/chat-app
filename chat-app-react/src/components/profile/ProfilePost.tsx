@@ -59,7 +59,6 @@ const ProfilePost: FC<IPropProfilePost> = memo(({ userId, user }) => {
         }
         setIsLoadingCallApi(false);
         setCurrentPage((prev) => prev + 1);
-        console.log('Call');
       }
     } catch (error) {
       console.error('Error fetching posts:', error);

@@ -17,14 +17,14 @@ const CreatePostWith: FC<IPropCreatePostWith> = memo(({ listFriendTag }) => {
       {listFriendTag.map((friend, idx) => {
         if (idx === 0)
           return (
-            <>
+            <div key={idx}>
               <span className='text-sm'>With</span>
               <Username
                 userName={friend.userName}
                 userId={friend.userId}
                 border={true}
               />
-            </>
+            </div>
           );
         else if (idx === 1)
           return (

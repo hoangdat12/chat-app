@@ -1,7 +1,8 @@
-import { IResponse } from '../../ultils/interface';
+import { IPagination, IResponse } from '../../ultils/interface';
 import {
   IAddFriendResponse,
   ICheckFriendResponse,
+  IDataGetAllFriendOfUser,
   IFriend,
   IFriendResponse,
   IUnConfirmedResonse,
@@ -10,7 +11,6 @@ import myAxios from '../../ultils/myAxios';
 
 const getFriendOfUser = async (userId: string): Promise<IFriendResponse> => {
   const res = await myAxios.get(`/friend/friends/${userId}`);
-  console.log(res);
   return res.data.metaData;
 };
 
@@ -48,6 +48,18 @@ const getTotalNotifyAddFriend = async (): Promise<{ totalNotify: number }> => {
   return res.data.metaData;
 };
 
+const getAllFriendOfUser = async (
+  userId: string,
+  pagination?: IPagination
+): Promise<IResponse<IDataGetAllFriendOfUser>> => {
+  const { page = 0, limit = 20, sortedBy = 'ctime' } = pagination || {};
+
+  const res = await myAxios.get(
+    `/friend/all/${userId}?page=${page}&limit=${limit}&sortBy=${sortedBy}`
+  );
+  return res;
+};
+
 const searchFriendByUserName = async (
   keyword: string
 ): Promise<
@@ -60,6 +72,11 @@ const searchFriendByUserName = async (
   return res;
 };
 
+const deleteFriend = async (friendId: string) => {
+  const res = await myAxios.delete(`/friend/${friendId}`);
+  return res;
+};
+
 export const friendService = {
   getFriendOfUser,
   addFriend,
@@ -69,4 +86,6 @@ export const friendService = {
   confirmFriend,
   refuseFriend,
   searchFriendByUserName,
+  deleteFriend,
+  getAllFriendOfUser,
 };

@@ -53,20 +53,21 @@ export class FriendService {
     };
   }
 
+  // The action of the user who make add friends
   async addFriend(user: IUserCreated, friend: IFriend) {
+    // Check user add friend exist
     const existUser = await this.authRepository.findById(friend.userId);
     if (!existUser)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-    friend.createdAt = new Date();
-
+    // Check have friend or not
     const isFriend = await this.friendRepository.checkUserIsFriend(
       user,
       friend.userId,
     );
     if (isFriend) return;
 
-    // Check user send request add friend to Friend or not
+    // Check have unconfirmed or not
     const waitConfirm = await this.friendRepository.checkUserUnConfirmed(
       user,
       friend.userId,
@@ -116,6 +117,7 @@ export class FriendService {
     };
   }
 
+  // The action of user received request add friend
   async confirmFriend(user: IUserCreated, friend: IFriend) {
     const existUser = await this.authRepository.findById(friend.userId);
     if (!existUser)
@@ -159,6 +161,8 @@ export class FriendService {
     return friend;
   }
 
+  // The action of user received request add friend
+  // Refuse request add friend
   async refuseFriend(user: IUserCreated, friend: IFriend) {
     const existUser = await this.authRepository.findById(friend.userId);
     if (!existUser)
@@ -177,18 +181,21 @@ export class FriendService {
     return friend;
   }
 
-  async deleteFriend(user: IUserCreated, friend: IFriend) {
+  // Delete friend
+  async deleteFriend(user: IUserCreated, friendId: string) {
     const isValidFriend = await this.friendRepository.checkUserIsFriend(
       user,
-      friend.userId,
+      friendId,
     );
 
     if (!isValidFriend) return;
 
     // Update quantity Friend
-    await this.authRepository.increQuantityFriend(user._id, -1);
+    this.authRepository.increQuantityFriend(user._id, -1);
+    this.authRepository.increQuantityFriend(friendId, -1);
 
-    return await this.friendRepository.deleteFriend(user._id, friend.userId);
+    this.friendRepository.deleteFriend(friendId, user._id);
+    return await this.friendRepository.deleteFriend(user._id, friendId);
   }
 
   async findFriend(
@@ -276,10 +283,8 @@ export class FriendService {
         mutualFriendsId,
         pagination,
       );
-      responseData.mutualFriends =
-        mutualFriendsId.length === 1 ? null : mutualFriendsId.length - 1;
+      responseData.mutualFriends = mutualFriendsId.length;
     }
-    console.log(responseData);
     return responseData;
   }
 
@@ -303,5 +308,49 @@ export class FriendService {
       user._id,
       pagination,
     );
+  }
+
+  async getAllFriendOfUser(user: IUserCreated, userId: string) {
+    if (user._id === userId)
+      return {
+        friends: await this.friendRepository.findAllFriendOfUser(userId),
+        mutualFriends: null,
+      };
+    const key1 = `friend:${userId}`;
+    const key2 = `friend:${user._id}`;
+    // Check mutual friend
+    if (!(await this.redisService.has(key1))) {
+      // Not has key
+      const friends = await this.friendRepository.findAllFriendOfUser(userId);
+      await this.redisService.sAdd(key1, friends[0].friends, 600);
+    }
+    // user make the request
+    // Not key
+    if (!(await this.redisService.has(key2))) {
+      const myFriends = await this.friendRepository.findAllFriendOfUser(
+        user._id,
+      );
+      await this.redisService.sAdd(key2, myFriends[0].friends);
+    }
+
+    const mutualFriendsId = await this.redisService.sInter(key1, key2);
+    const mutualFriendsPromise =
+      this.friendRepository.findMutualFriendsByFriendIds(
+        userId,
+        mutualFriendsId,
+      );
+    const friendsPromise = this.friendRepository.findFriendsNotInMutualFriendId(
+      userId,
+      mutualFriendsId,
+    );
+    const [mutualFriends, friends] = await Promise.all([
+      mutualFriendsPromise,
+      friendsPromise,
+    ]);
+
+    return {
+      mutualFriends,
+      friends,
+    };
   }
 }

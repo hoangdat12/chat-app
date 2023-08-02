@@ -1,5 +1,5 @@
 import Avatar from '../avatars/Avatar';
-import { BsPersonPlusFill } from 'react-icons/bs';
+import { BsFillPersonCheckFill, BsPersonPlusFill } from 'react-icons/bs';
 import Button from '../button/Button';
 import { FC, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,17 +9,23 @@ import {
   selectFriend,
 } from '../../features/friend/friendSlice';
 import { IFriend } from '../../ultils/interface';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface IPropProfileFriend {
   userId: string | undefined;
 }
+
+const userJson = getUserLocalStorageItem();
 
 const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
   const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
   const { friends, mutualFriends } = useAppSelector(selectFriend);
-
+  const condition =
+    friends &&
+    friends.size !== 0 &&
+    !(friends.size === 1 && friends.has(userJson._id));
   useEffect(() => {
     if (userId) {
       dispatch(getFriendOfUser(userId));
@@ -36,15 +42,23 @@ const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
           } text-sm text-gray-700 cursor-pointer`}
         >{`${mutualFriends} Mutual`}</span>
       </div>
-      <div className='flex flex-col gap-3'>
-        {friends &&
-          Array.from(friends.values()).map((friend) => (
-            <FriendBoxDetail key={friend.userId} friend={friend} />
-          ))}
+      <div className='flex flex-col-reverse gap-3'>
+        {condition ? (
+          Array.from(friends.values()).map((friend: IFriend) => {
+            if (friend.userId === userJson._id) return;
+            else return <FriendBoxDetail key={friend.userId} friend={friend} />;
+          })
+        ) : (
+          <div className='flex items-center justify-center min-h-[100px]'>
+            <h1>Not have friends</h1>
+          </div>
+        )}
       </div>
       <div
         onClick={() => navigate(`/profile/${userId}/friends`)}
-        className='flex items-center justify-center mt-4'
+        className={`${
+          condition ? 'flex' : 'hidden'
+        } items-center justify-center mt-4`}
       >
         <Button text={'Show more'} border={'border-none'} />
       </div>
@@ -57,17 +71,29 @@ export interface IPropFriendBoxDetial {
 }
 
 export const FriendBoxDetail: FC<IPropFriendBoxDetial> = ({ friend }) => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate(`/profile/${friend.userId}`);
+  };
+
   return (
     <div className='flex items-center justify-between mt-4'>
       <div className='flex items-center gap-2'>
-        <Avatar avatarUrl={friend.avatarUrl} className='w-12 h-12' />
+        <Avatar
+          onClick={handleNavigate}
+          avatarUrl={friend.avatarUrl}
+          className='w-12 h-12'
+        />
         <div className='flex flex-col'>
-          <span className='cursor-pointer'>{friend.userName}</span>
+          <span onClick={handleNavigate} className='cursor-pointer'>
+            {friend.userName}
+          </span>
           <span className='text-sm text-gray-700'>22th Birthday</span>
         </div>
       </div>
-      <span className='cursor-pointer'>
-        <BsPersonPlusFill />
+      <span onClick={handleNavigate} className='cursor-pointer'>
+        {friend?.isFriend ? <BsFillPersonCheckFill /> : <BsPersonPlusFill />}
       </span>
     </div>
   );

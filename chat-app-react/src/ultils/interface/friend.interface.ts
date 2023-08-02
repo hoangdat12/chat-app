@@ -3,6 +3,7 @@ export interface IFriend {
   email: string;
   userName: string;
   avatarUrl: string;
+  isFriend?: boolean;
 }
 
 export interface IFriendResponse {
@@ -24,4 +25,9 @@ export interface ICheckFriendResponse {
 
 export interface IUnConfirmedResonse {
   unconfirmed: IFriend;
+}
+
+export interface IDataGetAllFriendOfUser {
+  mutualFriends: IFriend[] | null;
+  friends: IFriend[] | null;
 }
