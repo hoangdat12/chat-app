@@ -55,7 +55,9 @@ const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
         )}
       </div>
       <div
-        onClick={() => navigate(`/profile/${userId}/friends`)}
+        onClick={() =>
+          navigate(`/profile/${userId}/friends`, { preventScrollReset: true })
+        }
         className={`${
           condition ? 'flex' : 'hidden'
         } items-center justify-center mt-4`}
@@ -74,7 +76,7 @@ export const FriendBoxDetail: FC<IPropFriendBoxDetial> = ({ friend }) => {
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate(`/profile/${friend.userId}`);
+    navigate(`/profile/${friend.userId}`, { preventScrollReset: true });
   };
 
   return (

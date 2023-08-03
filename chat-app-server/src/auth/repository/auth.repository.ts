@@ -20,7 +20,18 @@ export class AuthRepository {
   }
 
   async findByEmail(userEmail: string): Promise<IUserCreated | null> {
-    return await this.userModel.findOne({ email: userEmail }).lean();
+    return await this.userModel
+      .findOne({ email: userEmail })
+      // .select({
+      //   _id: 1,
+      //   firstName: 1,
+      //   lastName: 1,
+      //   email: 1,
+      //   avatarUrl: 1,
+      //   isActive: 1,
+      //   loginWith: 1,
+      // })
+      .lean();
   }
 
   async findByUserName(keyword: string, pagination: Pagination) {
@@ -31,9 +42,9 @@ export class AuthRepository {
       .aggregate([
         {
           $project: {
+            _id: 1,
             firstName: 1,
             lastName: 1,
-            userName: { $concat: ['$firstName', ' ', '$lastName'] },
             email: 1,
             avatarUrl: 1,
             isActive: 1,
@@ -45,11 +56,6 @@ export class AuthRepository {
               $regex: searchRegex,
             },
             isActive: true,
-          },
-        },
-        {
-          $sort: {
-            userName: 1,
           },
         },
       ])
@@ -104,6 +110,8 @@ export class AuthRepository {
       total_post: 0,
       job: 'Student',
       address: 'Viet Nam',
+      social_github: 'default',
+      social_facebook: 'default',
     });
   }
 
@@ -147,6 +155,17 @@ export class AuthRepository {
           viewer: 1,
         },
       },
+    );
+  }
+
+  async updateSocialLink(userId: string, type: string, social_link: string) {
+    const updatedField =
+      type === 'Github' ? 'social_github' : 'social_facebook';
+
+    return await this.userModel.findOneAndUpdate(
+      { _id: convertObjectId(userId) },
+      { [updatedField]: social_link },
+      { new: true, upsert: true },
     );
   }
 }

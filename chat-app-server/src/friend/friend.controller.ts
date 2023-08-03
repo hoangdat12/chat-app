@@ -203,7 +203,6 @@ export class FriendController {
     @Param('userId') userId: string,
   ) {
     try {
-      console.log('Call');
       const user = req.user as IUserCreated;
       return new Ok(await this.friendService.getAllFriendOfUser(user, userId));
     } catch (err) {

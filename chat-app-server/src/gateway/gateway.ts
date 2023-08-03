@@ -14,6 +14,7 @@ import {
 import { Services } from '../ultils/constant';
 import { Messages } from '../schema/message.model';
 import {
+  IComment,
   IConversation,
   IMessage,
   IParticipant,
@@ -166,19 +167,19 @@ export class MessagingGateway implements OnModuleInit {
     }
   }
 
-  // @OnEvent('friend.received.add')
-  // handleSendConfirmToFriend(payload: ISocketAddFriend) {
-  //   const { user, friend } = payload;
-  //   const friendSocket = this.sessions.getUserSocket(friend.userId);
-  //   if (friendSocket) friendSocket.emit('onAddFriend', user);
-  // }
+  @OnEvent('friend.received.add')
+  handleSendConfirmToFriend(payload: ISocketAddFriend) {
+    const { user, friend } = payload;
+    const friendSocket = this.sessions.getUserSocket(friend.userId);
+    if (friendSocket) friendSocket.emit('onAddFriend', user);
+  }
 
-  // @OnEvent('friend.user.cancel')
-  // handleUserCancelAddFriend(payload: ISocketAddFriend) {
-  //   const { user, friend } = payload;
-  //   const friendSocket = this.sessions.getUserSocket(friend.userId);
-  //   if (friendSocket) friendSocket.emit('onCancelFriend', user);
-  // }
+  @OnEvent('friend.user.cancel')
+  handleUserCancelAddFriend(payload: ISocketAddFriend) {
+    const { user, friend } = payload;
+    const friendSocket = this.sessions.getUserSocket(friend.userId);
+    if (friendSocket) friendSocket.emit('onCancelFriend', user);
+  }
 
   @OnEvent('notify.received')
   handleReceivedNotify(payload: ISocketReceivedNotify) {
@@ -193,4 +194,9 @@ export class MessagingGateway implements OnModuleInit {
     const userSocket = this.sessions.getUserSocket(user_id);
     if (userSocket) userSocket.emit('deleteNotify', payload.notify);
   }
+
+  // @OnEvent('comment.create')
+  // handleCreateComment(payload: IComment) {
+  //   const {comment_user_id} = payload;
+  // }
 }

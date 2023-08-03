@@ -1,5 +1,8 @@
-import { IResponse } from '../../ultils/interface';
-import { IDataSearchUser } from '../../ultils/interface/user.interface';
+import { IResponse, IUser } from '../../ultils/interface';
+import {
+  IDataSearchUser,
+  IDataUpdateSocialLink,
+} from '../../ultils/interface/user.interface';
 import myAxios from '../../ultils/myAxios';
 
 const findUserByName = async (
@@ -13,6 +16,18 @@ const findUserByName = async (
   return res;
 };
 
+const updateSocialLink = async (
+  data: IDataUpdateSocialLink
+): Promise<IResponse<IUser>> => {
+  const res = await myAxios.patch('/user/update/social-link', data);
+  if (res.status === 200) {
+    // Update localstore
+    localStorage.setItem('user', JSON.stringify(res.data.metaData));
+  }
+  return res;
+};
+
 export const userService = {
   findUserByName,
+  updateSocialLink,
 };

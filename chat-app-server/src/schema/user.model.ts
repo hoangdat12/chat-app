@@ -46,6 +46,12 @@ export class User {
 
   @Prop({ default: 'Viet Nam' })
   address?: string;
+
+  @Prop({ default: 'default' })
+  social_github?: string;
+
+  @Prop({ default: 'default' })
+  social_facebook?: string;
 }
 
 const UserSchema = SchemaFactory.createForClass(User);

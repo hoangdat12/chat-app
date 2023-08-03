@@ -2,10 +2,10 @@ import { BsFacebook } from 'react-icons/bs';
 import { FaGithub } from 'react-icons/fa';
 import { GrUserWorker } from 'react-icons/gr';
 import { MdPlace } from 'react-icons/md';
-import { RiPencilFill } from 'react-icons/ri';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { IUser } from '../../ultils/interface';
 import { getUsername } from '../../ultils';
+import ProfileSocial from './ProfileSocial';
 
 export interface IPropProfileInformation {
   user: IUser | null;
@@ -13,6 +13,11 @@ export interface IPropProfileInformation {
 }
 
 const ProfileInformation: FC<IPropProfileInformation> = ({ user, isOwner }) => {
+  const [addSocial, setAddSocial] = useState('');
+  const handleAddLinkSocial = (title: string) => {
+    setAddSocial(title);
+  };
+
   return (
     <div className='p-4 rounded-md bg-gray-100'>
       <div className='flex items-center justify-between pb-2 border-b border-gray-300'>
@@ -50,39 +55,27 @@ const ProfileInformation: FC<IPropProfileInformation> = ({ user, isOwner }) => {
 
       <div className='mt-3'>
         <h1 className='text-lg mb-2'>Social Profile</h1>
-        <div className='flex gap-2 items-center justify-between'>
-          <div className='flex gap-3 items-start cursor-pointer'>
-            <span className='text-2xl text-blue-500 mt-[2px]'>
-              <BsFacebook />
-            </span>
-            <span>
-              <h1 className='text-sm text-gray-700'>Facebook</h1>
-              <p className='text-xs text-gray-500'>Social Network</p>
-            </span>
-          </div>
-          {isOwner && (
-            <span className='text-xl cursor-pointer'>
-              <RiPencilFill />
-            </span>
-          )}
-        </div>
 
-        <div className='flex gap-2 items-center justify-between mt-2'>
-          <div className='flex gap-3 items-start cursor-pointer'>
-            <span className='text-2xl mt-[2px]'>
-              <FaGithub />
-            </span>
-            <span>
-              <h1 className='text-sm text-gray-700'>Github</h1>
-              <p className='text-xs text-gray-500'>Social Network</p>
-            </span>
-          </div>
-          {isOwner && (
-            <span className='text-xl cursor-pointer'>
-              <RiPencilFill />
-            </span>
-          )}
-        </div>
+        <ProfileSocial
+          ICon={BsFacebook}
+          title={'Facebook'}
+          isOwner={isOwner}
+          onClick={handleAddLinkSocial}
+          titleColor={'text-blue-500'}
+          addSocial={addSocial}
+          setAddSocial={setAddSocial}
+          link={user?.social_facebook}
+        />
+
+        <ProfileSocial
+          ICon={FaGithub}
+          title={'Github'}
+          isOwner={isOwner}
+          onClick={handleAddLinkSocial}
+          addSocial={addSocial}
+          setAddSocial={setAddSocial}
+          link={user?.social_facebook}
+        />
       </div>
     </div>
   );

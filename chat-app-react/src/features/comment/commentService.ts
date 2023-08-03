@@ -24,7 +24,6 @@ const getListComment = async (
       data.parentCommentId ? `?parentCommentId=${data.parentCommentId}` : ''
     }`
   );
-  console.log(res);
   return res;
 };
 

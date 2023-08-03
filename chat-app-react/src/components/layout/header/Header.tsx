@@ -262,7 +262,7 @@ const Search: FC<IPopSearchBox> = ({
   const handleClickBox = (userId: string) => {
     if (setIsShow) setIsShow(false);
     setSearchValue('');
-    navigate(`/profile/${userId}`);
+    navigate(`/profile/${userId}`, { preventScrollReset: true });
   };
   return (
     <div

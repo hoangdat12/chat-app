@@ -16,6 +16,7 @@ import Button from '../button/Button';
 import { commentService } from '../../features/comment/commentService';
 import { CommentType } from '../../ultils/constant';
 import useEnterListener from '../../hooks/useEnterEvent';
+// import { socket } from '../../ultils/context/Socket';
 
 export interface IPropCommentInput {
   sizeAvatar?: string;
@@ -66,6 +67,19 @@ const CommentInput: FC<IPropCommentInput> = memo(
         inputRef?.current?.focus();
       }
     }, []);
+
+    // useEffect(() => {
+    //   socket.on('connection', (data) => {
+    //     console.log(data);
+    //   });
+    //   socket.on('comment.create', (data: IComment) => {
+    //     setComments((prev) => (prev ? [data, ...prev] : [data]));
+    //   });
+
+    //   return () => {
+    //     socket.off('comment.create');
+    //   };
+    // }, []);
 
     return (
       <div

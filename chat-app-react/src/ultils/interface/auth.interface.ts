@@ -19,6 +19,8 @@ export interface IUser {
   total_post?: number;
   job?: string;
   address?: string;
+  social_github?: string;
+  social_facebook?: string;
 }
 
 export interface IDataLoginSuccess {
