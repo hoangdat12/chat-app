@@ -1,6 +1,12 @@
 import { ILoginData } from '../../pages/authPage/Login';
 import { IRegisterData } from '../../pages/authPage/Register';
-import { IDataLoginSuccess, IDataReceived } from '../../ultils/interface';
+import {
+  IDataChangePassword,
+  IDataLoginSuccess,
+  IDataReceived,
+  IResponse,
+  IUser,
+} from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
 const login = async (data: ILoginData) => {
@@ -34,12 +40,12 @@ const getInforUserWithOauth2 = async () => {
   return response.data.metaData;
 };
 
-export const register = async (data: IRegisterData) => {
+const register = async (data: IRegisterData) => {
   const response = await myAxios.post('/auth/register', data);
   return response.data;
 };
 
-export const logout = async () => {
+const logout = async () => {
   const res = await myAxios.post('/auth/logout');
   if (res.status === 200) {
     localStorage.removeItem('user');
@@ -49,8 +55,46 @@ export const logout = async () => {
   return res.data;
 };
 
+const verifyEmail = async (type: string): Promise<IResponse<string>> => {
+  const res = await myAxios.post(`/auth/verify-email/change/${type}`);
+  return res;
+};
+
+const verifyPassword = async (
+  data: ILoginData
+): Promise<IResponse<{ isValid: boolean }>> => {
+  const res = await myAxios.post(`/auth/verify-password`, data);
+  return res;
+};
+
+const changePassword = async (
+  data: IDataChangePassword
+): Promise<IResponse<string>> => {
+  const res = await myAxios.patch('/auth/change-password', data);
+  return res;
+};
+
+const changeEmail = async (email: string): Promise<IResponse<IUser>> => {
+  const res = await myAxios.patch('/auth/change-email', { email });
+  if (res.status === 200) {
+    localStorage.setItem('user', JSON.parse(res.data.metaData));
+  }
+  return res;
+};
+
+const lockedAccount = async (data: ILoginData): Promise<IResponse<string>> => {
+  const res = await myAxios.post('/auth/locked-account', data);
+  return res;
+};
+
 export const authService = {
   login,
   getInforUserWithOauth2,
   register,
+  logout,
+  changePassword,
+  verifyEmail,
+  verifyPassword,
+  changeEmail,
+  lockedAccount,
 };

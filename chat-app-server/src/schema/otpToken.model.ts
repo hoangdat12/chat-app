@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { OtpType } from '../ultils/constant';
 
 export type OtpTokenDocument = HydratedDocument<OtpToken>;
 
@@ -11,10 +12,13 @@ export class OtpToken {
   @Prop({ required: true })
   token: string;
 
+  @Prop({ enum: OtpType, default: OtpType.PASSWORD })
+  type: string;
+
   @Prop({ required: true })
   secret: string;
 
-  @Prop({ expires: 900, default: Date.now() })
+  @Prop({ expires: 1800, default: Date.now() })
   createdAt: Date;
 }
 

@@ -60,6 +60,13 @@ export class AppModule implements NestModule {
 
     consumer
       .apply(JwtMiddleWare)
-      .forRoutes({ path: 'auth/logout', method: RequestMethod.POST });
+      .forRoutes(
+        { path: 'auth/logout', method: RequestMethod.POST },
+        { path: 'auth/change-password', method: RequestMethod.PATCH },
+        { path: 'auth/verify-email/change/email', method: RequestMethod.POST },
+        { path: 'auth/change-email', method: RequestMethod.PATCH },
+        { path: 'auth/verify-password', method: RequestMethod.POST },
+        { path: 'auth/locked-account', method: RequestMethod.POST },
+      );
   }
 }

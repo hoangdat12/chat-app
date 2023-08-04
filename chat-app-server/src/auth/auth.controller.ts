@@ -8,9 +8,16 @@ import {
   UseGuards,
   HttpStatus,
   Param,
+  Patch,
+  Session,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ChangePassword, UserLogin, UserRegister } from './auth.dto';
+import {
+  ChangePassword,
+  ForgotPassword,
+  UserLogin,
+  UserRegister,
+} from './auth.dto';
 import { Response, Request } from 'express';
 import { GoogleAuthGuard } from './google/google.guard';
 import { GitHubAuthGuard } from './github/github.guard';
@@ -19,6 +26,7 @@ import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
 import { Ok } from '../ultils/response';
 import { FriendService } from '../friend/friend.service';
+import { OtpType } from '../ultils/constant';
 
 @Controller('auth')
 export class AuthController {
@@ -149,27 +157,61 @@ export class AuthController {
     }
   }
 
-  @Post('forgot-password')
-  async forgotPassword(@Body('email') email: string) {
+  @Post('verify-email/change/password')
+  async verifyEmailGetPassword(@Body('email') email: string) {
     try {
-      return await this.authService.forgetPassword(email);
+      if (!email) throw new Error('Missing value!');
+      return await this.authService.verifyEmail(email, OtpType.PASSWORD);
     } catch (err) {
       throw err;
     }
   }
 
-  @Post('verify-otp/:token')
-  async verifyOtpToken(@Param('token') token: string) {
+  @Post('verify-email/change/email')
+  async verifyEmailChangeEmail(@Req() req: Request) {
     try {
-      return await this.authService.verifyOtpToken(token);
+      const user = req.user as IUserCreated;
+      return await this.authService.verifyEmail(user.email, OtpType.EMAIL);
     } catch (err) {
       throw err;
     }
   }
 
-  @Post('change-password/:secret')
-  async changPassword(
-    @Body() data: ChangePassword,
+  @Post('verify-password')
+  async verifyPassword(@Req() req: Request, @Body() body: UserLogin) {
+    try {
+      const errors = await validate(body);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      if (user.email !== body.email) throw new Error('Invalid value!');
+      return new Ok(await this.authService.verifyPassword(body));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Get('verify-otp/:token')
+  async verifyOtpToken(@Res() res: Response, @Param('token') token: string) {
+    try {
+      const foundOtp = await this.authService.verifyOtpToken(token);
+      if (foundOtp) {
+        res.cookie('secret', foundOtp.secret, {
+          maxAge: 1000 * 60 * 15,
+        });
+        return res.redirect(
+          `http://localhost:5173/setting/security/change-email`,
+        );
+      } else return res.redirect(`http://localhost:5173/err`);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('change-password/:secret')
+  async changPasswordWithSecret(
+    @Body() data: ForgotPassword,
     @Param('secret') secret: string,
   ) {
     try {
@@ -177,7 +219,59 @@ export class AuthController {
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
-      return await this.authService.changePassword(data, secret);
+      return await this.authService.changePasswordWithSecret(data, secret);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('change-password')
+  async changPassword(@Req() req: Request, @Body() data: ChangePassword) {
+    try {
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      return await this.authService.changePassword(user, data);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('change-email')
+  async changeEmail(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body('email') email: string,
+  ) {
+    try {
+      if (!email) throw new Error('Missing value!');
+      const user = req.user as IUserCreated;
+      const secret = req.cookies['secret'];
+      if (!secret) throw new Error('Invalid request!');
+      // clear cookie
+      const updated = await this.authService.changeEmail(user, email, secret);
+      if (!updated) throw new Error('Server Error');
+      res.cookie('secret', '', { expires: new Date(0) });
+      return new Ok(updated).sender(res);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Post('locked-account')
+  async lockedAccount(@Req() req: Request, @Body() data: UserLogin) {
+    try {
+      const errors = await validate(data);
+      if (errors.length > 0) {
+        throw new Error('Missing value!');
+      }
+      const user = req.user as IUserCreated;
+      const updated = await this.authService.lockedAccount(user, data);
+      if (!updated) throw new Error('Server Error');
+      const res = new Ok('Locked Account successfully!');
+      return res;
     } catch (err) {
       throw err;
     }

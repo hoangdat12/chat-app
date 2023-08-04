@@ -19,7 +19,7 @@ import { Ok } from '../ultils/response';
 import { IUserCreated } from '../ultils/interface';
 import { multerOptions } from '../ultils/constant/multer.config';
 import { isObjectId } from '../ultils';
-import { IDataChangeSocialLink } from './user.dto';
+import { DataUpdateInformationUser, IDataChangeSocialLink } from './user.dto';
 import { validate } from 'class-validator';
 
 @Controller('user')
@@ -133,6 +133,19 @@ export class UserController {
       }
       const user = req.user as IUserCreated;
       return new Ok(await this.userService.updateSocialLink(user, data));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Patch('/update/user-information')
+  async changeUserInformation(
+    @Req() req: Request,
+    @Body() data: DataUpdateInformationUser,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(await this.userService.changeUserInformation(user, data));
     } catch (err) {
       throw err;
     }

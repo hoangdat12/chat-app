@@ -29,6 +29,9 @@ export default {
       fontFamily: {
         poppins: ['Poppins', 'sans-serif'],
       },
+      backdropBlur: {
+        20: 'blur(20px)',
+      },
     },
   },
   plugins: [],

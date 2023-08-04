@@ -9,7 +9,7 @@ import poster1 from '../../assets/poster/1.png';
 import poster2 from '../../assets/poster/2.png';
 import poster3 from '../../assets/poster/3.png';
 import poster4 from '../../assets/poster/4.png';
-import { register } from '../../features/auth/authService';
+import { authService } from '../../features/auth/authService';
 
 export interface IRegisterData {
   email: string;
@@ -56,7 +56,7 @@ const Register = () => {
   const handleLogin = async (data: IRegisterDataReceived) => {
     const { rePassword, ...payload } = data;
     setIsLoading(true);
-    const response = await register(payload);
+    const response = await authService.register(payload);
     if (response.status === 201) {
       setIsLoading(false);
       setIsError(false);
@@ -85,17 +85,19 @@ const Register = () => {
       onSubmit: handleLogin,
     }
   );
-
   return (
     <div className='flex justify-start items-center flex-col h-screen'>
       <div className='relative flex justify-center flex-col items-center w-full h-full bg-slate-300'>
-        <div className='grid grid-cols-1 md:w-[80%] lg:grid-cols-9 xl:w-[70%] w-[90%] h-[90%] mx-auto rounded-xl overflow-hidden bg-white '>
+        <div className='absolute grid grid-cols-1 md:w-[80%] lg:grid-cols-9 xl:w-[70%] w-[90%] h-[90%] mx-auto rounded-xl overflow-hidden bg-white '>
           <div className='relative hidden lg:col-span-4 lg:flex items-center justify-center bg-[#6197fc] overflow-hidden'>
             <Slider className='w-full h-[full] xl:p-10 lg:p-5' {...settings}>
               {posters.map((poster) => (
-                <div key={poster} className='flex justify-center items-center '>
+                <div
+                  key={poster}
+                  className='flex justify-center items-center outline-none'
+                >
                   <img
-                    className='w-full object-cover border-none'
+                    className='w-full object-cover border-none outline-none'
                     src={poster}
                     alt=''
                   />

@@ -26,14 +26,19 @@ export class UserLogin {
 
 export class ChangePassword {
   @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @IsNotEmpty()
   olderPassword: string;
 
   @IsNotEmpty()
   newPassword: string;
+
+  @IsNotEmpty()
+  rePassword: string;
+}
+
+export class ForgotPassword extends ChangePassword {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }
 
 export class ChangeUsername {

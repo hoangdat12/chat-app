@@ -68,3 +68,8 @@
 .hover-parent:hover .hover-child {
   display: flex !important;
 }
+
+.backdropModel {
+  position: relative;
+  backdrop-filter: blur(20px);
+}

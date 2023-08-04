@@ -30,11 +30,12 @@ export class OtpTokenRepository {
     return await this.otpTokenModel.deleteOne({ token });
   }
 
-  async createOtpToken(email: string) {
+  async createOtpToken(email: string, type: string) {
     const data = {
       email,
       token: crypto.randomBytes(20).toString('hex'),
       secret: crypto.randomBytes(10).toString('hex'),
+      type,
     };
 
     return await this.otpTokenModel.create(data);

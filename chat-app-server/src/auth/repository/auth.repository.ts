@@ -4,7 +4,12 @@ import mongoose, { Model } from 'mongoose';
 import { User } from '../../schema/user.model';
 import { ChangeUsername, UserRegister } from '../auth.dto';
 import { IUserCreated, Pagination } from '../../ultils/interface';
-import { checkNegativeNumber, convertObjectId } from '../../ultils';
+import {
+  checkNegativeNumber,
+  convertObjectId,
+  removeNullValues,
+} from '../../ultils';
+import { DataUpdateInformationUser } from '../../user/user.dto';
 
 @Injectable()
 export class AuthRepository {
@@ -20,47 +25,42 @@ export class AuthRepository {
   }
 
   async findByEmail(userEmail: string): Promise<IUserCreated | null> {
-    return await this.userModel
-      .findOne({ email: userEmail })
-      // .select({
-      //   _id: 1,
-      //   firstName: 1,
-      //   lastName: 1,
-      //   email: 1,
-      //   avatarUrl: 1,
-      //   isActive: 1,
-      //   loginWith: 1,
-      // })
-      .lean();
+    return await this.userModel.findOne({ email: userEmail }).lean();
   }
 
   async findByUserName(keyword: string, pagination: Pagination) {
     const searchRegex = new RegExp(keyword, 'i');
     const { limit, page } = checkNegativeNumber(pagination);
     const offset = (page - 1) * limit;
-    const users = await this.userModel
-      .aggregate([
-        {
-          $project: {
-            _id: 1,
-            firstName: 1,
-            lastName: 1,
-            email: 1,
-            avatarUrl: 1,
-            isActive: 1,
-          },
+    const users = await this.userModel.aggregate([
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          email: 1,
+          avatarUrl: 1,
+          isActive: 1,
         },
-        {
-          $match: {
-            userName: {
-              $regex: searchRegex,
+      },
+      {
+        $match: {
+          isActive: true,
+          $expr: {
+            $regexMatch: {
+              input: { $concat: ['$firstName', ' ', '$lastName'] },
+              regex: searchRegex,
             },
-            isActive: true,
           },
         },
-      ])
-      .skip(offset)
-      .limit(limit);
+      },
+      {
+        $skip: offset,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
     return {
       users,
       keyword,
@@ -80,6 +80,14 @@ export class AuthRepository {
       { email },
       { password },
       { new: true },
+    );
+  }
+
+  async changeEmail(user: IUserCreated, newEmail: string) {
+    return await this.userModel.findOneAndUpdate(
+      { _id: convertObjectId(user._id) },
+      { email: newEmail },
+      { new: true, upsert: true },
     );
   }
 
@@ -166,6 +174,38 @@ export class AuthRepository {
       { _id: convertObjectId(userId) },
       { [updatedField]: social_link },
       { new: true, upsert: true },
+    );
+  }
+
+  async updateUserInformation(
+    user: IUserCreated,
+    data: DataUpdateInformationUser,
+  ) {
+    const dataUpdated = removeNullValues(data);
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: convertObjectId(user._id),
+      },
+      dataUpdated,
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+  }
+
+  async lockedAccount(user: IUserCreated) {
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: user._id,
+      },
+      {
+        isActive: false,
+      },
+      {
+        new: true,
+        upsert: true,
+      },
     );
   }
 }

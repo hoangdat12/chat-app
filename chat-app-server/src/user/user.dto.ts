@@ -6,3 +6,9 @@ export class IDataChangeSocialLink {
   @IsNotEmpty()
   social_link: string;
 }
+
+export class DataUpdateInformationUser {
+  firstName: string;
+  lastName: string;
+  job: string;
+}

@@ -5,7 +5,8 @@ import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { IUserCreated, Pagination } from '../ultils/interface';
 import { RedisService } from '../redis/redis.service';
-import { IDataChangeSocialLink } from './user.dto';
+import { DataUpdateInformationUser, IDataChangeSocialLink } from './user.dto';
+import { removeNullValues } from '../ultils';
 
 @Injectable()
 export class UserService {
@@ -93,6 +94,42 @@ export class UserService {
       type,
       social_link,
     );
+  }
+
+  async changeUserInformation(
+    user: IUserCreated,
+    data: DataUpdateInformationUser,
+  ) {
+    let { firstName, lastName, job } = data;
+    firstName = firstName.trim();
+    lastName = lastName.trim();
+    job = job.trim();
+
+    let condition =
+      firstName === null &&
+      lastName === null &&
+      job === null &&
+      (firstName === '' || lastName !== '' || job !== '');
+
+    if (condition)
+      throw new HttpException('Invalid Value!', HttpStatus.BAD_REQUEST);
+
+    const foundUser = await this.authRepository.findById(user._id);
+    if (!foundUser)
+      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+    condition =
+      foundUser.firstName === firstName &&
+      foundUser.lastName === lastName &&
+      foundUser.job === job;
+    if (condition)
+      throw new HttpException('Invalid Value!', HttpStatus.BAD_REQUEST);
+
+    return await this.authRepository.updateUserInformation(user, {
+      firstName,
+      lastName,
+      job,
+    });
   }
 
   async fixBug() {

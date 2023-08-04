@@ -85,3 +85,12 @@ export const isObjectId = (id: string) => {
   if (!isValidObjectId(id))
     throw new HttpException('Invalid userId!', HttpStatus.BAD_REQUEST);
 };
+
+export const removeNullValues = (obj: Object) => {
+  for (let key in obj) {
+    if (obj[key] === null) {
+      delete obj[key];
+    }
+  }
+  return obj;
+};

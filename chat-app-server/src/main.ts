@@ -25,6 +25,10 @@ async function bootstrap() {
       secret: process.env.SESSION_SECRET_KEY,
       resave: false,
       saveUninitialized: false,
+      cookie: {
+        secure: false,
+        maxAge: 1800000,
+      },
     }),
   );
   app.enableCors({

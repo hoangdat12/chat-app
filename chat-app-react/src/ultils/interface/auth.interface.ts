@@ -28,3 +28,9 @@ export interface IDataLoginSuccess {
   token: string;
   refreshToken: string;
 }
+
+export interface IDataChangePassword {
+  olderPassword: string;
+  newPassword: string;
+  rePassword: string;
+}

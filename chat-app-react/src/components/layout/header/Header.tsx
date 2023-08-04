@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useRef } from 'react';
 
 import {
   IoGameControllerOutline,
@@ -24,6 +24,11 @@ import Loading from '../../button/Loading';
 import { getUsername } from '../../../ultils';
 import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { readNotify, selectNotify } from '../../../features/notify/notifySlice';
+import Button from '../../button/Button';
+import useClickOutside from '../../../hooks/useClickOutside';
+import Confirm from '../../modal/Confirm';
+import { authService } from '../../../features/auth/authService';
+import { LoadingScreen } from '../../../pages/authPage/Login';
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -53,12 +58,31 @@ const Header: FC<IPropHeader> = memo(
     const [isShowSearchModal, setIsShowSearchModal] = useState(false);
     const [userSearch, setUserSearch] = useState<IUser[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingLogout, setLoadingLogout] = useState(false);
+    const [showModel, setShowModel] = useState(false);
+    const [showModelConfirm, setShowModelConfirm] = useState('');
     const innerWidth = useInnerWidth();
+
+    const modelRef = useRef<HTMLDivElement | null>(null);
+    const navigate = useNavigate();
 
     const dispatch = useAppDispatch();
     const { numberNotifyUnRead: totalNotify, notifies } =
       useAppSelector(selectNotify);
     const debounceValue = useDebounce(searchValue, 500);
+
+    const handleLogout = async () => {
+      setLoadingLogout(true);
+      const res = await authService.logout();
+      if (res.status === 200) {
+        setLoadingLogout(false);
+        navigate('/login');
+      }
+    };
+
+    const handleShowModel = () => {
+      setShowModel(true);
+    };
 
     // For responsive
     const handleOpen = () => {
@@ -124,6 +148,8 @@ const Header: FC<IPropHeader> = memo(
         setIsShowSearchModal(false);
       }
     }, [searchValue]);
+
+    useClickOutside(modelRef, () => setShowModel(false), 'mousedown');
 
     return (
       <div
@@ -224,20 +250,49 @@ const Header: FC<IPropHeader> = memo(
 
             <span className='lg:p-1 xl:p-4 hidden sm:block'></span>
 
-            <div className='float-right'>
+            <div onClick={handleShowModel} className='relative float-right'>
               <Avatar
                 className={' w-[42px] h-[42px]'}
                 avatarUrl={
                   'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
                 }
               />
+              <div
+                ref={modelRef}
+                className={`${
+                  showModel ? 'block' : 'hidden'
+                } absolute top-[calc(100%+6px)] right-0 bg-white shadow-default rounded-md overflow-hidden`}
+              >
+                <Button
+                  text={'Logout'}
+                  border={'border-none'}
+                  paddingX={'px-6'}
+                  paddingY={'py-2'}
+                  hover={'hover:bg-gray-50 duration-300'}
+                  onClick={() => setShowModelConfirm('true')}
+                />
+              </div>
             </div>
           </div>
         </div>
-        <CreateNewGroup
-          isShowCreateNewGroup={isShowModelCreate}
-          setShowCreateNewGroup={setIsShowModelCreate}
-        />
+        {isShowModelCreate && (
+          <CreateNewGroup
+            isShowCreateNewGroup={isShowModelCreate}
+            setShowCreateNewGroup={setIsShowModelCreate}
+          />
+        )}
+        {showModelConfirm !== '' &&
+          (loadingLogout ? (
+            <LoadingScreen />
+          ) : (
+            <Confirm
+              title={'Want to sign out?'}
+              handleSave={handleLogout}
+              isShow={showModelConfirm}
+              setIsShow={setShowModelConfirm}
+              textBtn={'Logout'}
+            />
+          ))}
       </div>
     );
   }

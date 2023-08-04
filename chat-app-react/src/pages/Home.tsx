@@ -4,19 +4,9 @@ import { AiOutlineSearch } from 'react-icons/Ai';
 
 import happyBirthday from '../assets/happyBirthday.png';
 import CreateFeed, { ModeCreateFeed } from '../components/feed/CreateFeed';
-import { FriendBoxDetail } from '../components/profile/ProfileFriend';
 import ListFeed from '../components/feed/ListFeed';
-import { useAppDispatch, useAppSelector } from '../app/hook';
-import { selectPost } from '../features/post/postSlice';
 
 const Home = () => {
-  // const { posts } = useAppSelector(selectPost);
-  // const dispatch = useAppDispatch();
-
-  // useEffect(() => {
-  //   dis
-  // }, [])
-
   return (
     <Layout>
       <div className='relative md:grid md:grid-cols-12 flex gap-8 px-10 w-full h-full overflow-hidden bg-gray-100'>

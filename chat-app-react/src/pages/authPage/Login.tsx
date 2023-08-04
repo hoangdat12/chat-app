@@ -11,8 +11,6 @@ import BannerLogin from '../../assets/banner.mp4';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { login, selectAuth } from '../../features/auth/authSlice';
 import { getInforUserWithOauth2 } from '../../features/auth/authSlice';
-import axios from 'axios';
-import { IConversation, IResponse } from '../../ultils/interface';
 
 export interface IProp {
   className?: string;
@@ -62,7 +60,8 @@ export const LoginWith: React.FC<IProp> = ({ className, name, Icon }) => {
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { user, status, token, isLoading } = useAppSelector(selectAuth);
+
+  const { status, isLoading } = useAppSelector(selectAuth);
   const [showPassword, setShowPassword] = useState(false);
   const loginSchema = yup.object().shape({
     email: yup
@@ -71,8 +70,12 @@ const Login = () => {
       .required('Email is required field'),
     password: yup.string().min(5).required('Password is required field'),
   });
+
   const handleLogin = async (data: ILoginData) => {
     await dispatch(login(data));
+    if (status === 'succeeded') {
+      navigate('/');
+    }
   };
 
   const { errors, touched, handleBlur, handleChange, handleSubmit } = useFormik(
@@ -87,29 +90,14 @@ const Login = () => {
   );
 
   useEffect(() => {
-    const handleNavigate = async () => {
-      if (user) {
-        const res = (await axios.get(
-          `http://localhost:8080/api/v1/user/conversation/${user._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'x-client-id': user?._id,
-            },
-            withCredentials: true,
-          }
-        )) as IResponse<{ conversations: IConversation[] }>;
-        if (res.data.metaData.conversations.length) {
-          window.location.href = `/conversation/${res.data.metaData.conversations[0]?._id}`;
-        } else {
-          navigate('/');
-        }
-      }
+    const handleNavigate = () => {
+      navigate('/');
     };
-    if (user && status === 'idle') {
+
+    if (status === 'succeeded') {
       handleNavigate();
     }
-  }, [user, status, navigate]);
+  }, [status]);
 
   return (
     <div className='flex justify-start items-center flex-col h-screen'>
@@ -122,11 +110,8 @@ const Login = () => {
           autoPlay
           className='w-full h-full object-cover'
         />
-        <div className='absolute w-full h-full flex sm:flex-col items-center justify-center top-0 left-0 bottom-0 right-0 bg-blackOverlay'>
-          {/* <div className='relative h-[70px] w-full px-10 hidden sm:flex items-center justify-between mb-10'>
-           
-          </div> */}
-          <div className='sm:w-[550px] w-[90%] h-[80%] mx-auto rounded-xl bg-white px-8 py-12'>
+        <div className='absolute w-full h-full text-white flex sm:flex-col items-center justify-center top-0 left-0 bottom-0 right-0 bg-blackOverlay'>
+          <div className='sm:w-[550px] w-[90%] h-[80%] mx-auto rounded-xl backdropModel px-8 py-12'>
             <h1 className='sm:text-4xl text-2xl font-bold text-center'>
               Welcome back to Fasty
             </h1>
@@ -148,7 +133,7 @@ const Login = () => {
             <form action='' onSubmit={handleSubmit} autoComplete='off'>
               <input
                 name='email'
-                className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
+                className={`w-full px-4 py-3 bg-[#f1f1f1] text-black rounded-lg outline-none ${
                   errors.email && touched.email ? 'border-2 border-red-500' : ''
                 }`}
                 type='text'
@@ -162,7 +147,7 @@ const Login = () => {
               <div className='relative sm:mt-8 mt-4'>
                 <input
                   name='password'
-                  className={`w-full px-4 py-3 bg-[#f1f1f1] rounded-lg outline-none ${
+                  className={`w-full px-4 py-3 bg-[#f1f1f1] text-black rounded-lg outline-none ${
                     errors.password && touched.password
                       ? 'border-2 border-red-500'
                       : ''
@@ -189,36 +174,41 @@ const Login = () => {
               )}
               <button
                 type='submit'
-                className='bg-amber-300 w-full rounded-lg  px-4 py-2  text-white text-lg sm:mt-8 mt-6'
+                className='bg-[#579a90] w-full rounded-lg  px-4 py-2  text-white text-lg sm:mt-8 mt-6'
               >
                 Sign In
               </button>
-              <div className='sm:flex justify-between sm:mt-8 mt-4 cursor-pointer text-sm font-light text-gray-blur '>
+              <div className='sm:flex justify-between sm:mt-8 mt-4 cursor-pointer text-sm text-gray-blur'>
                 <div className=''>
-                  <span className='text-[#929aaa] font-light mr-3 inline cursor-pointer'>
+                  <span className='hover:text-[#bdc7da] duration-300 mr-3 inline cursor-pointer'>
                     Do not have account?
                   </span>
                   <Link to='/sign-up'>
-                    <button className='text-[#282a37] hover:text-red-500 duration-300 font-medium'>
+                    <button className='text-white hover:text-red-500 duration-300 font-medium'>
                       Sign Up
                     </button>
                   </Link>
                 </div>
-                <h4 className=''>Forget password?</h4>
+                <h4 className='hover:text-[#bdc7da] duration-300'>
+                  Forget password?
+                </h4>
               </div>
             </form>
           </div>
         </div>
-        <div
-          className={`absolute ${
-            isLoading ? 'flex' : 'hidden'
-          } items-center justify-center w-full h-full top-0 left-0 bottom-0 right-0 bg-blackOverlay`}
-        >
-          <span className='loading-spinner'></span>
-        </div>
+        {isLoading && <LoadingScreen />}
       </div>
     </div>
   );
 };
 
+export const LoadingScreen = () => {
+  return (
+    <div
+      className={`absolute flex items-center justify-center w-full h-full top-0 left-0 bottom-0 right-0 bg-blackOverlay z-[1002]`}
+    >
+      <span className='loading-spinner'></span>
+    </div>
+  );
+};
 export default Login;
