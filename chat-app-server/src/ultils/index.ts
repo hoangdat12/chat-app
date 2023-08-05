@@ -26,6 +26,7 @@ export const convertUserIdString = (user: any): IUserCreated => {
       isActive: user?.isActive,
       role: user?.role,
       loginWith: user?.loginWith,
+      isLocked: user.isLocked,
     };
   } catch (error) {
     throw error;

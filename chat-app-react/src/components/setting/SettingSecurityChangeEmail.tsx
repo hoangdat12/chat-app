@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import Button from '../button/Button';
 import InputDefault from '../input/InputDefault';
 import { authService } from '../../features/auth/authService';
-import { getUserLocalStorageItem } from '../../ultils';
+import { getUserLocalStorageItem, isValidEmail } from '../../ultils';
 import { ILoginData } from '../../pages/authPage/Login';
+import InputEmail from '../input/InputEmail';
 
 const SettingSecurityChangeEmail = () => {
   const [emailValue, setEmailValue] = useState('');
@@ -34,8 +35,7 @@ const SettingSecurityChangeEmail = () => {
 
   const handleChangeEmail = async () => {
     if (emailValue !== '') {
-      const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (pattern.test(emailValue)) {
+      if (isValidEmail(emailValue)) {
         // Call api
         await authService.changeEmail(emailValue);
         setIsValid(true);
@@ -84,14 +84,11 @@ const SettingSecurityChangeEmail = () => {
         )}
         {isValid ? (
           <>
-            <input
+            <InputEmail
               value={emailValue}
-              onChange={(e) => setEmailValue(e.target.value)}
-              type='text'
-              placeholder='Enter new email...'
-              className={`flex items-center gap-2 text-sm border mt-3 px-4 py-2 outline-none rounded-lg w-full ${
-                !isValid && 'cursor-not-allowed opacity-50'
-              }`}
+              setValue={setEmailValue}
+              placeholder={'Enter new email...'}
+              className={`${!isValid && 'cursor-not-allowed opacity-50'}`}
             />
             {invalidMessage !== '' && (
               <p className='px-2 mt-1 text-red-500 text-xs'>{invalidMessage}</p>

@@ -200,31 +200,45 @@ export class AuthController {
         res.cookie('secret', foundOtp.secret, {
           maxAge: 1000 * 60 * 15,
         });
-        return res.redirect(
-          `http://localhost:5173/setting/security/change-email`,
-        );
+        const redirectUrl =
+          foundOtp.type === OtpType.EMAIL
+            ? `http://localhost:5173/setting/security/change-email`
+            : `http://localhost:5173/login/change-password`;
+
+        return res.redirect(redirectUrl);
       } else return res.redirect(`http://localhost:5173/err`);
     } catch (err) {
       throw err;
     }
   }
 
-  @Patch('change-password/:secret')
+  // Forgot password
+  @Patch('get-password')
   async changPasswordWithSecret(
+    @Req() req: Request,
+    @Res() res: Response,
     @Body() data: ForgotPassword,
-    @Param('secret') secret: string,
   ) {
     try {
       const errors = await validate(data);
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
-      return await this.authService.changePasswordWithSecret(data, secret);
+      const secret = req.cookies['secret'];
+      if (!secret) throw new Error('Invalid request!');
+      const updated = await this.authService.changePasswordWithSecret(
+        data,
+        secret,
+      );
+      if (!updated) throw new Error('Server Error');
+      res.cookie('secret', '', { expires: new Date(0) });
+      return new Ok('Get password successfully!').sender(res);
     } catch (err) {
       throw err;
     }
   }
 
+  // Change password
   @Patch('change-password')
   async changPassword(@Req() req: Request, @Body() data: ChangePassword) {
     try {
@@ -275,5 +289,10 @@ export class AuthController {
     } catch (err) {
       throw err;
     }
+  }
+
+  @Get('/bug/fix')
+  async fixBug() {
+    return await this.authService.fixBug();
   }
 }

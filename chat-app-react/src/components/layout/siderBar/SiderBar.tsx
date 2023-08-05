@@ -219,7 +219,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                   className={`link whitespace-nowrap overflow-hidden ${
                     showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
-                  to='/'
+                  to={select.path}
                 >
                   <i className='select__icon w-16 flex justify-center whitespace-nowrap'>
                     {select.icons}
@@ -251,7 +251,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 className={`link whitespace-nowrap overflow-hidden ${
                   showMobile ? 'text-base sm:text-lg' : 'text-base'
                 }`}
-                to='/'
+                to={select.path}
               >
                 <i className='select__icon w-16 flex justify-center whitespace-nowrap'>
                   {select.icons}

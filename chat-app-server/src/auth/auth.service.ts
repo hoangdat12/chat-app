@@ -86,7 +86,8 @@ export class AuthService {
     const userUpdate = await this.authRepository.activeUser(otpToken.email);
     if (!userUpdate) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
-    await this.otpTokenRepository.deleteByToken(tokenActive);
+    this.otpTokenRepository.deleteByToken(tokenActive);
+
     const user = convertUserIdString(userUpdate);
     return { isValid: true, user };
   }
@@ -101,6 +102,11 @@ export class AuthService {
         'User is already login with google!',
         HttpStatus.NOT_FOUND,
       );
+
+    if (user.isLocked) {
+      // unLock account
+      this.authRepository.unLockedAccount(user);
+    }
 
     const isValidPassword = bcrypt.compareSync(password, user.password);
     if (!isValidPassword)
@@ -269,35 +275,27 @@ export class AuthService {
     const otpToken = await this.otpTokenRepository.findBySecret(secret);
     if (!otpToken) throw new HttpException('Wrong!', HttpStatus.BAD_REQUEST);
 
-    const email = data.email;
-    const userExist = await this.authRepository.findByEmail(email);
+    const userExist = await this.authRepository.findByEmail(otpToken.email);
     if (!userExist)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-    if (otpToken.type !== OtpType.PASSWORD || otpToken.email !== data.email)
+    if (otpToken.type !== OtpType.PASSWORD)
       throw new HttpException('Invalid!', HttpStatus.BAD_REQUEST);
-
-    if (data.olderPassword === data.newPassword)
-      throw new HttpException('Password unchanged!', HttpStatus.BAD_REQUEST);
 
     const matchPassword = data.newPassword === data.rePassword;
     if (!matchPassword)
       throw new HttpException('Wrong rePassword!', HttpStatus.BAD_REQUEST);
 
-    const isValidPassword = bcrypt.compareSync(
-      data.olderPassword,
-      userExist.password,
-    );
-    if (!isValidPassword)
-      throw new HttpException('Wrong older Password!', HttpStatus.BAD_REQUEST);
-
     const hashPassword = bcrypt.hashSync(data.newPassword, 10);
     const userChangePassoword = await this.authRepository.changePassword(
-      email,
+      otpToken.email,
       hashPassword,
     );
     if (!userChangePassoword)
       throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
+
+    // delete otp
+    this.otpTokenRepository.deleteByToken(otpToken.token);
 
     return new Ok<string>('Change password success!', 'success');
   }
@@ -357,7 +355,7 @@ export class AuthService {
   async lockedAccount(user: IUserCreated, data: UserLogin) {
     if (user.email !== data.email)
       throw new HttpException('Invalid email', HttpStatus.BAD_REQUEST);
-    const isValid = await this.verifyPassword(data);
+    const { isValid } = await this.verifyPassword(data);
     if (!isValid)
       throw new HttpException('Wrong password!', HttpStatus.BAD_REQUEST);
     return await this.authRepository.lockedAccount(user);
@@ -375,5 +373,9 @@ export class AuthService {
         format: 'pem',
       },
     });
+  }
+
+  async fixBug() {
+    return await this.authRepository.fixBug();
   }
 }

@@ -2,6 +2,7 @@ import { ILoginData } from '../../pages/authPage/Login';
 import { IRegisterData } from '../../pages/authPage/Register';
 import {
   IDataChangePassword,
+  IDataGetPassword,
   IDataLoginSuccess,
   IDataReceived,
   IResponse,
@@ -47,6 +48,7 @@ const register = async (data: IRegisterData) => {
 
 const logout = async () => {
   const res = await myAxios.post('/auth/logout');
+  console.log('Logout');
   if (res.status === 200) {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
@@ -55,8 +57,13 @@ const logout = async () => {
   return res.data;
 };
 
-const verifyEmail = async (type: string): Promise<IResponse<string>> => {
-  const res = await myAxios.post(`/auth/verify-email/change/${type}`);
+const verifyEmail = async (
+  type: string,
+  email?: string
+): Promise<IResponse<string>> => {
+  const res = await myAxios.post(`/auth/verify-email/change/${type}`, {
+    email,
+  });
   return res;
 };
 
@@ -87,6 +94,13 @@ const lockedAccount = async (data: ILoginData): Promise<IResponse<string>> => {
   return res;
 };
 
+const getPassword = async (
+  data: IDataGetPassword
+): Promise<IResponse<string>> => {
+  const res = await myAxios.patch('/auth/get-password', data);
+  return res;
+};
+
 export const authService = {
   login,
   getInforUserWithOauth2,
@@ -97,4 +111,5 @@ export const authService = {
   verifyPassword,
   changeEmail,
   lockedAccount,
+  getPassword,
 };

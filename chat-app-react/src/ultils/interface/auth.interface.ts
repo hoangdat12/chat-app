@@ -21,6 +21,7 @@ export interface IUser {
   address?: string;
   social_github?: string;
   social_facebook?: string;
+  isActive: boolean;
 }
 
 export interface IDataLoginSuccess {
@@ -29,8 +30,11 @@ export interface IDataLoginSuccess {
   refreshToken: string;
 }
 
-export interface IDataChangePassword {
-  olderPassword: string;
+export interface IDataGetPassword {
   newPassword: string;
   rePassword: string;
+}
+
+export interface IDataChangePassword extends IDataGetPassword {
+  olderPassword: string;
 }

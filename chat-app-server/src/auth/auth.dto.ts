@@ -24,10 +24,7 @@ export class UserLogin {
   password: string;
 }
 
-export class ChangePassword {
-  @IsNotEmpty()
-  olderPassword: string;
-
+export class ForgotPassword {
   @IsNotEmpty()
   newPassword: string;
 
@@ -35,10 +32,9 @@ export class ChangePassword {
   rePassword: string;
 }
 
-export class ForgotPassword extends ChangePassword {
+export class ChangePassword extends ForgotPassword {
   @IsNotEmpty()
-  @IsEmail()
-  email: string;
+  olderPassword: string;
 }
 
 export class ChangeUsername {

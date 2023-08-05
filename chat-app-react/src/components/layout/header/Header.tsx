@@ -28,7 +28,7 @@ import Button from '../../button/Button';
 import useClickOutside from '../../../hooks/useClickOutside';
 import Confirm from '../../modal/Confirm';
 import { authService } from '../../../features/auth/authService';
-import { LoadingScreen } from '../../../pages/authPage/Login';
+import LoadingScreen from '../../button/LoadingScreen';
 
 export interface IPropHeader {
   isOpen: boolean;

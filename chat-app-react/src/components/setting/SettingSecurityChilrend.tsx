@@ -5,9 +5,10 @@ import Confirm from '../modal/Confirm';
 import { IDataChangePassword } from '../../ultils/interface';
 import { authService } from '../../features/auth/authService';
 import { OtpType } from '../../ultils/constant';
-import { ILoginData, LoadingScreen } from '../../pages/authPage/Login';
+import { ILoginData } from '../../pages/authPage/Login';
 import { getUserLocalStorageItem } from '../../ultils';
 import { useNavigate } from 'react-router-dom';
+import LoadingScreen from '../button/LoadingScreen';
 
 export const ConfirmChangeEmail = () => {
   const [isValid, setIsValid] = useState(false);
@@ -15,8 +16,9 @@ export const ConfirmChangeEmail = () => {
 
   const handleConfirmChangeEmail = async () => {
     const res = await authService.verifyEmail(OtpType.EMAIL);
-    console.log(res);
-    setIsValid(true);
+    if (res.status === 200) {
+      setIsValid(true);
+    }
   };
 
   return isValid ? (

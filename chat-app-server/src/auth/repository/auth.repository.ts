@@ -46,6 +46,7 @@ export class AuthRepository {
       {
         $match: {
           isActive: true,
+          isLocked: true,
           $expr: {
             $regexMatch: {
               input: { $concat: ['$firstName', ' ', '$lastName'] },
@@ -198,14 +199,37 @@ export class AuthRepository {
     return await this.userModel.findOneAndUpdate(
       {
         _id: user._id,
+        isLocked: false,
       },
       {
-        isActive: false,
+        isLocked: true,
       },
       {
         new: true,
         upsert: true,
       },
     );
+  }
+
+  async unLockedAccount(user: IUserCreated) {
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: user._id,
+        isLocked: true,
+      },
+      {
+        isLocked: false,
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+  }
+
+  async fixBug() {
+    return await this.userModel.updateMany({
+      isLocked: false,
+    });
   }
 }

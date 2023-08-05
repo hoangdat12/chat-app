@@ -39,8 +39,16 @@ const changeUserInformation = async (
   return res;
 };
 
+const findUserByEmail = async (
+  email: string
+): Promise<IResponse<{ user: IUser }>> => {
+  const res = await myAxios.post('/user/email', { email });
+  return res;
+};
+
 export const userService = {
   findUserByName,
   updateSocialLink,
   changeUserInformation,
+  findUserByEmail,
 };

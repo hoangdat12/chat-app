@@ -23,6 +23,9 @@ export class User {
   @Prop({ default: false })
   isActive: boolean;
 
+  @Prop({ default: false })
+  isLocked: boolean;
+
   @Prop({ default: 'USER' })
   role: string;
 

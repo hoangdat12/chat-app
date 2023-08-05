@@ -132,6 +132,12 @@ export class UserService {
     });
   }
 
+  async findUserByEmail(email: string) {
+    const user = await this.authRepository.findByEmail(email);
+    delete user.password;
+    return { user };
+  }
+
   async fixBug() {
     return await this.authRepository.updateAll();
   }

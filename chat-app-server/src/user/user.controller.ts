@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   UploadedFile,
@@ -146,6 +147,15 @@ export class UserController {
     try {
       const user = req.user as IUserCreated;
       return new Ok(await this.userService.changeUserInformation(user, data));
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Post('/email')
+  async findUserByEmail(@Body('email') email: string) {
+    try {
+      return new Ok(await this.userService.findUserByEmail(email));
     } catch (err) {
       throw err;
     }

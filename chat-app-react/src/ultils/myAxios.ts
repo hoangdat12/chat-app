@@ -11,7 +11,6 @@ const token = getTokenLocalStorageItem();
 const myAxios = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
   headers: {
-    // Authorization: `Bearer ${token}`,
     'x-client-id': user?._id,
   },
   withCredentials: true,
@@ -84,7 +83,8 @@ myAxios.interceptors.response.use(
         return;
       }
     }
-    return Promise.reject(error);
+    Promise.reject(error);
+    return error;
   }
 );
 

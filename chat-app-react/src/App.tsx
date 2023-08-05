@@ -11,6 +11,7 @@ import { SocketContext, socket } from './ultils/context/Socket';
 import useInnerWidth from './hooks/useInnterWidth';
 import Profile from './pages/profile/Profile';
 import Setting from './pages/setting/Setting';
+import Game from './pages/game/Game';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -19,10 +20,10 @@ function App() {
       <Router>
         <Routes>
           <Route path='/' element={<Home />} />
-          <Route path='/login' element={<Login />} />
+          <Route path='/login/success' element={<LoginSuccess />} />
+          <Route path='/login/*' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/register/success' element={<RegisterSuccess />} />
-          <Route path='/login/success' element={<LoginSuccess />} />
           <Route element={<ProtectedRoutes />}>
             {innerWitdh < 640 ? (
               <Route
@@ -37,6 +38,7 @@ function App() {
             )}
             <Route path='/profile/:userId/*' element={<Profile />} />
             <Route path='/setting/*' element={<Setting />} />
+            <Route path='/game/*' element={<Game />} />
           </Route>
         </Routes>
       </Router>

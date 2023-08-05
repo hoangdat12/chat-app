@@ -31,7 +31,7 @@ export const selectNav1 = [
 export const selectNavUtils = [
   {
     display: 'Games',
-    path: '/setting/general',
+    path: '/game',
     icons: <IoGameControllerOutline />,
   },
   {
@@ -44,7 +44,7 @@ export const selectNavUtils = [
 export const selectNav2 = [
   {
     display: 'Setting',
-    path: '/setting/general',
+    path: '/setting',
     icons: <FiSettings />,
   },
   {
