@@ -31,30 +31,6 @@ export class User {
 
   @Prop({ default: 'email' })
   loginWith: string;
-
-  @Prop({
-    default: 0,
-    validator: (value: number) => value >= 0 && value <= 1000,
-  })
-  friends?: number;
-
-  @Prop({ default: 0 })
-  viewer?: number;
-
-  @Prop({ default: 0 })
-  total_post?: number;
-
-  @Prop({ default: 'Student' })
-  job?: string;
-
-  @Prop({ default: 'Viet Nam' })
-  address?: string;
-
-  @Prop({ default: 'default' })
-  social_github?: string;
-
-  @Prop({ default: 'default' })
-  social_facebook?: string;
 }
 
 const UserSchema = SchemaFactory.createForClass(User);

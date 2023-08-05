@@ -5,3 +5,4 @@ export * from './notify.interface';
 export * from './friend.interface';
 export * from './post.interface';
 export * from './comment.interface';
+export * from './profile.interface';

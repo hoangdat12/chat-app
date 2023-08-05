@@ -5,8 +5,6 @@ import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { IUserCreated, Pagination } from '../ultils/interface';
 import { RedisService } from '../redis/redis.service';
-import { DataUpdateInformationUser, IDataChangeSocialLink } from './user.dto';
-import { removeNullValues } from '../ultils';
 
 @Injectable()
 export class UserService {
@@ -23,24 +21,6 @@ export class UserService {
 
   async searchUser(keyword: string, pagination: Pagination) {
     return await this.authRepository.findByUserName(keyword.trim(), pagination);
-  }
-
-  async getUserDetail(user: IUserCreated, userId: string) {
-    if (user._id !== userId) {
-      const key = `user:${user._id}:profile:${userId}`;
-      // If haven't key then increment view profile
-      if (!(await this.redisService.get(key))) {
-        // Set key
-        await this.redisService.set(key, 'view');
-        // increment
-        this.authRepository.increViewProfile(userId);
-      }
-    }
-    const userExist = await this.authRepository.findById(userId);
-    if (!userExist)
-      throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
-    delete userExist.password;
-    return new Ok<any>(userExist, 'success');
   }
 
   async changeUserName(user: IUserCreated, data: ChangeUsername) {
@@ -78,58 +58,6 @@ export class UserService {
     if (!userExist)
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
     return userExist;
-  }
-
-  async updateSocialLink(user: IUserCreated, data: IDataChangeSocialLink) {
-    let { type, social_link } = data;
-    social_link = social_link.trim();
-    if (type !== 'Facebook' && type !== 'Github')
-      throw new HttpException('Not valid type!', HttpStatus.BAD_REQUEST);
-
-    if (!social_link.startsWith('https://'))
-      throw new HttpException('Not valid link', HttpStatus.BAD_REQUEST);
-
-    return await this.authRepository.updateSocialLink(
-      user._id,
-      type,
-      social_link,
-    );
-  }
-
-  async changeUserInformation(
-    user: IUserCreated,
-    data: DataUpdateInformationUser,
-  ) {
-    let { firstName, lastName, job } = data;
-    firstName = firstName.trim();
-    lastName = lastName.trim();
-    job = job.trim();
-
-    let condition =
-      firstName === null &&
-      lastName === null &&
-      job === null &&
-      (firstName === '' || lastName !== '' || job !== '');
-
-    if (condition)
-      throw new HttpException('Invalid Value!', HttpStatus.BAD_REQUEST);
-
-    const foundUser = await this.authRepository.findById(user._id);
-    if (!foundUser)
-      throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-
-    condition =
-      foundUser.firstName === firstName &&
-      foundUser.lastName === lastName &&
-      foundUser.job === job;
-    if (condition)
-      throw new HttpException('Invalid Value!', HttpStatus.BAD_REQUEST);
-
-    return await this.authRepository.updateUserInformation(user, {
-      firstName,
-      lastName,
-      job,
-    });
   }
 
   async findUserByEmail(email: string) {

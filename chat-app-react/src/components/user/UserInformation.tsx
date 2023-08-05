@@ -8,6 +8,7 @@ import { FaUserCheck, FaUserPlus } from 'react-icons/fa';
 import { RiUserSharedLine } from 'react-icons/ri';
 import { friendService } from '../../features/friend/friendService';
 import useClickOutside from '../../hooks/useClickOutside';
+import { useNavigate } from 'react-router-dom';
 
 export interface IUserInformationProp {
   user: IUser | null;
@@ -27,6 +28,7 @@ const UserInformation: FC<IUserInformationProp> = memo(
     showDeleteFriend,
     setShowDeleteFriend,
   }) => {
+    const navigate = useNavigate();
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const handleUnFriend = async () => {
       if (user) {
@@ -93,6 +95,7 @@ const UserInformation: FC<IUserInformationProp> = memo(
               )}
             </div>
             <Button
+              onClick={isOwner ? () => navigate('/setting') : undefined}
               className={'min-w-[120px]'}
               text={
                 isOwner

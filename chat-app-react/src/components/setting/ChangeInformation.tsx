@@ -2,7 +2,7 @@ import { Dispatch, FC, SetStateAction, memo, useState } from 'react';
 import { BsPencil } from 'react-icons/bs';
 import Avatar from '../avatars/Avatar';
 import Button from '../button/Button';
-import { getUserLocalStorageItem } from '../../ultils';
+import { getUserLocalStorageItem, getUsername } from '../../ultils';
 import { userService } from '../../features/user/userService';
 import { IDataChangeUserInformation } from '../../ultils/interface';
 
@@ -65,16 +65,11 @@ const ChangeInformation = () => {
       <h1 className='text-lg'>My Profile</h1>
 
       <div className='flex gap-4 p-4 border rounded-xl'>
-        <Avatar
-          avatarUrl={
-            'https://i.9mobi.vn/cf/Images/tt/2021/8/20/anh-avatar-dep-39.jpg'
-          }
-          className='w-16 h-16'
-        />
+        <Avatar avatarUrl={userLocal.avatarUrl} className='w-16 h-16' />
         <div>
-          <h2 className='text-lg'>Hoang Dat</h2>
-          <p className='text-sm text-[#8995a7]'>Student</p>
-          <p className='text-sm text-[#8995a7]'>Viet Nam</p>
+          <h2 className='text-lg'>{getUsername(userLocal)}</h2>
+          <p className='text-sm text-[#8995a7]'>{userLocal.job}</p>
+          <p className='text-sm text-[#8995a7]'>{userLocal.address}</p>
         </div>
       </div>
 

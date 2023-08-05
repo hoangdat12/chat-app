@@ -20,7 +20,6 @@ import { Ok } from '../ultils/response';
 import { IUserCreated } from '../ultils/interface';
 import { multerOptions } from '../ultils/constant/multer.config';
 import { isObjectId } from '../ultils';
-import { DataUpdateInformationUser, IDataChangeSocialLink } from './user.dto';
 import { validate } from 'class-validator';
 
 @Controller('user')
@@ -120,36 +119,6 @@ export class UserController {
       sortBy,
     };
     return new Ok<any>(data, 'success!');
-  }
-
-  @Patch('/update/social-link')
-  async updateSocialLink(
-    @Req() req: Request,
-    @Body() data: IDataChangeSocialLink,
-  ) {
-    try {
-      const errors = await validate(data);
-      if (errors.length > 0) {
-        throw new Error('Missing value!');
-      }
-      const user = req.user as IUserCreated;
-      return new Ok(await this.userService.updateSocialLink(user, data));
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  @Patch('/update/user-information')
-  async changeUserInformation(
-    @Req() req: Request,
-    @Body() data: DataUpdateInformationUser,
-  ) {
-    try {
-      const user = req.user as IUserCreated;
-      return new Ok(await this.userService.changeUserInformation(user, data));
-    } catch (err) {
-      throw err;
-    }
   }
 
   @Post('/email')

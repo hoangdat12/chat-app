@@ -23,6 +23,7 @@ import { NotifyModule } from './notify/notify.module';
 import { PostModule } from './post/post.module';
 import { RedisModule } from './redis/redis.module';
 import { CommentModule } from './comment/comment.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { CommentModule } from './comment/comment.module';
     NotifyModule,
     PostModule,
     CommentModule,
+    ProfileModule,
   ],
   controllers: [],
   providers: [],

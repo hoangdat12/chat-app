@@ -9,7 +9,6 @@ import {
   convertObjectId,
   removeNullValues,
 } from '../../ultils';
-import { DataUpdateInformationUser } from '../../user/user.dto';
 
 @Injectable()
 export class AuthRepository {
@@ -124,77 +123,6 @@ export class AuthRepository {
     });
   }
 
-  async updateQuantityPost(userId: string, quantity: number) {
-    if (quantity !== 1 && quantity !== -1) return;
-
-    return await this.userModel.findOneAndUpdate(
-      {
-        _id: userId,
-      },
-      {
-        $inc: {
-          total_post: quantity,
-        },
-      },
-    );
-  }
-
-  async increQuantityFriend(userId: string, quantity: number) {
-    if (quantity !== 1 && quantity !== -1) return;
-
-    return await this.userModel.findOneAndUpdate(
-      {
-        _id: userId,
-      },
-      {
-        $inc: {
-          friends: quantity,
-        },
-      },
-    );
-  }
-
-  async increViewProfile(userId: string) {
-    return await this.userModel.findOneAndUpdate(
-      {
-        _id: convertObjectId(userId),
-      },
-      {
-        $inc: {
-          viewer: 1,
-        },
-      },
-    );
-  }
-
-  async updateSocialLink(userId: string, type: string, social_link: string) {
-    const updatedField =
-      type === 'Github' ? 'social_github' : 'social_facebook';
-
-    return await this.userModel.findOneAndUpdate(
-      { _id: convertObjectId(userId) },
-      { [updatedField]: social_link },
-      { new: true, upsert: true },
-    );
-  }
-
-  async updateUserInformation(
-    user: IUserCreated,
-    data: DataUpdateInformationUser,
-  ) {
-    const dataUpdated = removeNullValues(data);
-    return await this.userModel.findOneAndUpdate(
-      {
-        _id: convertObjectId(user._id),
-      },
-      dataUpdated,
-      {
-        new: true,
-        upsert: true,
-      },
-    );
-  }
-
   async lockedAccount(user: IUserCreated) {
     return await this.userModel.findOneAndUpdate(
       {
@@ -223,6 +151,18 @@ export class AuthRepository {
       {
         new: true,
         upsert: true,
+      },
+    );
+  }
+
+  async updateUserName(userId: string, firstName: string, lastName: string) {
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: convertObjectId(userId),
+      },
+      {
+        firstName: firstName,
+        lastName: lastName,
       },
     );
   }

@@ -7,6 +7,7 @@ import { getUsername } from '../ultils';
 import { NotifyService } from '../notify/notify.service';
 import { NotifyType } from '../ultils/constant/notify.constant';
 import { RedisService } from '../redis/redis.service';
+import { ProfileRepository } from '../profile/repository/profile.repository';
 
 @Injectable()
 export class FriendService {
@@ -15,6 +16,7 @@ export class FriendService {
     private readonly friendRepository: FriendRepository,
     private readonly notifyService: NotifyService,
     private readonly redisService: RedisService,
+    private readonly profileRepository: ProfileRepository,
   ) {}
   async create(user: IUserCreated) {
     return await this.friendRepository.create(user);
@@ -147,10 +149,10 @@ export class FriendService {
     );
 
     // Delete Notify
-    await this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
+    this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
 
     // Update quantity Friend
-    await this.authRepository.increQuantityFriend(user._id, 1);
+    this.profileRepository.increQuantityFriend(user._id, 1);
 
     await Promise.all([
       confirmeFriendPromiseWithUser,
@@ -191,8 +193,8 @@ export class FriendService {
     if (!isValidFriend) return;
 
     // Update quantity Friend
-    this.authRepository.increQuantityFriend(user._id, -1);
-    this.authRepository.increQuantityFriend(friendId, -1);
+    this.profileRepository.increQuantityFriend(user._id, -1);
+    this.profileRepository.increQuantityFriend(friendId, -1);
 
     this.friendRepository.deleteFriend(friendId, user._id);
     return await this.friendRepository.deleteFriend(user._id, friendId);
