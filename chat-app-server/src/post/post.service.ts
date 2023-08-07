@@ -5,12 +5,14 @@ import { PostRepository } from './post.repository';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { RedisService } from '../redis/redis.service';
 import { PostType } from '../ultils/constant';
+import { ProfileRepository } from '../profile/repository/profile.repository';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postReposotpory: PostRepository,
     private readonly userRepository: AuthRepository,
+    private readonly profileRepository: ProfileRepository,
     private readonly redisService: RedisService,
   ) {}
 
@@ -82,7 +84,7 @@ export class PostService {
       throw new HttpException('Db error!', HttpStatus.INTERNAL_SERVER_ERROR);
 
     if (data.post_type === PostType.POST) {
-      await this.userRepository.updateQuantityPost(user._id, 1);
+      this.profileRepository.updateQuantityPost(user._id, 1);
     }
     // Incre share num
     else if (data.post_type === PostType.SHARE) {
@@ -106,7 +108,7 @@ export class PostService {
       throw new HttpException('User not permission!', HttpStatus.BAD_REQUEST);
 
     if (foundPost.post_type === PostType.POST) {
-      await this.userRepository.updateQuantityPost(user._id, -1);
+      this.profileRepository.updateQuantityPost(user._id, -1);
     }
 
     return await this.postReposotpory.delete(user._id, postId);

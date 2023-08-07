@@ -17,9 +17,9 @@ export class IDataChangeSocialLink {
 }
 
 export class DataUpdateAddress {
+  @IsNotEmpty()
   address_country: string;
 
-  @IsNotEmpty()
   address_city: string;
 
   @IsNotEmpty()
@@ -28,6 +28,5 @@ export class DataUpdateAddress {
   @IsNotEmpty()
   address_street: string;
 
-  @IsNotEmpty()
   address_postal_code: string;
 }

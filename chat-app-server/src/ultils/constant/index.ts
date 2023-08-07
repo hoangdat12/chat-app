@@ -7,6 +7,7 @@ export * from './notify.constant';
 export * from './post.constant';
 export * from './comment.constant';
 export * from './auth.constant';
+export * from './friend.constant';
 
 export enum MessageType {
   GROUP = 'group',

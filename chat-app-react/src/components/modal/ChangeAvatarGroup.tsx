@@ -4,8 +4,6 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { useParams } from 'react-router-dom';
 import Button from '../button/Button';
 import useClickOutside from '../../hooks/useClickOutside';
-import { useAppDispatch } from '../../app/hook';
-import { changeAvatarOfGroup } from '../../features/conversation/conversationSlice';
 import { FcAddImage } from 'react-icons/fc';
 import { ButtonRounded } from '../button/ButtonRounded';
 import { MdOutlineArrowBack } from 'react-icons/md';
@@ -15,19 +13,19 @@ export interface IPropChangeAvatarGroup {
   setViewImage: (value: string | ArrayBuffer | null) => void;
   isShow: boolean;
   setIsShow: (value: boolean) => void;
+  handleChangeAvatar: any;
 }
 
 const ChangeAvatarGroup: FC<IPropChangeAvatarGroup> = memo(
-  ({ imageUrl, setViewImage, isShow, setIsShow }) => {
+  ({ imageUrl, setViewImage, isShow, setIsShow, handleChangeAvatar }) => {
     const [crop, setCrop] = useState<any>();
     const [image, setImage] = useState<HTMLImageElement | undefined>();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const { conversationId } = useParams();
     const modalRef = useRef<HTMLDivElement | null>(null);
 
-    const dispatch = useAppDispatch();
-
     const handleCloseForm = () => {
+      window.URL.revokeObjectURL(imagePreview ?? '');
       setViewImage(null);
       setIsShow(false);
     };
@@ -122,13 +120,15 @@ const ChangeAvatarGroup: FC<IPropChangeAvatarGroup> = memo(
     };
 
     const handleSaveImage = async () => {
-      if (image && conversationId) {
+      if (image) {
         const imageFile = await getCroppedImage(image, crop, 'submit');
         const formData = new FormData();
         if (imageFile) {
           formData.append('file', imageFile, 'croppedImage.jpg');
-          formData.append('conversationId', conversationId);
-          dispatch(changeAvatarOfGroup(formData));
+          if (conversationId) {
+            formData.append('conversationId', conversationId);
+          }
+          handleChangeAvatar(formData);
           window.URL.revokeObjectURL(
             typeof imageUrl === 'string' ? imageUrl : ''
           );

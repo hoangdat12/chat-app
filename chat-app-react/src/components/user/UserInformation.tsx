@@ -1,17 +1,19 @@
-import { FC, memo, useRef } from 'react';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import { CiEdit } from 'react-icons/ci';
-import { getUsername } from '../../ultils';
+import { getUserLocalStorageItem, getUsername } from '../../ultils';
 import Button from '../button/Button';
 import { StatusFriend } from '../../pages/profile/Profile';
-import { IUser } from '../../ultils/interface';
 import { FaUserCheck, FaUserPlus } from 'react-icons/fa';
 import { RiUserSharedLine } from 'react-icons/ri';
 import { friendService } from '../../features/friend/friendService';
 import useClickOutside from '../../hooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
+import { IProfile } from '../../ultils/interface/profile.interface';
+import ChangeAvatarGroup from '../modal/ChangeAvatarGroup';
+import { userService } from '../../features/user/userService';
 
 export interface IUserInformationProp {
-  user: IUser | null;
+  profile: IProfile | null;
   isOwner: boolean;
   statusFriend: string;
   handleClickAddFriend?: () => void;
@@ -19,53 +21,113 @@ export interface IUserInformationProp {
   setShowDeleteFriend: (value: boolean) => void;
 }
 
+const userLocal = getUserLocalStorageItem();
+
 const UserInformation: FC<IUserInformationProp> = memo(
   ({
-    user,
+    profile,
     isOwner,
     statusFriend,
     handleClickAddFriend,
     showDeleteFriend,
     setShowDeleteFriend,
   }) => {
+    const [isShowChangeAvatarOfGroup, setIsShowChangeAvatarOfGroup] =
+      useState(false);
+    const [viewImage, setViewImage] = useState<string | ArrayBuffer | null>(
+      null
+    );
+    const [file, setFile] = useState<File | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
     const navigate = useNavigate();
-    const buttonRef = useRef<HTMLButtonElement | null>(null);
+    const buttonRef = useRef<HTMLDivElement | null>(null);
+
     const handleUnFriend = async () => {
-      if (user) {
-        await friendService.deleteFriend(user?._id);
-        setShowDeleteFriend(false);
+      if (profile) {
+        const res = await friendService.deleteFriend(
+          profile?.profile_user?._id
+        );
+        if (res.status === 200 || res.status === 201) {
+          setShowDeleteFriend(false);
+        } else {
+          // Show error
+        }
+      }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setFile(file);
+      }
+    };
+
+    const handleChangeAvatar = async (formData: FormData) => {
+      const res = await userService.changeAvatar(formData);
+      if (res.status === 200 || res.status === 201) {
+        const avatar = res.data.metaData;
+        userLocal.avatarUrl = avatar;
+        localStorage.setItem('user', JSON.stringify(userLocal));
+        setAvatarUrl(avatar);
       }
     };
 
     useClickOutside(buttonRef, () => setShowDeleteFriend(false), 'mousedown');
 
+    useEffect(() => {
+      if (file) {
+        const objectURL = URL.createObjectURL(file);
+        setViewImage(objectURL);
+        setIsShowChangeAvatarOfGroup(true);
+
+        return () => {
+          URL.revokeObjectURL(objectURL);
+        };
+      }
+    }, [file]);
+
     return (
       <div className='relative h-[280px] sm:h-[360px]'>
         <img
           className='w-full h-full shadow-lg object-cover'
-          src='https://source.unsplash.com/1600x900/?nature,photography,technology'
+          src={profile?.profile_banner}
           alt='user-pic'
         />
         <div className='absolute top-4 left-4 p-2 rounded-full bg-gray-50 cursor-pointer sm:text-xl md:text-3xl'>
           <CiEdit />
         </div>
         <div className='absolute top-1/2 left-[50%] -translate-x-1/2 translate-y-[40%] flex flex-col items-center justify-center'>
-          <img
-            className='w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-full border-2 border-pink-600 p-[1px] cursor-pointer'
-            src={user?.avatarUrl}
-            alt='user-pic'
-          />
+          <div className='relative'>
+            <img
+              className='w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-full border-2 border-pink-600 p-[1px] cursor-pointer'
+              src={avatarUrl ?? profile?.profile_user?.avatarUrl}
+              alt='user-pic'
+            />
+            <div className='absolute bottom-2 right-1 p-2 rounded-full bg-gray-100 cursor-pointer sm:text-lg md:text-xl'>
+              <span className='relative cursor-pointer'>
+                <CiEdit />
+                <input
+                  className='absolute top-0 right-0 bottom-0 left-0 opacity-0'
+                  type='file'
+                  name=''
+                  id=''
+                  onChange={handleFileChange}
+                />
+              </span>
+            </div>
+          </div>
           <h1 className='font-bold text-2xl sm:text-3xl text-center mt-3'>
-            {getUsername(user)}
+            {getUsername(profile?.profile_user ?? null)}
           </h1>
 
           <div className='flex items-center gap-4 justify-center w-full mt-4 sm:mt-6'>
             <div className='relative'>
               <Button
-                className={'min-w-[120px]'}
+                className={'min-w-[120px] gap-1 px-3'}
                 text={isOwner ? 'Add News' : statusFriend}
-                paddingY={'py-1'}
-                fontSize={'sm:text-lg'}
+                paddingY={'py-[6px]'}
+                fontSize={'sm:text-base'}
                 border={'border-none'}
                 background={'bg-blue-500'}
                 color={'text-white'}
@@ -81,22 +143,28 @@ const UserInformation: FC<IUserInformationProp> = memo(
                 onClick={isOwner ? undefined : handleClickAddFriend}
               />
               {showDeleteFriend && (
-                <Button
-                  onClick={handleUnFriend}
+                <div
                   className={
                     'absolute top-[calc(100%+2px)] shadow-default min-w-[120px]'
                   }
-                  text={'Un Friend'}
-                  paddingY={'py-1'}
-                  fontSize={'sm:text-lg'}
-                  border={'border-none'}
                   ref={buttonRef}
-                />
+                >
+                  <Button
+                    onClick={handleUnFriend}
+                    className='w-full gap-1 px-3'
+                    text={'Un Friend'}
+                    paddingY={'py-[6px]'}
+                    fontSize={'sm:text-base'}
+                    border={'border-none'}
+                  />
+                </div>
               )}
             </div>
             <Button
               onClick={isOwner ? () => navigate('/setting') : undefined}
-              className={'min-w-[120px]'}
+              className={'min-w-[120px] gap-1 px-3'}
+              paddingY={'py-[6px]'}
+              fontSize={'sm:text-base'}
               text={
                 isOwner
                   ? 'Edit Profile'
@@ -104,8 +172,6 @@ const UserInformation: FC<IUserInformationProp> = memo(
                   ? 'Chat now'
                   : 'Follow'
               }
-              paddingY={'py-1'}
-              fontSize={'sm:text-lg'}
             />
             {!isOwner && (
               <Button
@@ -117,6 +183,17 @@ const UserInformation: FC<IUserInformationProp> = memo(
             )}
           </div>
         </div>
+        {isShowChangeAvatarOfGroup && (
+          <ChangeAvatarGroup
+            imageUrl={viewImage}
+            setViewImage={setViewImage}
+            isShow={isShowChangeAvatarOfGroup}
+            setIsShow={setIsShowChangeAvatarOfGroup}
+            handleChangeAvatar={(formData: FormData) =>
+              handleChangeAvatar(formData)
+            }
+          />
+        )}
       </div>
     );
   }

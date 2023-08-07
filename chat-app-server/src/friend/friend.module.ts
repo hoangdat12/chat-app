@@ -2,21 +2,23 @@ import { Module } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { FriendController } from './friend.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { FriendModel } from '../schema/friend.model';
-import { FriendRepository } from './friend.repository';
+import { FriendRepository } from './repository/friend.repository';
 import { NotifyModule } from '../notify/notify.module';
 import { RedisModule } from '../redis/redis.module';
 import { ProfileModule } from '../profile/profile.module';
+import { FriendRequestModel } from '../schema/friend.request.model';
+import { FriendRequestRepository } from './repository/friend.request.repository';
+import { FriendModel } from 'src/schema/friend.model';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([FriendModel]),
+    MongooseModule.forFeature([FriendModel, FriendRequestModel]),
     NotifyModule,
     RedisModule,
     ProfileModule,
   ],
   controllers: [FriendController],
-  providers: [FriendService, FriendRepository],
+  providers: [FriendService, FriendRepository, FriendRequestRepository],
   exports: [FriendService],
 })
 export class FriendModule {}

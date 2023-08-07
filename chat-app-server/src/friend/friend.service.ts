@@ -2,92 +2,95 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { IParticipant, IUserCreated, Pagination } from 'src/ultils/interface';
 import { IFriend } from '../ultils/interface/friend.interface';
 import { AuthRepository } from '../auth/repository/auth.repository';
-import { FriendRepository } from './friend.repository';
+import { FriendRepository } from './repository/friend.repository';
 import { getUsername } from '../ultils';
 import { NotifyService } from '../notify/notify.service';
 import { NotifyType } from '../ultils/constant/notify.constant';
 import { RedisService } from '../redis/redis.service';
 import { ProfileRepository } from '../profile/repository/profile.repository';
+import { FriendRequestRepository } from './repository/friend.request.repository';
+import { FriendStatus } from 'src/ultils/constant';
 
 @Injectable()
 export class FriendService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly friendRepository: FriendRepository,
+    private readonly friendRequestRepository: FriendRequestRepository,
     private readonly notifyService: NotifyService,
     private readonly redisService: RedisService,
     private readonly profileRepository: ProfileRepository,
   ) {}
-  async create(user: IUserCreated) {
-    return await this.friendRepository.create(user);
-  }
 
   async statusFriend(user: IUserCreated, friendId: string) {
-    // way 1
-    // const status = await this.friendRepository.statusFriend(user, friendId);
+    const foundUserFriend = await this.authRepository.findById(friendId);
+    if (!foundUserFriend)
+      throw new HttpException('User not foud', HttpStatus.BAD_REQUEST);
 
-    // way 2
-    // Check of friend
-    const isFriendPromise = this.friendRepository.checkUserIsFriend(
-      user,
-      friendId,
-    );
-    const waitConfirmPromise = this.friendRepository.checkUserUnConfirmed(
-      user,
-      friendId,
-    );
-    // Check of user
-    const userConfirmPromise = this.friendRepository.checkWaitConfirmOfUser(
-      user,
-      friendId,
-    );
+    if (friendId === user._id) {
+      return;
+    }
 
-    const [isFriend, waitConfirm, confirm] = await Promise.all([
-      isFriendPromise,
-      waitConfirmPromise,
-      userConfirmPromise,
-    ]);
-    return {
-      isFriend: isFriend !== null,
-      waitConfirm: waitConfirm !== null,
-      confirm: confirm !== null,
-      unFriended: isFriend === null && waitConfirm === null && confirm === null,
+    const isFriend = await this.friendRepository.isFriend(user._id, friendId);
+    const responseData = {
+      isFriend: isFriend ? true : false,
+      isWaitConfirm: false,
+      isConfirm: false,
     };
+
+    // Check user or friend have send any request add friend or not
+    if (!isFriend) {
+      const foundRequest = await this.friendRequestRepository.findById(
+        user._id,
+        friendId,
+      );
+      // If not have any request add friend then return false
+      if (!foundRequest) return responseData;
+
+      if (foundRequest.sender._id.toString() === user._id) {
+        responseData.isWaitConfirm = true;
+        return responseData;
+      } else {
+        responseData.isConfirm = true;
+        return responseData;
+      }
+    } else return responseData;
   }
 
   // The action of the user who make add friends
-  async addFriend(user: IUserCreated, friend: IFriend) {
+  async addFriend(user: IUserCreated, friendId: string) {
+    if (friendId === user._id)
+      throw new HttpException("Can't not add yourself!", HttpStatus.CONFLICT);
+
     // Check user add friend exist
-    const existUser = await this.authRepository.findById(friend.userId);
-    if (!existUser)
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-
-    // Check have friend or not
-    const isFriend = await this.friendRepository.checkUserIsFriend(
-      user,
-      friend.userId,
+    const foundFriendProfile = await this.profileRepository.findByUserId(
+      friendId,
     );
-    if (isFriend) return;
 
-    // Check have unconfirmed or not
-    const waitConfirm = await this.friendRepository.checkUserUnConfirmed(
-      user,
-      friend.userId,
-    );
-    // Un Confirm
-    if (waitConfirm) {
-      // Delete Notify
-      const notify = await this.notifyService.deleteNotifyAddFriend(
-        friend.userId,
-        user._id,
+    if (!foundFriendProfile)
+      throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+    if (foundFriendProfile.profile_total_friends >= 1000)
+      throw new HttpException(
+        `Can't not request, because ${getUsername(
+          foundFriendProfile.profile_user,
+        )} already have maximum friends!`,
+        HttpStatus.NOT_FOUND,
       );
 
-      return {
-        status: 'Add Friend',
-        data: await this.friendRepository.cancelRequest(user, friend),
-        notify,
-      };
-    }
+    const foundMyProfile = await this.profileRepository.findByUserId(friendId);
+    if (foundMyProfile.profile_total_friends >= 1000)
+      throw new HttpException(
+        `Can't not request, because you already have maximum friends!`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    // Check have friend or not
+    const foundRequest = await this.friendRequestRepository.findById(
+      user._id,
+      friendId,
+    );
+    if (foundRequest)
+      throw new HttpException('Found request!', HttpStatus.NOT_FOUND);
 
     // Create notify
     const userNotify = {
@@ -97,7 +100,7 @@ export class FriendService {
     };
     const data = {
       notifyType: NotifyType.ADD_FRIEND,
-      ownerNotify: { userId: friend.userId },
+      ownerNotify: { userId: friendId },
       notify_friend: {
         ...userNotify,
         email: user.email,
@@ -113,91 +116,71 @@ export class FriendService {
       );
     // Add Friend
     return {
-      status: 'Cancel',
-      data: await this.friendRepository.addFriend(user, friend),
+      data: await this.friendRequestRepository.addFriend(user._id, friendId),
       notify,
     };
   }
 
   // The action of user received request add friend
-  async confirmFriend(user: IUserCreated, friend: IFriend) {
-    const existUser = await this.authRepository.findById(friend.userId);
-    if (!existUser)
+  async confirmFriend(userId: string, friendId: string) {
+    const foundUser = await this.authRepository.findById(friendId);
+    if (!foundUser)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-    const userConfirm = {
-      userId: user._id,
-      email: user.email,
-      userName: getUsername(user),
-      avatarUrl: user.avatarUrl,
-      createdAt: new Date(),
-    };
-    friend.createdAt = new Date();
-    // push into friend
-    const confirmeFriendPromiseWithUser = this.friendRepository.confirmFriend(
-      userConfirm,
-      friend,
+    const foundRequest = await this.friendRequestRepository.findById(
+      userId,
+      friendId,
     );
-    const confirmeFriendPromiseWithFriend = this.friendRepository.confirmFriend(
-      friend,
-      userConfirm,
-    );
-    // delete from unconfirmed
-    const confirmFriendPromise = this.friendRepository.refuseFriend(
-      user,
-      friend,
-    );
+    if (!foundRequest)
+      throw new HttpException('Request not found', HttpStatus.BAD_REQUEST);
+
+    // Create new Friend
+    await this.friendRepository.confirmFriend(userId, friendId);
 
     // Delete Notify
-    this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
+    this.notifyService.deleteNotifyAddFriend(userId, friendId);
 
-    // Update quantity Friend
-    this.profileRepository.increQuantityFriend(user._id, 1);
+    this.changeQuantityFriend(userId, friendId);
 
-    await Promise.all([
-      confirmeFriendPromiseWithUser,
-      confirmeFriendPromiseWithFriend,
-      confirmFriendPromise,
-    ]);
+    // Delete Friend Request;
+    await this.friendRequestRepository.refuseFriend(userId, friendId);
 
-    return friend;
+    // Create new notify
+
+    return foundUser;
   }
 
   // The action of user received request add friend
   // Refuse request add friend
-  async refuseFriend(user: IUserCreated, friend: IFriend) {
-    const existUser = await this.authRepository.findById(friend.userId);
-    if (!existUser)
+  async refuseFriend(userId: string, friendId: string) {
+    const foundFriend = await this.authRepository.findById(friendId);
+    if (!foundFriend)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-    const data = await this.friendRepository.refuseFriend(user, friend);
-    if (!data)
-      throw new HttpException(
-        'Server Error!',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    const foundRequest = await this.friendRequestRepository.findById(
+      userId,
+      friendId,
+    );
+    if (!foundRequest)
+      throw new HttpException('Request not found', HttpStatus.BAD_REQUEST);
+
+    await this.friendRequestRepository.refuseFriend(userId, friendId);
 
     // Delete Notify
-    await this.notifyService.deleteNotifyAddFriend(user._id, friend.userId);
+    await this.notifyService.deleteNotifyAddFriend(userId, friendId);
 
-    return friend;
+    return 'Refuse friend successfully!';
   }
 
   // Delete friend
-  async deleteFriend(user: IUserCreated, friendId: string) {
-    const isValidFriend = await this.friendRepository.checkUserIsFriend(
-      user,
-      friendId,
-    );
-
-    if (!isValidFriend) return;
+  async deleteFriend(userId: string, friendId: string) {
+    const isFriend = await this.friendRepository.isFriend(userId, friendId);
+    if (!isFriend) return;
 
     // Update quantity Friend
-    this.profileRepository.increQuantityFriend(user._id, -1);
-    this.profileRepository.increQuantityFriend(friendId, -1);
+    this.changeQuantityFriend(userId, friendId, 'decre');
 
-    this.friendRepository.deleteFriend(friendId, user._id);
-    return await this.friendRepository.deleteFriend(user._id, friendId);
+    return await this.friendRepository.deleteFriend(userId, friendId);
   }
 
   async findFriend(
@@ -215,144 +198,95 @@ export class FriendService {
     };
   }
 
-  async getFriendAndUnConfirmedOfUser(
-    user: IUserCreated,
-    pagination: Pagination,
-  ) {
-    const { totalNotify } = await this.getNotifyAddFriend(user);
-    const data = await this.friendRepository.findByUserId(user._id, pagination);
-    return { ...data, totalNotify };
+  async getFriends(userId: string) {
+    const key = `friends:${userId}`;
+    let friends = null;
+    // Check catch
+    if (await this.redisService.has(key)) {
+      const friendJson = await this.redisService.get(key);
+      friends = JSON.parse(friendJson);
+      return friends;
+    }
+    friends = await this.friendRepository.findFriendsV2(userId);
+    // Set catch
+    await this.redisService.set(key, JSON.stringify(friends), 600);
+    return friends;
   }
 
-  // console.log(await this.friendRepository.findAllFriendOfUser(userId));
-  // [
-  //   {
-  //     friends: [
-  //       '644d4fee5fbc1a71278fe6c0',
-  //       '644944193bcfbedbdea05a98',
-  //       '644943ee3bcfbedbdea05a8c'
-  //     ]
-  //   }
-  // ]
-  async getListFriend(
-    user: IUserCreated,
-    userId: string,
-    pagination: Pagination,
-  ) {
-    const responseData = {
-      friends: [],
-      mutualFriends: null,
-    };
-    // If user'profile or list friend equal 0 then return
-    if (user._id === userId) {
-      responseData.friends = await this.friendRepository.findByUserId(
-        userId,
-        pagination,
-      );
-      return responseData;
-    }
-
-    // If view profile
-
-    // Key of user's friend
-    const key1 = `friend:${userId}`;
-    // Check mutual friend
-    if (!(await this.redisService.has(key1))) {
-      // Not has key
-      const friends = await this.friendRepository.findAllFriendOfUser(userId);
-      if (friends.length === 0) return responseData;
-      await this.redisService.sAdd(key1, friends[0].friends, 600);
-    } else {
-      // user make the request
-      const key2 = `friend:${user._id}`;
-      // Not key
-      if (!(await this.redisService.has(key2))) {
-        const myFriends = await this.friendRepository.findAllFriendOfUser(
-          user._id,
-        );
-        if (!myFriends || myFriends[0].friends.length === 0)
-          return responseData;
-
-        await this.redisService.sAdd(key2, myFriends[0].friends);
-      }
-
-      // Get mutual Friend
-      const mutualFriendsId = await this.redisService.sInter(key1, key2);
-
-      responseData.friends = await this.friendRepository.findMutualFriends(
-        user,
-        userId,
-        mutualFriendsId,
-        pagination,
-      );
-      responseData.mutualFriends = mutualFriendsId.length;
-    }
-    return responseData;
-  }
-
-  async getNotifyAddFriend(user: IUserCreated) {
-    const numberNotify = 6;
-    const waiters = await this.friendRepository.getNotifyAddFriend(
-      user,
-      numberNotify,
-    );
-    let totalNotify = 0;
-    for (let waiter of waiters) {
-      if (!waiter.unconfirmed.isWatched) {
-        totalNotify++;
-      } else break;
-    }
-    return { totalNotify };
-  }
-
-  async getListUnConfirmed(user: IUserCreated, pagination: Pagination) {
-    return await this.friendRepository.findUnconfirmedByUserId(
-      user._id,
+  async findPendingFriends(userId: string, pagination: Pagination) {
+    return await this.friendRequestRepository.findPendingFriendsV2(
+      userId,
       pagination,
     );
   }
 
-  async getAllFriendOfUser(user: IUserCreated, userId: string) {
-    if (user._id === userId)
-      return {
-        friends: await this.friendRepository.findAllFriendOfUser(userId),
-        mutualFriends: null,
-      };
-    const key1 = `friend:${userId}`;
-    const key2 = `friend:${user._id}`;
-    // Check mutual friend
-    if (!(await this.redisService.has(key1))) {
-      // Not has key
-      const friends = await this.friendRepository.findAllFriendOfUser(userId);
-      await this.redisService.sAdd(key1, friends[0].friends, 600);
-    }
-    // user make the request
-    // Not key
-    if (!(await this.redisService.has(key2))) {
-      const myFriends = await this.friendRepository.findAllFriendOfUser(
-        user._id,
-      );
-      await this.redisService.sAdd(key2, myFriends[0].friends);
-    }
-
-    const mutualFriendsId = await this.redisService.sInter(key1, key2);
-    const mutualFriendsPromise =
-      this.friendRepository.findMutualFriendsByFriendIds(
-        userId,
-        mutualFriendsId,
-      );
-    const friendsPromise = this.friendRepository.findFriendsNotInMutualFriendId(
+  async findAccepFriends(userId: string, pagination: Pagination) {
+    return await this.friendRequestRepository.findAccepFriends(
       userId,
-      mutualFriendsId,
+      pagination,
     );
-    const [mutualFriends, friends] = await Promise.all([
-      mutualFriendsPromise,
-      friendsPromise,
+  }
+
+  async findMutualFriends(
+    user: IUserCreated,
+    friendId: string,
+    pagination: Pagination,
+  ) {
+    if (user._id === friendId)
+      throw new HttpException(
+        "Can't not get mutual friend with yourself!",
+        HttpStatus.BAD_REQUEST,
+      );
+    // Check catch
+    await Promise.all([
+      this.getFriendIds(friendId),
+      this.getFriendIds(user._id),
     ]);
 
-    return {
-      mutualFriends,
-      friends,
-    };
+    const key1 = `friendIds:${friendId}`;
+    const key2 = `friendIds:${user._id}`;
+    const mutualIds = await this.redisService.sInter(key1, key2);
+
+    if (!mutualIds) {
+      return {
+        quantity: 0,
+        mutualFriends: null,
+      };
+    } else {
+      const mutualFriends = await this.authRepository.findUserFromIds(
+        mutualIds,
+      );
+      return {
+        quantity: mutualIds.length,
+        mutualFriends,
+      };
+    }
+  }
+
+  async changeQuantityFriend(userId: string, friendId: string, type = 'incre') {
+    if (type === 'incre') {
+      this.profileRepository.increQuantityFriend(userId, 1);
+      this.profileRepository.increQuantityFriend(friendId, 1);
+    } else {
+      this.profileRepository.increQuantityFriend(userId, -1);
+      this.profileRepository.increQuantityFriend(friendId, -1);
+    }
+  }
+
+  // Bug
+  async getFriendIds(userId: string) {
+    const key1 = `friendIds:${userId}`;
+
+    if (!(await this.redisService.has(key1))) {
+      const friends1 = await this.friendRepository.findFriendIds(userId);
+      if (!friends1[0])
+        throw new HttpException('Error', HttpStatus.INTERNAL_SERVER_ERROR);
+      const friendIds = friends1[0].friendIds;
+      await this.redisService.sAdd(key1, friendIds, 600);
+    }
+  }
+
+  async test(userId: string) {
+    return await this.friendRepository.findFriendIds(userId);
   }
 }

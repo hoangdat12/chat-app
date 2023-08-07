@@ -1,15 +1,11 @@
 import Avatar from '../avatars/Avatar';
 import { BsFillPersonCheckFill, BsPersonPlusFill } from 'react-icons/bs';
 import Button from '../button/Button';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../app/hook';
-import {
-  getFriendOfUser,
-  selectFriend,
-} from '../../features/friend/friendSlice';
 import { IFriend } from '../../ultils/interface';
 import { getUserLocalStorageItem } from '../../ultils';
+import { friendService } from '../../features/friend/friendService';
 
 export interface IPropProfileFriend {
   userId: string | undefined;
@@ -18,35 +14,39 @@ export interface IPropProfileFriend {
 const userJson = getUserLocalStorageItem();
 
 const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
+  const [friends, setFriends] = useState<IFriend[] | null>(null);
   const navigate = useNavigate();
 
-  const dispatch = useAppDispatch();
-  const { friends, mutualFriends } = useAppSelector(selectFriend);
-  const condition =
-    friends &&
-    friends.size !== 0 &&
-    !(friends.size === 1 && friends.has(userJson._id));
   useEffect(() => {
-    if (userId) {
-      dispatch(getFriendOfUser(userId));
-    }
+    const getFriends = async () => {
+      if (userId) {
+        const res = await friendService.getFriendOfUser(userId);
+        if (res.status === 200) {
+          setFriends(res.data.metaData);
+        } else {
+          // Handle Error
+          setFriends(null);
+        }
+      }
+    };
+    getFriends();
   }, [userId]);
 
   return (
     <div className='p-4 rounded-md bg-gray-100'>
       <div className='flex justify-between items-center'>
         <h1 className='text-lg md:text-xl xl:text-2xl font-medium'>Friends</h1>
-        <span
+        {/* <span
           className={`${
             !mutualFriends && 'hidden'
           } text-sm text-gray-700 cursor-pointer`}
-        >{`${mutualFriends} Mutual`}</span>
+        >{`${mutualFriends} Mutual`}</span> */}
       </div>
       <div className='flex flex-col-reverse gap-3'>
-        {condition ? (
+        {friends && friends.length ? (
           Array.from(friends.values()).map((friend: IFriend) => {
-            if (friend.userId === userJson._id) return;
-            else return <FriendBoxDetail key={friend.userId} friend={friend} />;
+            if (friend._id !== userJson._id)
+              return <FriendBoxDetail key={friend._id} friend={friend} />;
           })
         ) : (
           <div className='flex items-center justify-center min-h-[100px]'>
@@ -59,7 +59,7 @@ const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
           navigate(`/profile/${userId}/friends`, { preventScrollReset: true })
         }
         className={`${
-          condition ? 'flex' : 'hidden'
+          friends && friends.length ? 'flex' : 'hidden'
         } items-center justify-center mt-4`}
       >
         <Button text={'Show more'} border={'border-none'} />
@@ -76,7 +76,7 @@ export const FriendBoxDetail: FC<IPropFriendBoxDetial> = ({ friend }) => {
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate(`/profile/${friend.userId}`, { preventScrollReset: true });
+    navigate(`/profile/${friend._id}`, { preventScrollReset: true });
   };
 
   return (

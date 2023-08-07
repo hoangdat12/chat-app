@@ -19,8 +19,6 @@ import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from '../ultils/response';
 import { IUserCreated } from '../ultils/interface';
 import { multerOptions } from '../ultils/constant/multer.config';
-import { isObjectId } from '../ultils';
-import { validate } from 'class-validator';
 
 @Controller('user')
 export class UserController {
@@ -56,17 +54,6 @@ export class UserController {
     }
   }
 
-  @Get('/:userId')
-  async getUserDetail(@Req() req: Request, @Param('userId') userId: string) {
-    try {
-      isObjectId(userId);
-      const user = req.user as IUserCreated;
-      return await this.userService.getUserDetail(user, userId);
-    } catch (err) {
-      throw err;
-    }
-  }
-
   @Patch('change-username')
   async changeUsername(@Req() req: Request, @Body() data: ChangeUsername) {
     try {
@@ -88,7 +75,9 @@ export class UserController {
       const user = req.user as IUserCreated;
       const avatarUrl = `${process.env.IMAGE_URL}/${file.filename}`;
 
-      return await this.userService.changeUserAvatar(user.email, avatarUrl);
+      return new Ok(
+        await this.userService.changeUserAvatar(user._id, avatarUrl),
+      );
     } catch (err) {
       throw err;
     }

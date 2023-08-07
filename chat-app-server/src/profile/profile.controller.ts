@@ -62,8 +62,8 @@ export class ProfileController {
     }
   }
 
-  @Patch('/update/user-information')
-  async updateAddress(@Req() req: Request, @Body() data: DataUpdateAddress) {
+  @Patch('/update/user-address')
+  async updateInformation(@Req() req: Request, @Body() data: DataUpdateAddress) {
     try {
       const errors = await validate(data);
       if (errors.length > 0) {
@@ -74,5 +74,10 @@ export class ProfileController {
     } catch (err) {
       throw err;
     }
+  }
+
+  @Get('/bug/fix')
+  async fixBug() {
+    return await this.profileService.createProfileFixBug();
   }
 }

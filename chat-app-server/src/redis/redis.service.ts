@@ -25,7 +25,8 @@ export class RedisService {
   async sAdd(key: string, members: string[], ttl: number = 60) {
     const pipeline = this.redisClient.pipeline();
     pipeline.sadd(key, ...members);
-    pipeline.expire(key, ttl + Math.random() * 10);
+    const randomExpiration = ttl + Math.floor(Math.random() * 11);
+    pipeline.expire(key, randomExpiration);
     await pipeline.exec();
   }
 

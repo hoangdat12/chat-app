@@ -8,7 +8,6 @@ export interface IInitialStateFriend {
   unconfirmed: Map<string, IFriend> | null;
   isLoading: boolean;
   status: 'idle' | 'pending' | 'succeeded' | 'failed';
-  mutualFriends: number | null;
 }
 
 const initialState: IInitialStateFriend = {
@@ -16,7 +15,6 @@ const initialState: IInitialStateFriend = {
   unconfirmed: null,
   isLoading: false,
   status: 'idle',
-  mutualFriends: null,
 };
 
 export const getFriendOfUser = createAsyncThunk(
@@ -58,18 +56,6 @@ const friendSlice = createSlice({
   name: 'friend',
   initialState: initialState,
   reducers: {
-    receivedAddFriend: (state, action: PayloadAction<IFriend>) => {
-      const newConversationMap = new Map([
-        [action.payload.userId, action.payload],
-      ]);
-      state.unconfirmed?.delete(action.payload.userId);
-      if (state.unconfirmed) {
-        state.unconfirmed = new Map([
-          ...newConversationMap,
-          ...state?.unconfirmed,
-        ]);
-      } else state.unconfirmed = newConversationMap;
-    },
     cancelRequestAddFriend: (
       state,
       action: PayloadAction<{ userId: string }>
@@ -88,34 +74,12 @@ const friendSlice = createSlice({
         state.status = 'idle';
         state.isLoading = false;
         const newFriend = new Map<string, IFriend>();
-        for (let friend of action.payload.friends) {
-          newFriend.set(friend.userId, friend);
+        for (let friend of action.payload.data.metaData) {
+          newFriend.set(friend._id, friend);
         }
         state.friends = newFriend;
-        state.mutualFriends = action.payload.mutualFriends;
       })
       .addCase(getFriendOfUser.rejected, (state) => {
-        state.status = 'failed';
-        state.isLoading = false;
-      })
-
-      // Unconfirmed
-      .addCase(getUnconfirmedFriend.pending, (state) => {
-        state.status = 'pending';
-        state.isLoading = true;
-      })
-      .addCase(getUnconfirmedFriend.fulfilled, (state, action) => {
-        state.status = 'idle';
-        state.isLoading = false;
-        const newConfirmed = new Map<string, IFriend>();
-
-        for (let waiter of action.payload) {
-          newConfirmed.set(waiter.unconfirmed.userId, waiter.unconfirmed);
-        }
-
-        state.unconfirmed = newConfirmed;
-      })
-      .addCase(getUnconfirmedFriend.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
       })
@@ -130,8 +94,8 @@ const friendSlice = createSlice({
         state.isLoading = false;
 
         const newFriend = action.payload;
-        state.unconfirmed?.delete(newFriend.userId);
-        state.friends?.set(newFriend.userId, newFriend);
+        state.unconfirmed?.delete(newFriend._id);
+        state.friends?.set(newFriend._id, newFriend);
       })
       .addCase(confirmFriend.rejected, (state) => {
         state.status = 'failed';
@@ -148,7 +112,7 @@ const friendSlice = createSlice({
         state.isLoading = false;
 
         const newFriend = action.payload;
-        state.unconfirmed?.delete(newFriend.userId);
+        state.unconfirmed?.delete(newFriend._id);
       })
       .addCase(refuseFriend.rejected, (state) => {
         state.status = 'failed';
@@ -160,7 +124,6 @@ const friendSlice = createSlice({
 export const {
   // confirmFriend,
   // refuseFriend,
-  receivedAddFriend,
   cancelRequestAddFriend,
 } = friendSlice.actions;
 export default friendSlice.reducer;

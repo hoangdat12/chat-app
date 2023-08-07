@@ -19,6 +19,11 @@ export class ProfileService {
     private readonly redisService: RedisService,
   ) {}
 
+  async createProfile(userId: string) {
+    const address = await this.addressRepository.create(userId);
+    await this.profileRepository.createProfile(userId, address._id.toString());
+  }
+
   async viewProfile(user: IUserCreated, userId: string) {
     if (user._id !== userId) {
       const key = `user:${user._id}:profile:${userId}`;
@@ -130,5 +135,17 @@ export class ProfileService {
     await foundAddress.save();
 
     return data;
+  }
+
+  async createProfileFixBug() {
+    const users = await this.userRepository.findAll();
+    for (let user of users) {
+      const address = await this.addressRepository.create(user._id.toString());
+      await this.profileRepository.createProfile(
+        user._id.toString(),
+        address._id.toString(),
+      );
+    }
+    return { msg: true };
   }
 }

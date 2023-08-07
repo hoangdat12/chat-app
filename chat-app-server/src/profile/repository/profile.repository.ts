@@ -11,6 +11,13 @@ export class ProfileRepository {
     private readonly profileModel: Model<Profile>,
   ) {}
 
+  async createProfile(userId: string, addressId: string) {
+    return await this.profileModel.create({
+      profile_user: convertObjectId(userId),
+      profile_address: convertObjectId(addressId),
+    });
+  }
+
   async findByUserId(userId: string) {
     return await this.profileModel
       .findOne({
@@ -41,7 +48,7 @@ export class ProfileRepository {
       },
       {
         $inc: {
-          total_post: quantity,
+          profile_total_post: quantity,
         },
       },
     );
@@ -56,7 +63,7 @@ export class ProfileRepository {
       },
       {
         $inc: {
-          friends: quantity,
+          profile_total_friends: quantity,
         },
       },
     );

@@ -14,10 +14,8 @@ import {
 import { Services } from '../ultils/constant';
 import { Messages } from '../schema/message.model';
 import {
-  IComment,
   IConversation,
   IMessage,
-  IParticipant,
   ISocketChangeEmoji,
   ISocketChangeUsername,
   ISocketDeleteMember,

@@ -1,8 +1,10 @@
 export interface IFriend {
-  userId: string;
+  _id: string;
   email: string;
   userName: string;
   avatarUrl: string;
+  firstName: string;
+  lastName: string;
   isFriend?: boolean;
 }
 
@@ -17,10 +19,9 @@ export interface IAddFriendResponse {
 }
 
 export interface ICheckFriendResponse {
+  isConfirm: boolean;
   isFriend: boolean;
-  unFriended: boolean;
-  waitConfirm: boolean;
-  confirm: boolean;
+  isWaitConfirm: boolean;
 }
 
 export interface IUnConfirmedResonse {

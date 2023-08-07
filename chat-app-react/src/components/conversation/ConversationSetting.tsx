@@ -22,6 +22,7 @@ import NotAllowed from '../NotAllowed';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { useNavigate } from 'react-router-dom';
 import {
+  changeAvatarOfGroup,
   handleDeleteConversation,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
@@ -364,6 +365,9 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
             setViewImage={setViewImage}
             isShow={isShowChangeAvatarOfGroup}
             setIsShow={setIsShowChangeAvatarOfGroup}
+            handleChangeAvatar={(formData: FormData) =>
+              dispatch(changeAvatarOfGroup(formData))
+            }
           />
         )}
         {isShowManagerMember && (

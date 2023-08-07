@@ -14,6 +14,7 @@ import { OtpModel } from '../schema/otpToken.model';
 import { OtpTokenRepository } from './repository/otpToken.repository';
 import { MailSenderModule } from '../mail-sender/mail-sender.module';
 import { FriendModule } from '../friend/friend.module';
+import { ProfileModule } from '../profile/profile.module';
 
 @Global()
 @Module({
@@ -22,6 +23,7 @@ import { FriendModule } from '../friend/friend.module';
     JwtModule,
     FriendModule,
     MailSenderModule,
+    ProfileModule,
   ],
   providers: [
     AuthService,

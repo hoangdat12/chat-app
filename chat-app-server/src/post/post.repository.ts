@@ -17,7 +17,10 @@ export class PostRepository {
   async findById(postId: string) {
     return await this.postModel
       .findById({ _id: postId })
-      .populate('user')
+      .populate({
+        path: 'user',
+        select: '_id email firstName lastName avatarUrl',
+      })
       .lean();
   }
 
@@ -28,7 +31,10 @@ export class PostRepository {
       .find({
         user: userId,
       })
-      .populate('user')
+      .populate({
+        path: 'user',
+        select: '_id email firstName lastName avatarUrl',
+      })
       .sort(sortBy === 'ctime' ? { createdAt: -1 } : { createdAt: 1 })
       .skip(offset)
       .limit(limit)

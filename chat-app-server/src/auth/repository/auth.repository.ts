@@ -20,7 +20,13 @@ export class AuthRepository {
 
   async findById(userId: string): Promise<IUserCreated | null> {
     const objectId = new mongoose.Types.ObjectId(userId);
-    return await this.userModel.findOne({ _id: objectId }).lean();
+    return await this.userModel
+      .findOne({ _id: objectId })
+      .select({
+        password: 0,
+        __v: 0,
+      })
+      .lean();
   }
 
   async findByEmail(userEmail: string): Promise<IUserCreated | null> {
@@ -40,12 +46,13 @@ export class AuthRepository {
           email: 1,
           avatarUrl: 1,
           isActive: 1,
+          isLocked: 1,
         },
       },
       {
         $match: {
           isActive: true,
-          isLocked: true,
+          isLocked: false,
           $expr: {
             $regexMatch: {
               input: { $concat: ['$firstName', ' ', '$lastName'] },
@@ -61,6 +68,7 @@ export class AuthRepository {
         $limit: limit,
       },
     ]);
+    console.log(users);
     return {
       users,
       keyword,
@@ -99,9 +107,9 @@ export class AuthRepository {
     );
   }
 
-  async changeUserAvatar(email: string, avatarUrl: string) {
+  async changeUserAvatar(userId: string, avatarUrl: string) {
     return await this.userModel.findOneAndUpdate(
-      { email },
+      { _id: convertObjectId(userId) },
       { avatarUrl },
       { new: true },
     );
@@ -171,5 +179,21 @@ export class AuthRepository {
     return await this.userModel.updateMany({
       isLocked: false,
     });
+  }
+
+  async findUserFromIds(ids: string[]) {
+    return await this.userModel
+      .find({
+        _id: {
+          $in: ids,
+        },
+      })
+      .select({
+        _id: 1,
+        email: 1,
+        firstName: 1,
+        lastName: 1,
+        userName: { $concat: ['$firstName', ' ', '$lastName'] },
+      });
   }
 }

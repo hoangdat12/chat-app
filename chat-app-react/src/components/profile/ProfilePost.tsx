@@ -1,5 +1,5 @@
 import { FC, memo, useEffect, useRef, useState } from 'react';
-import { IPost, IUser } from '../../ultils/interface';
+import { IPost } from '../../ultils/interface';
 import { postService } from '../../features/post/postService';
 import Loading from '../button/Loading';
 import Feed from '../feed/Feed';
@@ -8,6 +8,7 @@ import CreateFeed, { ModeCreateFeed } from '../feed/CreateFeed';
 import { getUserLocalStorageItem, getUsername } from '../../ultils';
 import { getPost } from '../../features/post/postSlice';
 import { useAppDispatch } from '../../app/hook';
+import { IProfile } from '../../ultils/interface/profile.interface';
 
 export enum modeViewProfilePost {
   FEEDS = 'Feeds',
@@ -16,12 +17,12 @@ export enum modeViewProfilePost {
 
 export interface IPropProfilePost {
   userId: string | undefined;
-  user?: IUser | null;
+  profile?: IProfile | null;
 }
 
 const userLocal = getUserLocalStorageItem();
 
-const ProfilePost: FC<IPropProfilePost> = memo(({ userId, user }) => {
+const ProfilePost: FC<IPropProfilePost> = memo(({ userId, profile }) => {
   const [active, setActive] = useState('Feeds');
   const [postSaves, setPostSaves] = useState<IPost[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -102,9 +103,11 @@ const ProfilePost: FC<IPropProfilePost> = memo(({ userId, user }) => {
           placeHolder={
             userId === userLocal._id
               ? undefined
-              : `Write on 's timeline ${getUsername(user ?? null)}`
+              : `Write on 's timeline ${getUsername(
+                  profile?.profile_user ?? null
+                )}`
           }
-          user={user}
+          user={profile?.profile_user}
         />
         <div className='flex gap-4 items-center mt-4 w-full'>
           {userId === userLocal._id ? (

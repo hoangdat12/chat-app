@@ -10,11 +10,9 @@ import {
 } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { IUserCreated } from '../ultils/interface';
-import { IFriend } from '../ultils/interface/friend.interface';
 import { Request } from 'express';
 import { Ok } from 'src/ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { isObject } from 'lodash';
 
 @Controller('friend')
 export class FriendController {
@@ -23,18 +21,8 @@ export class FriendController {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  @Post('')
-  create(@Req() req: Request) {
-    try {
-      const user = req.user as IUserCreated;
-      return this.friendService.create(user);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get()
-  async getListFriendAndUnConfirmedOfUser(
+  @Get('/pending')
+  async findPendingFriends(
     @Req() req: Request,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
@@ -48,42 +36,15 @@ export class FriendController {
         sortBy: sortBy,
       };
       return new Ok(
-        await this.friendService.getFriendAndUnConfirmedOfUser(
-          user,
-          pagination,
-        ),
+        await this.friendService.findPendingFriends(user._id, pagination),
       );
     } catch (error) {
       throw error;
     }
   }
 
-  @Get('/friends/:userId')
-  async getListFriendOfUser(
-    @Req() req: Request,
-    @Param('userId') userId: string,
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '20',
-    @Query('sortBy') sortBy: string = 'name',
-  ) {
-    try {
-      isObject(userId);
-      const user = req.user as IUserCreated;
-      const pagination = {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        sortBy: sortBy,
-      };
-      return new Ok(
-        await this.friendService.getListFriend(user, userId, pagination),
-      );
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get('/uncofirmed')
-  async getListUnConfirmedOfUser(
+  @Get('/request')
+  async findAccepFriends(
     @Req() req: Request,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
@@ -97,7 +58,7 @@ export class FriendController {
         sortBy: sortBy,
       };
       return new Ok(
-        await this.friendService.getListUnConfirmed(user, pagination),
+        await this.friendService.findAccepFriends(user._id, pagination),
       );
     } catch (error) {
       throw error;
@@ -138,18 +99,12 @@ export class FriendController {
   }
 
   @Post('/add')
-  async addFriend(@Req() req: Request, @Body('friend') friend: IFriend) {
+  async addFriend(@Req() req: Request, @Body('friendId') friendId: string) {
     try {
       const user = req.user as IUserCreated;
-      const data = await this.friendService.addFriend(user, friend);
-      // add friend success
+      const data = await this.friendService.addFriend(user, friendId);
       const { notify, ...responseData } = data;
-      // Add friend
-      if (data.status === 'Cancel') {
-        this.eventEmitter.emit('notify.received', { notify });
-      } else if (data.status === 'Add Friend') {
-        this.eventEmitter.emit('notify.delete', { notify });
-      }
+      this.eventEmitter.emit('notify.received', { notify });
       return new Ok(responseData);
     } catch (error) {
       throw error;
@@ -160,53 +115,68 @@ export class FriendController {
   async deleteFriend(@Req() req: Request, @Param('friendId') friendId: string) {
     try {
       const user = req.user as IUserCreated;
-      return new Ok(await this.friendService.deleteFriend(user, friendId));
+      return new Ok(await this.friendService.deleteFriend(user._id, friendId));
     } catch (error) {
       throw error;
     }
   }
 
   @Post('/confirm')
-  async confirmFriend(@Req() req: Request, @Body('friend') friend: IFriend) {
+  async confirmFriend(@Req() req: Request, @Body('friendId') friendId: string) {
     try {
       const user = req.user as IUserCreated;
-
-      return new Ok(await this.friendService.confirmFriend(user, friend));
+      // this.eventEmitter.emit('friend.confirm', )
+      return new Ok(await this.friendService.confirmFriend(user._id, friendId));
     } catch (error) {
       throw error;
     }
   }
 
   @Post('/refuse')
-  async refuseFriend(@Req() req: Request, @Body('friend') friend: IFriend) {
+  async refuseFriend(@Req() req: Request, @Body('friendId') friendId: string) {
     try {
       const user = req.user as IUserCreated;
-      return new Ok(await this.friendService.refuseFriend(user, friend));
+      return new Ok(await this.friendService.refuseFriend(user._id, friendId));
     } catch (error) {
       throw error;
     }
   }
 
-  @Get('/total-notify')
-  async getNotifyAddFriend(@Req() req: Request) {
-    try {
-      const user = req.user as IUserCreated;
-      return new Ok(await this.friendService.getNotifyAddFriend(user));
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get('/all/:userId')
-  async getAllFriendOfUser(
+  @Get('/mutual/:friendId')
+  async getMutualFriends(
     @Req() req: Request,
-    @Param('userId') userId: string,
+    @Param('friendId') friendId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+    @Query('sortBy') sortBy: string = 'name',
   ) {
     try {
       const user = req.user as IUserCreated;
-      return new Ok(await this.friendService.getAllFriendOfUser(user, userId));
-    } catch (err) {
-      throw err;
+      const pagination = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy: sortBy,
+      };
+      return new Ok(
+        await this.friendService.findMutualFriends(user, friendId, pagination),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/test')
+  async test(@Req() req: Request) {
+    const user = req.user as IUserCreated;
+    return await this.friendService.test(user._id);
+  }
+
+  @Get('/:userId')
+  async getFriends(@Param('userId') userId: string) {
+    try {
+      return new Ok(await this.friendService.getFriends(userId));
+    } catch (error) {
+      throw error;
     }
   }
 }

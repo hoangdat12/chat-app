@@ -14,13 +14,6 @@ export interface IUser {
   avatarUrl: string;
   role: string;
   loginWith: string;
-  friends?: number;
-  viewer?: number;
-  total_post?: number;
-  job?: string;
-  address?: string;
-  social_github?: string;
-  social_facebook?: string;
   isActive: boolean;
 }
 

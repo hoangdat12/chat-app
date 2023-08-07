@@ -5,22 +5,22 @@ import { User } from './user.model';
 
 @Schema({ collection: 'Address', timestamps: true })
 export class Address {
-  @Prop({ type: Types.ObjectId, ref: User.name })
+  @Prop({ type: Types.ObjectId, ref: User.name, unique: true })
   address_user: IUserCreated;
 
   @Prop({ default: 'Viet Nam' })
   address_country: string;
 
-  @Prop()
+  @Prop({ default: '' })
   address_city: string;
 
-  @Prop()
+  @Prop({ default: '' })
   address_state: string;
 
-  @Prop()
+  @Prop({ default: '' })
   address_street: string;
 
-  @Prop()
+  @Prop({ default: '' })
   address_postal_code: string;
 }
 const AddressSchema = SchemaFactory.createForClass(Address);

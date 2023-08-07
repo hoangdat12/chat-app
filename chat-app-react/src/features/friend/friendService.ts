@@ -1,62 +1,40 @@
-import { IPagination, IResponse } from '../../ultils/interface';
+import { IResponse } from '../../ultils/interface';
 import {
   IAddFriendResponse,
   ICheckFriendResponse,
-  IDataGetAllFriendOfUser,
   IFriend,
   IFriendResponse,
-  IUnConfirmedResonse,
 } from '../../ultils/interface/friend.interface';
 import myAxios from '../../ultils/myAxios';
 
-const getFriendOfUser = async (userId: string): Promise<IFriendResponse> => {
-  const res = await myAxios.get(`/friend/friends/${userId}`);
-  return res.data.metaData;
-};
-
-const getUnconfirmedFriend = async (): Promise<IUnConfirmedResonse[]> => {
-  const res = await myAxios.get('/friend/uncofirmed');
-  return res.data.metaData;
-};
-
-const addFriend = async (
-  friend: IFriend
-): Promise<IResponse<IAddFriendResponse>> => {
-  const res = await myAxios.post('/friend/add', { friend });
+const getFriendOfUser = async (
+  userId: string
+): Promise<IResponse<IFriend[]>> => {
+  const res = await myAxios.get(`/friend/${userId}`);
   return res;
 };
 
-const confirmFriend = async (friend: IFriend): Promise<IFriend> => {
-  const res = await myAxios.post('/friend/confirm', { friend });
-  return res.data.metaData;
+const addFriend = async (
+  friendId: string
+): Promise<IResponse<IAddFriendResponse>> => {
+  const res = await myAxios.post('/friend/add', { friendId });
+  return res;
 };
 
-const refuseFriend = async (friend: IFriend): Promise<IFriend> => {
-  const res = await myAxios.post('/friend/refuse', { friend });
-  return res.data.metaData;
+const confirmFriend = async (friendId: string): Promise<IResponse<IFriend>> => {
+  const res = await myAxios.post('/friend/confirm', { friendId });
+  return res;
+};
+
+const refuseFriend = async (friendId: string): Promise<IResponse<string>> => {
+  const res = await myAxios.post('/friend/refuse', { friendId });
+  return res;
 };
 
 const statusFriend = async (
   friendId: string
 ): Promise<IResponse<ICheckFriendResponse>> => {
   const res = await myAxios.get(`/friend/status/${friendId}`);
-  return res;
-};
-
-const getTotalNotifyAddFriend = async (): Promise<{ totalNotify: number }> => {
-  const res = await myAxios.get(`/friend/total-notify`);
-  return res.data.metaData;
-};
-
-const getAllFriendOfUser = async (
-  userId: string,
-  pagination?: IPagination
-): Promise<IResponse<IDataGetAllFriendOfUser>> => {
-  const { page = 0, limit = 20, sortedBy = 'ctime' } = pagination || {};
-
-  const res = await myAxios.get(
-    `/friend/all/${userId}?page=${page}&limit=${limit}&sortBy=${sortedBy}`
-  );
   return res;
 };
 
@@ -77,15 +55,24 @@ const deleteFriend = async (friendId: string) => {
   return res;
 };
 
+const getListRequestAddFriend = async () => {
+  const res = await myAxios.get(`/friend/request`);
+  return res;
+};
+
+const getListPendingAddFriend = async () => {
+  const res = await myAxios.get(`/friend/pending`);
+  return res;
+};
+
 export const friendService = {
   getFriendOfUser,
   addFriend,
   statusFriend,
-  getTotalNotifyAddFriend,
-  getUnconfirmedFriend,
   confirmFriend,
   refuseFriend,
   searchFriendByUserName,
+  getListRequestAddFriend,
+  getListPendingAddFriend,
   deleteFriend,
-  getAllFriendOfUser,
 };

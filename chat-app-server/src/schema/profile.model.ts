@@ -6,7 +6,7 @@ import { User } from './user.model';
 
 @Schema({ collection: 'Profile', timestamps: true })
 export class Profile {
-  @Prop({ type: Types.ObjectId, ref: User.name })
+  @Prop({ type: Types.ObjectId, ref: User.name, unique: true })
   profile_user: IUserCreated;
 
   @Prop({
@@ -24,7 +24,7 @@ export class Profile {
   @Prop({ default: 'Student' })
   profile_job: string;
 
-  @Prop({ type: Types.ObjectId, ref: Address.name })
+  @Prop({ type: Types.ObjectId, ref: Address.name, unique: true })
   profile_address: IAddress;
 
   @Prop({ default: 'default' })

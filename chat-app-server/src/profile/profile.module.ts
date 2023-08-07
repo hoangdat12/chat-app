@@ -15,6 +15,6 @@ import { AddressRepository } from './repository/address.repository';
   ],
   providers: [ProfileService, ProfileRepository, AddressRepository],
   controllers: [ProfileController],
-  exports: [ProfileService],
+  exports: [ProfileService, ProfileRepository],
 })
 export class ProfileModule {}

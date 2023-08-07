@@ -130,6 +130,7 @@ const Header: FC<IPropHeader> = memo(
       const handleSearchUser = async () => {
         setIsLoading(true);
         const res = await userService.findUserByName(searchValue.trim());
+        console.log(res);
         if (res.status === 200) {
           setUserSearch(res.data.metaData.users);
           setIsShowSearchModal(true);

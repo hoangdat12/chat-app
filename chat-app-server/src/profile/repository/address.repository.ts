@@ -16,4 +16,10 @@ export class AddressRepository {
       address_user: convertObjectId(userId),
     });
   }
+
+  async create(userId: string) {
+    return await this.addressModel.create({
+      address_user: convertObjectId(userId),
+    });
+  }
 }

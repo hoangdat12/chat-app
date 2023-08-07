@@ -41,16 +41,16 @@ export class UserService {
     );
   }
 
-  async changeUserAvatar(email: string, avatarUrl: string) {
+  async changeUserAvatar(userId: string, avatarUrl: string) {
     const userUpdate = await this.authRepository.changeUserAvatar(
-      email,
+      userId,
       avatarUrl,
     );
 
     if (!userUpdate)
       throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);
 
-    return new Ok<string>(avatarUrl, 'Change avatar success!');
+    return avatarUrl;
   }
 
   async checkUserExist(email: string) {

@@ -1,24 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { User } from './user.model';
-import { IFriend } from '../ultils/interface/friend.interface';
+import { IUserCreated } from '../ultils/interface';
 
 @Schema({ collection: 'Friend', timestamps: true })
 export class Friend {
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  user: User;
+  @Prop({ type: Types.ObjectId, ref: User.name })
+  friend_sender: IUserCreated;
 
-  @Prop({ default: [] })
-  friends: IFriend[];
-
-  @Prop({ default: [] })
-  unconfirmed: IFriend[];
+  @Prop({ type: Types.ObjectId, ref: User.name })
+  friend_receiver: IUserCreated;
 }
 const FriendSchema = SchemaFactory.createForClass(Friend);
-
-FriendSchema.index({
-  'friends.userName': 1,
-});
 
 export const FriendModel = {
   name: Friend.name,

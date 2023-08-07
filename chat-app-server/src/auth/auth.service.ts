@@ -23,6 +23,7 @@ import { ILoginWithGoogleData } from '../ultils/interface';
 import { IUserCreated } from '../ultils/interface';
 import { convertUserIdString, getUsername } from '../ultils';
 import { OtpType } from '../ultils/constant';
+import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly keyTokenRepository: KeyTokenRepository,
     private readonly otpTokenRepository: OtpTokenRepository,
+    private readonly profileService: ProfileService,
     private readonly mailSender: MailSenderService,
   ) {}
 
@@ -87,6 +89,8 @@ export class AuthService {
     if (!userUpdate) throw new HttpException('Not found', HttpStatus.NOT_FOUND);
 
     this.otpTokenRepository.deleteByToken(tokenActive);
+    // Create Repository
+    this.profileService.createProfile(userUpdate._id.toString());
 
     const user = convertUserIdString(userUpdate);
     return { isValid: true, user };
@@ -161,6 +165,8 @@ export class AuthService {
         isActive: true,
       };
       const newUser = await this.authRepository.create(inforUser);
+      // Create Repository
+      this.profileService.createProfile(newUser._id.toString());
 
       if (!newUser)
         throw new HttpException('DB error!', HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,9 +1,7 @@
 import Layout from '../../components/layout/Layout';
 import { FC, memo, useEffect, useRef, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router-dom';
-import myAxios from '../../ultils/myAxios';
-import { IResponse, IUser } from '../../ultils/interface';
-import { getUserLocalStorageItem, getUsername } from '../../ultils';
+import { getUserLocalStorageItem } from '../../ultils';
 import { friendService } from '../../features/friend/friendService';
 import { ICheckFriendResponse } from '../../ultils/interface/friend.interface';
 import UserInformation from '../../components/user/UserInformation';
@@ -15,6 +13,8 @@ import ProfileInformation from '../../components/profile/ProfileInformation';
 import ProfilePost from '../../components/profile/ProfilePost';
 import ProfileFriend from '../../components/profile/ProfileFriend';
 import Loading from '../../components/button/Loading';
+import { profileService } from '../../features/profile/profileService';
+import { IProfile } from '../../ultils/interface/profile.interface';
 
 const userLocalstorage = getUserLocalStorageItem();
 
@@ -28,19 +28,19 @@ export enum StatusFriend {
 export interface IFriendAndPostProp {
   userId: string | undefined;
   isOwner: boolean;
-  user: IUser | null;
+  profile: IProfile | null;
 }
 
 const getStatusFriend = (data: ICheckFriendResponse) => {
-  const { isFriend, unFriended, confirm } = data;
+  const { isFriend, isConfirm, isWaitConfirm } = data;
   if (isFriend) return StatusFriend.FRIEND;
-  else if (unFriended) return StatusFriend.UNFRIENDED;
-  else if (confirm) return StatusFriend.CONFIRM;
-  else return StatusFriend.CANCEL;
+  else if (isWaitConfirm) return StatusFriend.CANCEL;
+  else if (isConfirm) return StatusFriend.CONFIRM;
+  else return StatusFriend.UNFRIENDED;
 };
 
 const Profile = () => {
-  const [user, setUser] = useState<IUser | null>(null);
+  const [profile, setProfile] = useState<IProfile | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [showDeleteFriend, setShowDeleteFriend] = useState<boolean | null>(
     null
@@ -52,47 +52,76 @@ const Profile = () => {
   const dispatch = useAppDispatch();
   const { isLoading: loadingLoadPost } = useAppSelector(selectPost);
 
-  // Add friend
-  const handleClickAddFriend = async () => {
-    if (statusFriend !== StatusFriend.FRIEND) {
-      if (user) {
-        const friend = {
-          userId: user?._id,
-          email: user?.email,
-          userName: getUsername(user),
-          avatarUrl: user?.avatarUrl,
-        };
-        const res = await friendService.addFriend(friend);
-        if (res.status === 201) {
-          setStatusFriend(res.data.metaData.status);
-        }
+  const handleAddFriend = async () => {
+    if (profile) {
+      const res = await friendService.addFriend(profile.profile_user._id);
+      if (res.status === 200 || res.status === 201) {
+        setStatusFriend(StatusFriend.CANCEL);
       }
-    } else {
-      // Show delete friend
-      setShowDeleteFriend(true);
+    }
+  };
+
+  const handleCancelFriend = async () => {
+    if (profile) {
+      const res = await friendService.refuseFriend(profile.profile_user._id);
+      if (res.status === 200 || res.status === 201) {
+        setStatusFriend(StatusFriend.UNFRIENDED);
+      }
+    }
+  };
+
+  const handleConfirmFriend = async () => {
+    if (profile) {
+      const res = await friendService.confirmFriend(profile.profile_user._id);
+      if (res.status === 200 || res.status === 201) {
+        setStatusFriend(StatusFriend.FRIEND);
+      }
+    }
+  };
+
+  // Add friend
+  const handleClick = async () => {
+    switch (statusFriend) {
+      case StatusFriend.FRIEND:
+        setShowDeleteFriend(true);
+        break;
+      case StatusFriend.UNFRIENDED:
+        await handleAddFriend();
+        break;
+      case StatusFriend.CANCEL:
+        handleCancelFriend();
+        break;
+      case StatusFriend.CONFIRM:
+        handleConfirmFriend();
+        break;
+      default:
+        console.log('Invalid Status friend!!!');
+        return;
     }
   };
 
   // Get information of user
   useEffect(() => {
     if (userId) {
-      const getUserDetail = async () => {
-        const res = (await myAxios.get(`/user/${userId}`)) as IResponse<IUser>;
-        setUser(res.data.metaData);
+      const getProfile = async () => {
+        const res = await profileService.viewProfile(userId);
+        setProfile(res.data.metaData);
         if (res.data.metaData?._id === userLocalstorage._id) {
           setIsOwner(true);
         }
       };
       const statusFriend = async () => {
-        const res = await friendService.statusFriend(userId);
-        if (res.status === 200) {
-          const status = getStatusFriend(res.data.metaData);
-          setStatusFriend(status);
+        if (userId !== userLocalstorage._id) {
+          const res = await friendService.statusFriend(userId);
+          if (res.status === 200) {
+            const status = getStatusFriend(res.data.metaData);
+            setStatusFriend(status);
+          }
         }
       };
       // Get data
       setIsLoading(true);
-      getUserDetail();
+      getProfile();
       statusFriend();
       setIsLoading(false);
     }
@@ -118,10 +147,10 @@ const Profile = () => {
         <div className='relative pb-20'>
           <div className='relative flex flex-col'>
             <UserInformation
-              user={user}
+              profile={profile}
               isOwner={isOwner}
               statusFriend={statusFriend}
-              handleClickAddFriend={handleClickAddFriend}
+              handleClickAddFriend={handleClick}
               showDeleteFriend={showDeleteFriend}
               setShowDeleteFriend={setShowDeleteFriend}
             />
@@ -130,13 +159,13 @@ const Profile = () => {
                 path='/'
                 element={
                   <FriendAndPost
-                    user={user}
+                    profile={profile}
                     userId={userId}
                     isOwner={isOwner}
                   />
                 }
               />
-              <Route path='/friends' element={<ListFriend />} />
+              <Route path='/friends/*' element={<ListFriend />} />
             </Routes>
           </div>
         </div>
@@ -146,17 +175,17 @@ const Profile = () => {
 };
 
 export const FriendAndPost: FC<IFriendAndPostProp> = memo(
-  ({ userId, user, isOwner }) => {
+  ({ userId, profile, isOwner }) => {
     const elementRef = useRef<HTMLDivElement>(null);
     return (
       <>
         <div className='mt-[200px] md:mt-[240px] lg:mt-[280px] px-3 sm:px-8 md:px-4 xl:px-32 md:grid grid-cols-3 gap-6 flex flex-col-reverse md:flex-col'>
-          <ProfilePost userId={userId} user={user} />
+          <ProfilePost userId={userId} profile={profile} />
           <div
             ref={elementRef}
             className={`md:col-span-1 flex flex-col gap-6  order-1`}
           >
-            <ProfileInformation user={user} isOwner={isOwner} />
+            <ProfileInformation profile={profile} isOwner={isOwner} />
             <ProfileFriend userId={userId} />
           </div>
         </div>
