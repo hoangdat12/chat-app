@@ -1,4 +1,4 @@
-import './App.css';
+import './App.scss';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import ProtectedRoutes from './ultils/ProtectedRoute';
@@ -12,6 +12,7 @@ import useInnerWidth from './hooks/useInnterWidth';
 import Profile from './pages/profile/Profile';
 import Setting from './pages/setting/Setting';
 import Game from './pages/game/Game';
+import ChangeAvatarGroup from './components/modal/ChangeAvatarGroup';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -39,6 +40,7 @@ function App() {
             <Route path='/profile/:userId/*' element={<Profile />} />
             <Route path='/setting/*' element={<Setting />} />
             <Route path='/game/*' element={<Game />} />
+            <Route path='/crop/avatar' element={<ChangeAvatarGroup />} />
           </Route>
         </Routes>
       </Router>

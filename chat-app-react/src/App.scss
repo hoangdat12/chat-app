@@ -73,3 +73,14 @@
   position: relative;
   backdrop-filter: blur(20px);
 }
+
+.image-editor {
+  color: #61dafb;
+  border: solid 1px #2b2a30;
+  max-height: 100%;
+}
+
+.advanced-cropper-preview__content {
+  width: 100% !important;
+  height: 100% !important;
+}

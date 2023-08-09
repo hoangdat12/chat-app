@@ -109,31 +109,31 @@ const ProfilePost: FC<IPropProfilePost> = memo(({ userId, profile }) => {
           }
           user={profile?.profile_user}
         />
-        <div className='flex gap-4 items-center mt-4 w-full'>
-          {userId === userLocal._id ? (
-            (
-              Object.keys(
-                modeViewProfilePost
-              ) as (keyof typeof modeViewProfilePost)[]
-            ).map((mode) => (
-              <h1
-                onClick={() => handleClickModeView(modeViewProfilePost[mode])}
-                key={mode}
-                className={`${
-                  active === modeViewProfilePost[mode]
-                    ? 'text-lg md:text-xl xl:text-2xl font-medium'
-                    : 'text-base md:text-base xl:text-md'
-                } cursor-pointer`}
-              >
-                {modeViewProfilePost[mode]}
-              </h1>
-            ))
-          ) : (
-            <div className='flex justify-start w-full text-lg md:text-xl xl:text-2xl font-medium cursor-pointer'>
-              Feeds
-            </div>
-          )}
-        </div>
+      </div>
+      <div className='flex gap-4 items-center bg-gray-100 py-4 px-4 rounded-md w-full'>
+        {userId === userLocal._id ? (
+          (
+            Object.keys(
+              modeViewProfilePost
+            ) as (keyof typeof modeViewProfilePost)[]
+          ).map((mode) => (
+            <h1
+              onClick={() => handleClickModeView(modeViewProfilePost[mode])}
+              key={mode}
+              className={`${
+                active === modeViewProfilePost[mode]
+                  ? 'bg-blue-500 text-white'
+                  : ''
+              } text-base md:text-lg px-4 py-[6px] cursor-pointer rounded`}
+            >
+              {modeViewProfilePost[mode]}
+            </h1>
+          ))
+        ) : (
+          <div className='flex justify-start w-full text-lg md:text-xl xl:text-2xl font-medium cursor-pointer'>
+            Feeds
+          </div>
+        )}
       </div>
       {isLoading ? (
         <div className='flex items-center justify-center min-h-[300px]'>

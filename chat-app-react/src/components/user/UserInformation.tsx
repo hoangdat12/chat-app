@@ -1,6 +1,6 @@
 import { FC, memo, useEffect, useRef, useState } from 'react';
 import { CiEdit } from 'react-icons/ci';
-import { getUserLocalStorageItem, getUsername } from '../../ultils';
+import { getUsername } from '../../ultils';
 import Button from '../button/Button';
 import { StatusFriend } from '../../pages/profile/Profile';
 import { FaUserCheck, FaUserPlus } from 'react-icons/fa';
@@ -9,8 +9,6 @@ import { friendService } from '../../features/friend/friendService';
 import useClickOutside from '../../hooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
 import { IProfile } from '../../ultils/interface/profile.interface';
-import ChangeAvatarGroup from '../modal/ChangeAvatarGroup';
-import { userService } from '../../features/user/userService';
 
 export interface IUserInformationProp {
   profile: IProfile | null;
@@ -21,8 +19,6 @@ export interface IUserInformationProp {
   setShowDeleteFriend: (value: boolean) => void;
 }
 
-const userLocal = getUserLocalStorageItem();
-
 const UserInformation: FC<IUserInformationProp> = memo(
   ({
     profile,
@@ -32,13 +28,7 @@ const UserInformation: FC<IUserInformationProp> = memo(
     showDeleteFriend,
     setShowDeleteFriend,
   }) => {
-    const [isShowChangeAvatarOfGroup, setIsShowChangeAvatarOfGroup] =
-      useState(false);
-    const [viewImage, setViewImage] = useState<string | ArrayBuffer | null>(
-      null
-    );
     const [file, setFile] = useState<File | null>(null);
-    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
     const navigate = useNavigate();
     const buttonRef = useRef<HTMLDivElement | null>(null);
@@ -63,27 +53,11 @@ const UserInformation: FC<IUserInformationProp> = memo(
       }
     };
 
-    const handleChangeAvatar = async (formData: FormData) => {
-      const res = await userService.changeAvatar(formData);
-      if (res.status === 200 || res.status === 201) {
-        const avatar = res.data.metaData;
-        userLocal.avatarUrl = avatar;
-        localStorage.setItem('user', JSON.stringify(userLocal));
-        setAvatarUrl(avatar);
-      }
-    };
-
     useClickOutside(buttonRef, () => setShowDeleteFriend(false), 'mousedown');
 
     useEffect(() => {
       if (file) {
-        const objectURL = URL.createObjectURL(file);
-        setViewImage(objectURL);
-        setIsShowChangeAvatarOfGroup(true);
-
-        return () => {
-          URL.revokeObjectURL(objectURL);
-        };
+        navigate('/crop/avatar', { state: { file } });
       }
     }, [file]);
 
@@ -101,7 +75,7 @@ const UserInformation: FC<IUserInformationProp> = memo(
           <div className='relative'>
             <img
               className='w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-full border-2 border-pink-600 p-[1px] cursor-pointer'
-              src={avatarUrl ?? profile?.profile_user?.avatarUrl}
+              src={profile?.profile_user?.avatarUrl}
               alt='user-pic'
             />
             <div className='absolute bottom-2 right-1 p-2 rounded-full bg-gray-100 cursor-pointer sm:text-lg md:text-xl'>
@@ -183,17 +157,6 @@ const UserInformation: FC<IUserInformationProp> = memo(
             )}
           </div>
         </div>
-        {isShowChangeAvatarOfGroup && (
-          <ChangeAvatarGroup
-            imageUrl={viewImage}
-            setViewImage={setViewImage}
-            isShow={isShowChangeAvatarOfGroup}
-            setIsShow={setIsShowChangeAvatarOfGroup}
-            handleChangeAvatar={(formData: FormData) =>
-              handleChangeAvatar(formData)
-            }
-          />
-        )}
       </div>
     );
   }

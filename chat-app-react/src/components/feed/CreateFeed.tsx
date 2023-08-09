@@ -1,8 +1,8 @@
-import { AiOutlineFileImage } from 'react-icons/Ai';
 import Avatar from '../avatars/Avatar';
 import { FC, useState } from 'react';
 import CreatePostModel from '../modal/CreatePostModel';
 import { IUser } from '../../ultils/interface';
+import { FaFileImage } from 'react-icons/fa';
 
 export interface IPropCreateFeed {
   mode: string;
@@ -23,7 +23,7 @@ const CreateFeed: FC<IPropCreateFeed> = ({ mode, placeHolder, user }) => {
   };
 
   return (
-    <div className='w-full p-3 rounded bg-white'>
+    <div className='w-full p-3 rounded-lg bg-white'>
       <div className='flex justify-between gap-3 '>
         <Avatar
           avatarUrl={
@@ -41,7 +41,7 @@ const CreateFeed: FC<IPropCreateFeed> = ({ mode, placeHolder, user }) => {
             onClick={setShowModelCreatePost}
           />
           <span onClick={setShowModelCreatePost} className='p-1 cursor-pointer'>
-            <AiOutlineFileImage />
+            <FaFileImage />
           </span>
         </div>
       </div>
