@@ -13,7 +13,7 @@ import {
   IDataChangeUsernameOfParticipant,
   PayloadCreateConversation,
 } from './conversation.dto';
-import { checkNegativeNumber } from 'src/ultils';
+import { checkNegativeNumber, convertObjectId } from 'src/ultils';
 import { MessageType } from 'src/ultils/constant';
 
 @Injectable()
@@ -307,5 +307,23 @@ export class ConversationRepository {
       participant.enable = true;
     }
     return participants;
+  }
+
+  async findAllConversaiton() {
+    return await this.conversationModel.find();
+  }
+
+  async updateParticipant(user: IUserCreated, conversationId: string) {
+    return await this.conversationModel.findOneAndUpdate(
+      {
+        _id: convertObjectId(conversationId),
+        'participants.userId': user._id.toString(),
+      },
+      {
+        $addToSet: {
+          'participants.peer': user.peer,
+        },
+      },
+    );
   }
 }

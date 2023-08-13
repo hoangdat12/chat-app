@@ -335,6 +335,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         userName={userName}
         avatarUrl={avatarUrl}
         status={status}
+        conversation={conversation}
       />
 
       <MessageContent />

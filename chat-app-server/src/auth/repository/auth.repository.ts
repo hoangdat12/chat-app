@@ -4,11 +4,8 @@ import mongoose, { Model } from 'mongoose';
 import { User } from '../../schema/user.model';
 import { ChangeUsername, UserRegister } from '../auth.dto';
 import { IUserCreated, Pagination } from '../../ultils/interface';
-import {
-  checkNegativeNumber,
-  convertObjectId,
-  removeNullValues,
-} from '../../ultils';
+import { checkNegativeNumber, convertObjectId } from '../../ultils';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthRepository {
@@ -116,7 +113,8 @@ export class AuthRepository {
   }
 
   async create(data: UserRegister) {
-    return await this.userModel.create(data);
+    const peerId = uuidv4();
+    return await this.userModel.create({ ...data, peer: peerId });
   }
 
   async updateAll() {
@@ -195,5 +193,16 @@ export class AuthRepository {
         lastName: 1,
         userName: { $concat: ['$firstName', ' ', '$lastName'] },
       });
+  }
+
+  async updatePeerId(userId: string, peerId: string) {
+    return await this.userModel.findOneAndUpdate(
+      {
+        _id: convertObjectId(userId),
+      },
+      {
+        peer: peerId,
+      },
+    );
   }
 }

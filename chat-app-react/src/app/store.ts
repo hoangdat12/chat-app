@@ -7,6 +7,7 @@ import messageReducer from '../features/message/messageSlice';
 import friendReducer from '../features/friend/friendSlice';
 import notifyReducer from '../features/notify/notifySlice';
 import postReducer from '../features/post/postSlice';
+import callReducer from '../features/call/callSlice';
 // import commentReducer from '../features/comment/commentSlice';
 
 enableMapSet();
@@ -18,6 +19,7 @@ export const store = configureStore({
     friend: friendReducer,
     notify: notifyReducer,
     post: postReducer,
+    call: callReducer,
     // comment: commentReducer,
   },
   middleware: (getDefaultMiddleware) =>

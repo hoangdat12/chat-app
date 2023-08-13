@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { MessagingGateway } from './gateway';
 import { GatewaySessionManager } from './gateway.sesstion';
 import { Services } from '../ultils/constant';
+import { ConversationModule } from '../conversation/conversation.module';
 
 @Module({
-  imports: [],
+  imports: [ConversationModule],
   providers: [
     MessagingGateway,
     {

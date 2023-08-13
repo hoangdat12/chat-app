@@ -23,13 +23,15 @@ import {
   getMessageNotify,
   getUsername,
 } from '../ultils';
-import { MessageContentType } from 'src/ultils/constant/message.constant';
+import { MessageContentType } from '../ultils/constant/message.constant';
+import { AuthRepository } from '../auth/repository/auth.repository';
 
 @Injectable()
 export class ConversationService {
   constructor(
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,
+    private readonly authRepository: AuthRepository,
   ) {}
 
   async createConversation(
@@ -45,11 +47,13 @@ export class ConversationService {
         avatarUrl: user.avatarUrl,
         userName: getUsername(user),
         enable: true,
+        peerId: user.peer,
       };
       payload.creators = [creator];
       payload.avatarUrl =
         avatarUrl ?? 'http://localhost:8080/assets/avatar.group.jpg';
     }
+
     const newConversation =
       await this.conversationRepository.createConversation(payload);
 
@@ -493,5 +497,18 @@ export class ConversationService {
         'User not permission delete member out of group!',
         HttpStatus.FORBIDDEN,
       );
+  }
+
+  async fixBug() {
+    const conversations =
+      await this.conversationRepository.findAllConversaiton();
+    for (let conversation of conversations) {
+      for (let participant of conversation.participants) {
+        const user = await this.authRepository.findById(participant.userId);
+        participant.peerId = user.peer;
+        console.log(participant);
+      }
+      await conversation.save();
+    }
   }
 }

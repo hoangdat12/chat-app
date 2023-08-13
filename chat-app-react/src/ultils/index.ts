@@ -1,6 +1,6 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import { MessageType } from './constant/message.constant';
-import { IConversation, IUser } from './interface';
+import { IConversation, IFriend, IParticipant, IUser } from './interface';
 
 export const calculatorTime = (timeStamp: string) => {
   const date = new Date(timeStamp);
@@ -240,4 +240,39 @@ export const getUserNameAndAvatarUrl = (
 export const isValidEmail = (email: string) => {
   const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return pattern.test(email);
+};
+
+export const convertFriendToParticipant = (friend: IFriend): IParticipant => {
+  return {
+    userId: friend._id,
+    email: friend.email,
+    avatarUrl: friend.avatarUrl,
+    userName: friend.userName,
+    enable: false,
+    isReadLastMessage: false,
+    peerId: friend.peerId,
+  };
+};
+
+export const convertUserToParticipant = (user: IUser): IParticipant => {
+  return {
+    userId: user._id,
+    email: user.email,
+    avatarUrl: user.avatarUrl,
+    userName: getUsername(user),
+    enable: false,
+    isReadLastMessage: false,
+    peerId: user.peer,
+  };
+};
+
+export const handleNavigateCallPage = () => {
+  const desiredWidth = Math.floor(window.screen.width * 0.9);
+  const desiredHeight = Math.floor(window.screen.height * 0.9);
+
+  window.open(
+    'http://localhost:5173/call',
+    '_blank',
+    `width=${desiredWidth},height=${desiredHeight}`
+  );
 };

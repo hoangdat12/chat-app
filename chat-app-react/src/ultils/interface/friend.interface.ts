@@ -6,6 +6,7 @@ export interface IFriend {
   firstName: string;
   lastName: string;
   isFriend?: boolean;
+  peerId: string;
 }
 
 export interface IFriendResponse {

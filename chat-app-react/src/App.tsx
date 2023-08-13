@@ -13,6 +13,8 @@ import Profile from './pages/profile/Profile';
 import Setting from './pages/setting/Setting';
 import Game from './pages/game/Game';
 import ChangeAvatarGroup from './components/modal/ChangeAvatarGroup';
+import CallerPage from './pages/callerPage/CallerPage';
+import VideoCall from './components/call/VideoCall';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -20,12 +22,12 @@ function App() {
     <SocketContext.Provider value={socket}>
       <Router>
         <Routes>
-          <Route path='/' element={<Home />} />
           <Route path='/login/success' element={<LoginSuccess />} />
           <Route path='/login/*' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/register/success' element={<RegisterSuccess />} />
-          <Route element={<ProtectedRoutes />}>
+          <Route element={<ProtectedRoutes children={<CallerPage />} />}>
+            <Route path='/' element={<Home />} />
             {innerWitdh < 640 ? (
               <Route
                 path='/conversation/:conversationId/*'
@@ -41,6 +43,7 @@ function App() {
             <Route path='/setting/*' element={<Setting />} />
             <Route path='/game/*' element={<Game />} />
             <Route path='/crop/avatar' element={<ChangeAvatarGroup />} />
+            <Route path='/call' element={<VideoCall />} />
           </Route>
         </Routes>
       </Router>

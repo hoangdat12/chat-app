@@ -24,31 +24,17 @@ export const getFriendOfUser = createAsyncThunk(
   }
 );
 
-export const getUnconfirmedFriend = createAsyncThunk(
-  'friend/unconfirmed',
-  async () => {
-    return await friendService.getUnconfirmedFriend();
-  }
-);
-
-export const getTotalNotifyAddFriend = createAsyncThunk(
-  'friend/totalNotify',
-  async () => {
-    return await friendService.getTotalNotifyAddFriend();
-  }
-);
-
 export const confirmFriend = createAsyncThunk(
   'friend/confirm',
   async (friend: IFriend) => {
-    return await friendService.confirmFriend(friend);
+    return await friendService.confirmFriend(friend._id);
   }
 );
 
 export const refuseFriend = createAsyncThunk(
   'friend/refuse',
   async (friend: IFriend) => {
-    return await friendService.refuseFriend(friend);
+    return await friendService.refuseFriend(friend._id);
   }
 );
 
@@ -82,42 +68,42 @@ const friendSlice = createSlice({
       .addCase(getFriendOfUser.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
-      })
-
-      // Confirm
-      .addCase(confirmFriend.pending, (state) => {
-        state.status = 'pending';
-        state.isLoading = true;
-      })
-      .addCase(confirmFriend.fulfilled, (state, action) => {
-        state.status = 'idle';
-        state.isLoading = false;
-
-        const newFriend = action.payload;
-        state.unconfirmed?.delete(newFriend._id);
-        state.friends?.set(newFriend._id, newFriend);
-      })
-      .addCase(confirmFriend.rejected, (state) => {
-        state.status = 'failed';
-        state.isLoading = false;
-      })
-
-      // Refuse
-      .addCase(refuseFriend.pending, (state) => {
-        state.status = 'pending';
-        state.isLoading = true;
-      })
-      .addCase(refuseFriend.fulfilled, (state, action) => {
-        state.status = 'idle';
-        state.isLoading = false;
-
-        const newFriend = action.payload;
-        state.unconfirmed?.delete(newFriend._id);
-      })
-      .addCase(refuseFriend.rejected, (state) => {
-        state.status = 'failed';
-        state.isLoading = false;
       });
+
+    // Confirm
+    // .addCase(confirmFriend.pending, (state) => {
+    //   state.status = 'pending';
+    //   state.isLoading = true;
+    // })
+    // .addCase(confirmFriend.fulfilled, (state, action) => {
+    //   state.status = 'idle';
+    //   state.isLoading = false;
+
+    //   const newFriend = action.payload;
+    //   state.unconfirmed?.delete(newFriend._id);
+    //   state.friends?.set(newFriend._id, newFriend);
+    // })
+    // .addCase(confirmFriend.rejected, (state) => {
+    //   state.status = 'failed';
+    //   state.isLoading = false;
+    // })
+
+    // // Refuse
+    // .addCase(refuseFriend.pending, (state) => {
+    //   state.status = 'pending';
+    //   state.isLoading = true;
+    // })
+    // .addCase(refuseFriend.fulfilled, (state, action) => {
+    //   state.status = 'idle';
+    //   state.isLoading = false;
+
+    //   const newFriend = action.payload;
+    //   state.unconfirmed?.delete(newFriend._id);
+    // })
+    // .addCase(refuseFriend.rejected, (state) => {
+    //   state.status = 'failed';
+    //   state.isLoading = false;
+    // });
   },
 });
 

@@ -1,9 +1,9 @@
 import { FC } from 'react';
 import { AvatarOnline } from './Avatar';
-import { IFriend } from '../../ultils/interface/friend.interface';
+import { IParticipant } from '../../ultils/interface';
 
 export interface IPropUserAdd {
-  friend: IFriend;
+  friend: IParticipant;
 }
 
 export const AvatarUserAdd: FC<IPropUserAdd> = ({ friend }) => {

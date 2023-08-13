@@ -345,4 +345,9 @@ export class ConversationController {
       throw err;
     }
   }
+
+  @Get('/bug/fix')
+  async fixBug() {
+    return await this.conversationService.fixBug();
+  }
 }

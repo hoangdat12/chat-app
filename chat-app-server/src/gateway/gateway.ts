@@ -1,6 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
+  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -14,8 +15,12 @@ import {
 import { Services } from '../ultils/constant';
 import { Messages } from '../schema/message.model';
 import {
+  ICallAccepPayload,
+  ICallClosePayload,
   IConversation,
   IMessage,
+  IRejectVideoPayload,
+  ISocketCallInitiate,
   ISocketChangeEmoji,
   ISocketChangeUsername,
   ISocketDeleteMember,
@@ -23,8 +28,13 @@ import {
   ISocketReceivedNotify,
   iSocketDeleteMessage,
 } from '../ultils/interface';
-import { ISocketAddFriend } from 'src/ultils/interface/friend.interface';
-import { IDataChangeUsernameOfParticipant } from 'src/conversation/conversation.dto';
+import { ISocketAddFriend } from '../ultils/interface/friend.interface';
+import {
+  SocketCall,
+  WebsocketEvents,
+} from '../ultils/constant/socket.constant';
+import { ConversationRepository } from '../conversation/conversation.repository';
+import { convertUserToIParticipant } from '../ultils';
 
 @WebSocketGateway({
   cors: {
@@ -37,6 +47,7 @@ export class MessagingGateway implements OnModuleInit {
   constructor(
     @Inject(Services.GATEWAY_SESSION_MANAGER)
     private readonly sessions: IGatewaySessionManager,
+    private readonly conversationRepository: ConversationRepository,
   ) {}
 
   onModuleInit() {
@@ -197,4 +208,74 @@ export class MessagingGateway implements OnModuleInit {
   // handleCreateComment(payload: IComment) {
   //   const {comment_user_id} = payload;
   // }
+
+  // CALL
+  @SubscribeMessage(SocketCall.ON_VIDEO_CALL_REQUEST)
+  handleCallVideo(
+    @MessageBody() data: ISocketCallInitiate,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const { receiver } = data;
+    const receiverSocket = this.sessions.getUserSocket(receiver.userId);
+    if (!receiverSocket) socket.emit('onUserUnavailable');
+    receiverSocket.emit(WebsocketEvents.ON_VIDEO_CALL, data);
+  }
+
+  @SubscribeMessage(SocketCall.VIDEO_CALL_ACCEPTED)
+  async handleVideoCallAccepted(
+    @MessageBody() data: ICallAccepPayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const callerSocket = this.sessions.getUserSocket(data.caller.userId);
+    const conversation = await this.conversationRepository.findById(
+      data.conversationId,
+    );
+    if (!conversation) return console.log('No conversation found');
+    if (callerSocket) {
+      const payload = {
+        ...data,
+        conversation,
+        acceptor: convertUserToIParticipant(socket.user),
+      };
+      callerSocket.emit(WebsocketEvents.ON_VIDEO_CALL_ACCEPT, payload);
+      socket.emit(WebsocketEvents.ON_VIDEO_CALL_ACCEPT, payload);
+    }
+  }
+
+  @SubscribeMessage(SocketCall.VIDEO_CALL_REJECTED)
+  async handleVideoCallRejected(
+    @MessageBody() data: IRejectVideoPayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const receiver = socket.user;
+    const callerSocket = this.sessions.getUserSocket(data.caller.userId);
+    callerSocket &&
+      callerSocket.emit(WebsocketEvents.ON_VIDEO_CALL_REJECT, {
+        receiver: convertUserToIParticipant(receiver),
+        caller: data.caller,
+      });
+    socket.emit(WebsocketEvents.ON_VIDEO_CALL_REJECT, {
+      receiver: convertUserToIParticipant(receiver),
+      caller: data.caller,
+    });
+  }
+
+  @SubscribeMessage(SocketCall.VIDEO_CALL_CLOSE)
+  async handleCloseVideoCall(
+    @MessageBody() data: ICallClosePayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const { caller, receiver } = data;
+    console.log('close data::: ', data);
+    if (socket.user._id === caller.userId) {
+      const receiverSocket = this.sessions.getUserSocket(receiver.userId);
+      socket.emit(WebsocketEvents.ON_VIDEO_CLOSE);
+      return (
+        receiverSocket && receiverSocket.emit(WebsocketEvents.ON_VIDEO_CLOSE)
+      );
+    }
+    socket.emit(WebsocketEvents.ON_VIDEO_CLOSE);
+    const callerSocket = this.sessions.getUserSocket(caller.userId);
+    callerSocket && callerSocket.emit(WebsocketEvents.ON_VIDEO_CLOSE);
+  }
 }

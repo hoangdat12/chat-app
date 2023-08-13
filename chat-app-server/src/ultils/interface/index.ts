@@ -6,3 +6,5 @@ export * from './friend.interface';
 export * from './post.interface';
 export * from './comment.interface';
 export * from './profile.interface';
+export * from './socket.interface';
+export * from './call.interface';

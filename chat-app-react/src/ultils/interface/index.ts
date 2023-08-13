@@ -7,6 +7,7 @@ export * from './notify.interface';
 export * from './user.interface';
 export * from './post.interface';
 export * from './comment.interface';
+export * from './call.interface';
 
 export interface IResponse<T> extends AxiosResponse {
   data: {

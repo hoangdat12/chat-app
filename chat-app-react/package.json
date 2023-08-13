@@ -19,6 +19,7 @@
     "date-fns": "^2.30.0",
     "emoji-mart": "^5.5.2",
     "formik": "^2.2.9",
+    "peerjs": "^1.4.7",
     "react": "^18.2.0",
     "react-advanced-cropper": "^0.19.3",
     "react-dom": "^18.2.0",

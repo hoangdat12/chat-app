@@ -49,6 +49,7 @@ export class AuthService {
       ...data,
       password: hashPassword,
     });
+
     if (!newUser)
       throw new HttpException(
         'User already Eixst!',

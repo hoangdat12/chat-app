@@ -37,6 +37,7 @@ export interface IParticipant {
   userName: string;
   enable: boolean;
   isReadLastMessage: boolean;
+  peerId :string
 }
 
 // Group and Conversation

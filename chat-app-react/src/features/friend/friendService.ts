@@ -3,7 +3,6 @@ import {
   IAddFriendResponse,
   ICheckFriendResponse,
   IFriend,
-  IFriendResponse,
 } from '../../ultils/interface/friend.interface';
 import myAxios from '../../ultils/myAxios';
 
@@ -42,7 +41,7 @@ const searchFriendByUserName = async (
   keyword: string
 ): Promise<
   IResponse<{
-    friends: IFriendResponse[];
+    friends: IFriend[];
     keyword: string;
   }>
 > => {

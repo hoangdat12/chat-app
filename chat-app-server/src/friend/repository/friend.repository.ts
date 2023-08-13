@@ -67,27 +67,33 @@ export class FriendRepository {
       },
       {
         $match: {
-          $or: [
-            {
-              $regexMatch: {
-                input: {
-                  $concat: [
-                    '$friendObjects.firstName',
-                    ' ',
-                    '$friendObjects.lastName',
-                  ],
-                },
-                regex: searchRegex,
+          $expr: {
+            $regexMatch: {
+              input: {
+                $concat: [
+                  '$friendObjects.firstName',
+                  ' ',
+                  '$friendObjects.lastName',
+                ],
               },
+              regex: searchRegex,
             },
-          ],
+          },
         },
       },
       {
         $project: {
-          _id: 0,
-          userId: userId,
-          friend: { $arrayElemAt: ['$friendObjects', 0] },
+          _id: '$friendObjects._id',
+          email: '$friendObjects.email',
+          firstName: '$friendObjects.firstName',
+          lastName: '$friendObjects.lastName',
+          avatarUrl: '$friendObjects.avatarUrl',
+          peerId: '$friendObjects.peer',
+        },
+      },
+      {
+        $addFields: {
+          userName: { $concat: ['$firstName', ' ', '$lastName'] },
         },
       },
       {
@@ -143,7 +149,6 @@ export class FriendRepository {
 
   async findFriendsV2(userId: string) {
     const userObjectId = convertObjectId(userId);
-
     return await this.friendModelV2.aggregate([
       {
         $match: {
@@ -184,11 +189,13 @@ export class FriendRepository {
           firstName: 1,
           lastName: 1,
           avatarUrl: 1,
+          peer: 1,
         },
       },
       {
         $addFields: {
           userName: { $concat: ['$firstName', ' ', '$lastName'] },
+          peerId: '$peer',
         },
       },
     ]);

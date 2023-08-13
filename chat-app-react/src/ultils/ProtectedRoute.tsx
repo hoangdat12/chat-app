@@ -1,10 +1,12 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { getUserLocalStorageItem } from '.';
+import { FC } from 'react';
 // import { useAppSelector } from "../app/hook";
 
-const ProtectedRoutes = () => {
+const ProtectedRoutes: FC<React.PropsWithChildren> = ({ children }) => {
   const user = getUserLocalStorageItem();
-  return user ? <Outlet /> : <Navigate to={'/login'} />;
+  if (user) return <>{children}</>;
+  return <Navigate to='/login' state={{ from: location }} replace />;
 };
 
 export default ProtectedRoutes;

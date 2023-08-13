@@ -5,6 +5,7 @@ import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { IUserCreated, Pagination } from '../ultils/interface';
 import { RedisService } from '../redis/redis.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -67,6 +68,10 @@ export class UserService {
   }
 
   async fixBug() {
-    return await this.authRepository.updateAll();
+    const users = await this.authRepository.findAll();
+    for (let user of users) {
+      const peerId = uuidv4();
+      await this.authRepository.updatePeerId(user._id.toString(), peerId);
+    }
   }
 }

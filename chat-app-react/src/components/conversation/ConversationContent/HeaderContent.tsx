@@ -3,8 +3,18 @@ import Avatar from '../../avatars/Avatar';
 import { IoCallOutline, IoVideocamOutline } from 'react-icons/io5';
 import { BsPinAngle } from 'react-icons/bs';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
-import { FC, MouseEventHandler, memo } from 'react';
+import { FC, MouseEventHandler, memo, useContext } from 'react';
 import { ButtonRounded } from '../../button/ButtonRounded';
+import { IConversation, IParticipant, IUser } from '../../../ultils/interface';
+import { useParams } from 'react-router-dom';
+import { SocketContext } from '../../../ultils/context/Socket';
+import { initiateCallState } from '../../../features/call/callSlice';
+import { useAppDispatch } from '../../../app/hook';
+import {
+  convertUserToParticipant,
+  getUserLocalStorageItem,
+} from '../../../ultils';
+import { SocketCall } from '../../../ultils/constant';
 
 export interface IPropHeaderContent {
   handleShowMoreConversation: MouseEventHandler<HTMLAnchorElement>;
@@ -13,7 +23,18 @@ export interface IPropHeaderContent {
   userName: string | null;
   avatarUrl: string | null;
   status?: string | null;
+  conversation: IConversation;
 }
+
+const userLocal = getUserLocalStorageItem();
+
+const getParticipants = (user: IUser, participants: IParticipant[]) => {
+  for (let participant of participants) {
+    if (user._id !== participant.userId) return participant;
+    else continue;
+  }
+  return participants[1];
+};
 
 const HeaderContent: FC<IPropHeaderContent> = memo(
   ({
@@ -23,7 +44,56 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
     userName,
     avatarUrl,
     status,
+    conversation,
   }) => {
+    const { conversationId } = useParams();
+    const dispatch = useAppDispatch();
+    const socket = useContext(SocketContext);
+
+    const hanldeCallVideo = async () => {
+      if (!conversationId) return;
+      const data = {
+        conversationId: conversationId,
+        caller: convertUserToParticipant(userLocal),
+        receiver: getParticipants(userLocal, conversation.participants),
+      };
+      socket.emit(SocketCall.ON_VIDEO_CALL_REQUEST, data);
+      console.log(1);
+      const constraints = { video: true, audio: true };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const payload = {
+        ...data,
+        localStream: stream,
+        isCalling: true,
+        activeConversationId: conversationId,
+        callType: 'video',
+      };
+      if (!payload) throw new Error('Video Call Payload is undefined.');
+      console.log('Start call...');
+      dispatch(initiateCallState(payload));
+    };
+
+    const hanldeCallAudio = async () => {
+      if (!conversationId) return;
+      socket.emit(SocketCall.ON_AUDIO_CALL_REQUEST, {
+        conversationId: conversationId,
+        // Contains user make request
+        recipient: conversation.participants,
+      });
+      const constraints = { video: true, audio: true };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const payload = {
+        localStream: stream,
+        caller: convertUserToParticipant(userLocal),
+        receiver: getParticipants(userLocal, conversation.participants),
+        isCalling: true,
+        activeConversationId: conversationId.toString(),
+        callType: 'video',
+      };
+      if (!payload) throw new Error('Audio Call Payload is undefined.');
+      dispatch(initiateCallState(payload));
+    };
+
     return (
       <div className='flex items-center justify-between h-16 sm:h-[5.5rem] px-4 sm:px-8 w-full shadow-nomal'>
         {/* Mobile */}
@@ -71,10 +141,12 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
           <ButtonRounded
             className={'text-base p-1 sm:text-lg md:text-[22px] sm:p-2'}
             icon={<IoCallOutline />}
+            onClick={hanldeCallAudio}
           />
           <ButtonRounded
             className={'text-base p-1 sm:text-lg md:text-[22px] sm:p-2'}
             icon={<IoVideocamOutline />}
+            onClick={hanldeCallVideo}
           />
           <ButtonRounded
             className={'text-base p-1 sm:text-lg md:text-[22px] sm:p-2'}

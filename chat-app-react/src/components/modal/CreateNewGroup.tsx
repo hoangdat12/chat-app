@@ -16,7 +16,7 @@ import {
   getFriendOfUser,
   selectFriend,
 } from '../../features/friend/friendSlice';
-import { IFriendResponse } from '../../ultils/interface/friend.interface';
+import { IFriend } from '../../ultils/interface/friend.interface';
 import { friendService } from '../../features/friend/friendService';
 import Loading from '../button/Loading';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -39,7 +39,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
     const [listUserAddGroup, setListUserAddGroup] = useState<IParticipant[]>(
       []
     );
-    const [listFriend, setListFriend] = useState<IFriendResponse[]>([]);
+    const [listFriend, setListFriend] = useState<IFriend[]>([]);
     const [member, setMember] = useState(listUserAddGroup.length + 1);
     const [groupName, setGroupName] = useState('');
     const [searchValue, setSearchValue] = useState('');
@@ -86,8 +86,8 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
         avatarUrl: user?.avatarUrl,
         enable: true,
         isReadLastMessage: true,
+        peerId: user?.peer,
       };
-
       const participantsGroup = listUserAddGroup.map((friend) => ({
         userId: friend.userId,
         email: friend.email,
@@ -95,6 +95,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
         avatarUrl: friend.avatarUrl,
         enable: true,
         isReadLastMessage: false,
+        peerId: friend.peerId,
       }));
 
       const data = {
@@ -272,7 +273,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
                 {searchValue.trim() === ''
                   ? friends &&
                     Array.from(friends.values()).map((friend) => (
-                      <div key={friend.userId}>
+                      <div key={friend._id}>
                         <AvatarSearch
                           friend={friend}
                           setListUserAddGroup={setListUserAddGroup}
@@ -282,9 +283,9 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
                       </div>
                     ))
                   : listFriend.map((friend) => (
-                      <div key={friend.friends.userId}>
+                      <div key={friend._id}>
                         <AvatarSearch
-                          friend={friend.friends}
+                          friend={friend}
                           setListUserAddGroup={setListUserAddGroup}
                           setMember={setMember}
                           isShowCreateNewGroup={isShowCreateNewGroup}

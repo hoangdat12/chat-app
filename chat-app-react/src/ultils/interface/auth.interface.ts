@@ -15,6 +15,7 @@ export interface IUser {
   role: string;
   loginWith: string;
   isActive: boolean;
+  peer: string;
 }
 
 export interface IDataLoginSuccess {

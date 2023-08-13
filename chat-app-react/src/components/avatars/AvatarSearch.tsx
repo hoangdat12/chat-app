@@ -3,6 +3,7 @@ import { AiOutlineClose, AiOutlinePlus } from 'react-icons/Ai';
 import { AvatarOnline } from './Avatar';
 import { IFriend } from '../../ultils/interface/friend.interface';
 import { IParticipant } from '../../ultils/interface';
+import { convertFriendToParticipant } from '../../ultils';
 
 export interface IPropAvatarSearch {
   friend: IFriend;
@@ -19,18 +20,15 @@ export const AvatarSearch: FC<IPropAvatarSearch> = ({
 }) => {
   const [add, setAdd] = useState(false);
   const handleAddUser = (data: IFriend) => {
-    const friendAdd = {
-      ...data,
-      enable: true,
-      isReadLastMessage: false,
-    } as IParticipant;
+    const friendAdd: IParticipant = convertFriendToParticipant(data);
+    console.log(friendAdd);
     if (setListUserAddGroup) {
       if (!add) {
         setListUserAddGroup((prev) => [...prev, friendAdd]);
         setMember((prev: number) => prev + 1);
       } else {
         setListUserAddGroup((prev) =>
-          prev.filter((pre) => pre.userId !== friend.userId)
+          prev.filter((pre) => pre.userId !== friend._id)
         );
         setMember((prev: number) => prev - 1);
       }

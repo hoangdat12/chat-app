@@ -27,6 +27,7 @@ export const convertUserIdString = (user: any): IUserCreated => {
       role: user?.role,
       loginWith: user?.loginWith,
       isLocked: user.isLocked,
+      peer: user.peer,
     };
   } catch (error) {
     throw error;
@@ -94,4 +95,18 @@ export const removeNullValues = (obj: Object) => {
     }
   }
   return obj;
+};
+
+export const convertUserToIParticipant = (user: IUserCreated): IParticipant => {
+  if (!user) {
+    console.log('No user');
+    return;
+  }
+  return {
+    userId: user._id,
+    email: user.email,
+    avatarUrl: user.avatarUrl,
+    userName: getUsername(user),
+    peerId: user.peer,
+  };
 };

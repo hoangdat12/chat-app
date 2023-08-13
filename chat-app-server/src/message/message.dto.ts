@@ -12,6 +12,7 @@ export class UserJoinChat {
   @IsNotEmpty()
   userName: string;
   enable?: boolean;
+  peerId?: string;
 }
 
 export class PayloadCreateMessage {
