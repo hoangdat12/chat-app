@@ -21,6 +21,7 @@ export interface CallState {
   activeConversationId?: string;
   // callType?: CallType;
   callType?: string;
+  isMini?: boolean;
 }
 
 const initialState: CallState = {
@@ -70,8 +71,10 @@ export const callSlice = createSlice({
     setCallType: (state, action: PayloadAction<CallType>) => {
       state.callType = action.payload;
     },
+    setIsMini: (state, action: PayloadAction<boolean>) => {
+      state.isMini = action.payload;
+    },
     resetState: (state) => {
-      console.log('reset');
       state.isCalling = false;
       state.isCallInProgress = false;
       state.caller = undefined;
@@ -83,9 +86,9 @@ export const callSlice = createSlice({
       state.activeConversationId = undefined;
       state.receiver = undefined;
       state.callType = undefined;
+      state.isMini = undefined;
     },
     initiateCallState: (state, action: PayloadAction<CallInitiatePayload>) => {
-      console.log(action.payload);
       return {
         ...state,
         ...action.payload,

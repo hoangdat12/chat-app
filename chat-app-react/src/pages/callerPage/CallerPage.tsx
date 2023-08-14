@@ -15,13 +15,27 @@ import Peer from 'peerjs';
 import { useVideoCallAccept } from '../../hooks/call/useVideoCallAccept';
 import { useVideoCallRejected } from '../../hooks/call/useVideoCallRejected';
 import { useVideoClose } from '../../hooks/call/useVideoClose';
+import { useVoiceCall } from '../../hooks/call/useVoiceCall';
+import { useVoiceCallAccept } from '../../hooks/call/useVoiceCallAccept';
+import { useVoiceCallRejected } from '../../hooks/call/useVoiceCallRejected';
+import { useVoiceCallClose } from '../../hooks/call/useVoiceCallClose';
+import CallHidden from '../../components/call/VideoCallHidden';
+import VoiceCallHidden from '../../components/call/VoiceCallHidden';
 
 const userLocal = getUserLocalStorageItem();
 
 const CallerPage = () => {
   const dispatch = useAppDispatch();
-  const { isReceivingCall, caller, peer, callType, connection, call } =
-    useAppSelector(selectCall);
+  const {
+    isReceivingCall,
+    caller,
+    peer,
+    callType,
+    connection,
+    call,
+    isCalling,
+    isMini,
+  } = useAppSelector(selectCall);
 
   useEffect(() => {
     if (!userLocal) return;
@@ -38,16 +52,18 @@ const CallerPage = () => {
         ],
       },
     });
+    console.log('set peer successfully!');
     dispatch(setPeer(newPeer));
   }, [userLocal]);
 
   useVideoCall();
+  useVoiceCall();
 
   useEffect(() => {
     if (!peer) {
       return;
     }
-    peer.on('call', async (incomingCall) => {
+    peer.on('call', async (incomingCall: any) => {
       const constraints = { video: callType === 'video', audio: true };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       incomingCall.answer(stream);
@@ -76,6 +92,9 @@ const CallerPage = () => {
   useVideoCallAccept();
   useVideoCallRejected();
   useVideoClose();
+  useVoiceCallAccept();
+  useVoiceCallRejected();
+  useVoiceCallClose();
 
   useEffect(() => {
     if (connection) {
@@ -104,11 +123,13 @@ const CallerPage = () => {
   }, [connection]);
 
   return (
-    <>
+    <div className='relative h-screen overflow-hidden'>
       {isReceivingCall && caller && <CallReceiveDialog />}
-      {/* {true && true && <CallReceiveDialog />} */}
+      {isCalling &&
+        isMini &&
+        (callType === 'video' ? <CallHidden /> : <VoiceCallHidden />)}
       <Outlet />
-    </>
+    </div>
   );
 };
 

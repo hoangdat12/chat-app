@@ -13,7 +13,7 @@ const Avatar: FC<IPropAvatar> = ({ className, avatarUrl, onClick }) => {
       onClick={onClick}
       className={`${className} overflow-hidden rounded-full cursor-pointer`}
     >
-      <img className='w-full rounded-full' src={avatarUrl} alt='' />
+      <img className='w-full h-full rounded-full' src={avatarUrl} alt='' />
     </div>
   );
 };

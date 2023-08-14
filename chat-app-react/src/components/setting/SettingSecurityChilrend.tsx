@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import InputDefault from '../input/InputDefault';
 import Button from '../button/Button';
 import Confirm from '../modal/Confirm';
@@ -9,6 +9,7 @@ import { ILoginData } from '../../pages/authPage/Login';
 import { getUserLocalStorageItem } from '../../ultils';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from '../button/LoadingScreen';
+import { AuthContext } from '../../ultils/context/Auth';
 
 export const ConfirmChangeEmail = () => {
   const [isValid, setIsValid] = useState(false);
@@ -156,7 +157,7 @@ export const LockAccount = () => {
   const [isValid, setIsValid] = useState(false);
   const [invalidMessage, setInvalidMessasge] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
+  const { updateAuthUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLockedAccount = async () => {
@@ -173,7 +174,7 @@ export const LockAccount = () => {
         setIsValid(true);
         setInvalidMessasge('');
         // Logout
-        await authService.logout();
+        await authService.logout(updateAuthUser);
         setIsLoading(false);
         navigate('/login');
       } else {

@@ -278,4 +278,75 @@ export class MessagingGateway implements OnModuleInit {
     const callerSocket = this.sessions.getUserSocket(caller.userId);
     callerSocket && callerSocket.emit(WebsocketEvents.ON_VIDEO_CLOSE);
   }
+
+  // Audio Call
+  @SubscribeMessage(SocketCall.ON_AUDIO_CALL_REQUEST)
+  async handleCallAudio(
+    @MessageBody() data: ISocketCallInitiate,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const { receiver } = data;
+    const receiverSocket = this.sessions.getUserSocket(receiver.userId);
+    if (!receiverSocket) socket.emit('onUserUnavailable');
+    receiverSocket.emit(WebsocketEvents.ON_VOICE_CALL, data);
+  }
+
+  @SubscribeMessage(SocketCall.VOICE_CALL_ACCEPTED)
+  async handleVoiceCallAccepted(
+    @MessageBody() payload: ICallAccepPayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    console.log('Inside onVoiceCallAccepted event');
+    const callerSocket = this.sessions.getUserSocket(payload.caller.userId);
+    const conversation = await this.conversationRepository.findById(
+      payload.conversationId,
+    );
+    if (!conversation) return console.log('No conversation found');
+    if (callerSocket) {
+      console.log('Emitting onVoiceCallAccepted event');
+      const callPayload = {
+        ...payload,
+        conversation,
+        acceptor: convertUserToIParticipant(socket.user),
+      };
+      callerSocket.emit(WebsocketEvents.ON_VOICE_CALL_ACCEPT, callPayload);
+      socket.emit(WebsocketEvents.ON_VOICE_CALL_ACCEPT, callPayload);
+    }
+  }
+
+  @SubscribeMessage(SocketCall.VOICE_CALL_REJECTED)
+  async handleVoiceCallRejected(
+    @MessageBody() data: IRejectVideoPayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const receiver = socket.user;
+    const callerSocket = this.sessions.getUserSocket(data.caller.userId);
+    callerSocket &&
+      callerSocket.emit(WebsocketEvents.ON_VOICE_CALL_REJECT, {
+        receiver: convertUserToIParticipant(receiver),
+        caller: data.caller,
+      });
+    socket.emit(WebsocketEvents.ON_VOICE_CALL_REJECT, {
+      receiver: convertUserToIParticipant(receiver),
+      caller: data.caller,
+    });
+  }
+
+  @SubscribeMessage(SocketCall.VOICE_CALL_CLOSE)
+  async handleVoiceCallHangUp(
+    @MessageBody() { caller, receiver }: ICallClosePayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    console.log('inside onVoiceCallHangUp event');
+    if (socket.user._id === caller.userId) {
+      const receiverSocket = this.sessions.getUserSocket(receiver.userId);
+      socket.emit(WebsocketEvents.ON_VOICE_CLOSE);
+      return (
+        receiverSocket && receiverSocket.emit(WebsocketEvents.ON_VOICE_CLOSE)
+      );
+    }
+    socket.emit(WebsocketEvents.ON_VOICE_CLOSE);
+    const callerSocket = this.sessions.getUserSocket(caller.userId);
+    callerSocket && callerSocket.emit(WebsocketEvents.ON_VOICE_CLOSE);
+  }
 }

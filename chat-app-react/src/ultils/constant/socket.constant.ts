@@ -15,6 +15,7 @@ export enum WebsocketEvents {
   ON_VIDEO_CALL_REJECT = 'onVoiceCallAccept',
   ON_VOICE_CALL_REJECT = 'onVoiceCallReject',
   ON_VIDEO_CALL = 'onVideoCall',
+  ON_VOICE_CALL = 'onVoiceCall',
   ON_VIDEO_CLOSE = 'onVideoClose',
   ON_VOICE_CLOSE = 'onVoiceClose',
 }

@@ -77,10 +77,10 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
       if (!conversationId) return;
       socket.emit(SocketCall.ON_AUDIO_CALL_REQUEST, {
         conversationId: conversationId,
-        // Contains user make request
-        recipient: conversation.participants,
+        caller: convertUserToParticipant(userLocal),
+        receiver: getParticipants(userLocal, conversation.participants),
       });
-      const constraints = { video: true, audio: true };
+      const constraints = { video: false, audio: true };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       const payload = {
         localStream: stream,

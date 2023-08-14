@@ -1,17 +1,18 @@
-import { useEffect, useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { SocketContext } from '../../ultils/context/Socket';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { resetState, selectCall } from '../../features/call/callSlice';
 import { WebsocketEvents } from '../../ultils/constant';
 
-export function useVideoClose() {
+export const useVoiceCallClose = () => {
   const socket = useContext(SocketContext);
   const dispatch = useAppDispatch();
   const { call, connection, localStream, remoteStream } =
     useAppSelector(selectCall);
+
   useEffect(() => {
-    socket.on(WebsocketEvents.ON_VIDEO_CLOSE, () => {
-      console.log('received onVideoCallHangUp');
+    socket.on(WebsocketEvents.ON_VOICE_CLOSE, () => {
+      console.log('received onVoiceCallHangUp');
       localStream &&
         localStream.getTracks().forEach((track) => {
           console.log(localStream.id);
@@ -31,7 +32,7 @@ export function useVideoClose() {
     });
 
     return () => {
-      socket.off(WebsocketEvents.ON_VIDEO_CLOSE);
+      socket.off(WebsocketEvents.ON_VOICE_CLOSE);
     };
   }, [call, remoteStream, localStream, connection]);
-}
+};

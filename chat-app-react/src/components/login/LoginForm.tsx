@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { Link } from 'react-router-dom';
 import { useFormik } from 'formik';
@@ -11,11 +11,14 @@ import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { login, selectAuth } from '../../features/auth/authSlice';
 import LoginWith from '../../components/login/LoginWith';
 import { ILoginData } from '../../pages/authPage/Login';
+import { AuthContext } from '../../ultils/context/Auth';
 
 const LoginForm = () => {
+  const { updateAuthUser } = useContext(AuthContext);
+
   const dispatch = useAppDispatch();
 
-  const { status } = useAppSelector(selectAuth);
+  const { status, user } = useAppSelector(selectAuth);
   const [showPassword, setShowPassword] = useState(false);
   const loginSchema = yup.object().shape({
     email: yup
@@ -45,6 +48,8 @@ const LoginForm = () => {
       window.location.href = 'http://localhost:5173';
     };
     if (status === 'succeeded') {
+      console.log(user);
+      updateAuthUser(user);
       handleNavigate();
     }
   }, [status]);

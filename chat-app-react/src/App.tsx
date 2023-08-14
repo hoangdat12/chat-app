@@ -14,40 +14,51 @@ import Setting from './pages/setting/Setting';
 import Game from './pages/game/Game';
 import ChangeAvatarGroup from './components/modal/ChangeAvatarGroup';
 import CallerPage from './pages/callerPage/CallerPage';
-import VideoCall from './components/call/VideoCall';
+import VideoCall from './pages/callerPage/VideoCall';
+import AudioCall from './pages/callerPage/AudioCall';
+import { AuthContext } from './ultils/context/Auth';
+import { IUser } from './ultils/interface';
+import { useState } from 'react';
+import CallHidden from './components/call/VideoCallHidden';
 
 function App() {
   const innerWitdh = useInnerWidth();
+  const [user, setUser] = useState<IUser | null>(null);
+
   return (
-    <SocketContext.Provider value={socket}>
-      <Router>
-        <Routes>
-          <Route path='/login/success' element={<LoginSuccess />} />
-          <Route path='/login/*' element={<Login />} />
-          <Route path='/register' element={<Register />} />
-          <Route path='/register/success' element={<RegisterSuccess />} />
-          <Route element={<ProtectedRoutes children={<CallerPage />} />}>
-            <Route path='/' element={<Home />} />
-            {innerWitdh < 640 ? (
-              <Route
-                path='/conversation/:conversationId/*'
-                element={<Conversation />}
-              />
-            ) : (
-              <Route
-                path='/conversation/:conversationId'
-                element={<Conversation />}
-              />
-            )}
-            <Route path='/profile/:userId/*' element={<Profile />} />
-            <Route path='/setting/*' element={<Setting />} />
-            <Route path='/game/*' element={<Game />} />
-            <Route path='/crop/avatar' element={<ChangeAvatarGroup />} />
-            <Route path='/call' element={<VideoCall />} />
-          </Route>
-        </Routes>
-      </Router>
-    </SocketContext.Provider>
+    <AuthContext.Provider value={{ user, updateAuthUser: setUser }}>
+      <SocketContext.Provider value={socket}>
+        <Router>
+          <Routes>
+            <Route path='/login/success' element={<LoginSuccess />} />
+            <Route path='/login/*' element={<Login />} />
+            <Route path='/register' element={<Register />} />
+            <Route path='/register/success' element={<RegisterSuccess />} />
+            <Route element={<ProtectedRoutes children={<CallerPage />} />}>
+              <Route path='/' element={<Home />} />
+              {innerWitdh < 640 ? (
+                <Route
+                  path='/conversation/:conversationId/*'
+                  element={<Conversation />}
+                />
+              ) : (
+                <Route
+                  path='/conversation/:conversationId'
+                  element={<Conversation />}
+                />
+              )}
+              <Route path='/profile/:userId/*' element={<Profile />} />
+              <Route path='/setting/*' element={<Setting />} />
+              <Route path='/game/*' element={<Game />} />
+              <Route path='/crop/avatar' element={<ChangeAvatarGroup />} />
+              <Route path='/call' element={<VideoCall />} />
+              <Route path='/call/audio' element={<AudioCall />} />
+              <Route path='/call/hidden' element={<CallHidden />} />
+            </Route>
+          </Routes>
+        </Router>
+      </SocketContext.Provider>
+    </AuthContext.Provider>
   );
 }
 

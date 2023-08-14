@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useContext, useEffect, useRef } from 'react';
 
 import {
   IoGameControllerOutline,
@@ -29,6 +29,7 @@ import useClickOutside from '../../../hooks/useClickOutside';
 import Confirm from '../../modal/Confirm';
 import { authService } from '../../../features/auth/authService';
 import LoadingScreen from '../../button/LoadingScreen';
+import { AuthContext } from '../../../ultils/context/Auth';
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -65,6 +66,7 @@ const Header: FC<IPropHeader> = memo(
 
     const modelRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
+    const { updateAuthUser } = useContext(AuthContext);
 
     const dispatch = useAppDispatch();
     const { numberNotifyUnRead: totalNotify, notifies } =
@@ -73,7 +75,7 @@ const Header: FC<IPropHeader> = memo(
 
     const handleLogout = async () => {
       setLoadingLogout(true);
-      const res = await authService.logout();
+      const res = await authService.logout(updateAuthUser);
       if (res.status === 200) {
         setLoadingLogout(false);
         navigate('/login');
