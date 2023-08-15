@@ -82,3 +82,10 @@ export interface ISocketChangeEmoji {
   user: IUserCreated;
   conversation: IConversation;
 }
+
+export interface IMessageCall {
+  status?: string;
+  time?: string;
+  caller: IParticipant;
+  receiver: IParticipant;
+}

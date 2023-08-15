@@ -1,20 +1,97 @@
-import { AiOutlineCheck, AiOutlineClose } from 'react-icons/Ai';
 import Avatar from '../avatars/Avatar';
 import Button from '../button/Button';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { resetState, selectCall } from '../../features/call/callSlice';
 import { useContext, useEffect, useState } from 'react';
 import { SocketContext } from '../../ultils/context/Socket';
-import { HandleCallType } from '../../ultils/interface';
-import { SocketCall } from '../../ultils/constant';
+import {
+  HandleCallType,
+  IConversation,
+  IDataCreateMessage,
+  IParticipant,
+} from '../../ultils/interface';
+import {
+  MessageContentType,
+  MessageType,
+  SocketCall,
+} from '../../ultils/constant';
+import PhoneRinging, { PhoneRingingCancel } from './CallRinging/PhoneRinging';
+import { messageService } from '../../features/message/messageService';
+import { createNewMessage } from '../../features/message/messageSlice';
+import {
+  createNewMessageOfConversation,
+  selectConversation,
+} from '../../features/conversation/conversationSlice';
+
+export const sendMessageCallVideo = async (
+  caller: IParticipant | undefined,
+  receiver: IParticipant | undefined,
+  callType: string | undefined,
+  conversation: IConversation,
+  timeStartCall: Date | undefined,
+  dispatch: any,
+  data: any
+) => {
+  // const conversation = conversations.get(conversationId ?? '');
+  if (conversation && caller && receiver) {
+    const body: IDataCreateMessage = {
+      conversationId: conversation._id,
+      participants: conversation.participants,
+      message_content_type:
+        callType === 'video'
+          ? MessageContentType.VIDEO_CALL
+          : MessageContentType.VOICE_CALL,
+      message_type: MessageType.CONVERSATION,
+      ...data,
+      createdAt: timeStartCall,
+    };
+    console.log(body);
+    const res = await messageService.createNewMessage(body);
+    console.log(res);
+    if (res.status === 201) {
+      dispatch(createNewMessage(res.data.metaData));
+      const dataUpdate = {
+        lastMessage: res.data.metaData,
+        conversationId: conversation._id,
+      };
+      dispatch(createNewMessageOfConversation(dataUpdate));
+    }
+  }
+};
 
 const CallReceiveDialog = () => {
-  const { caller, callType, activeConversationId } = useAppSelector(selectCall);
   const socket = useContext(SocketContext);
   const [timer, setTimer] = useState(30);
-  const dispatch = useAppDispatch();
 
-  const handleCall = (type: HandleCallType) => {
+  const dispatch = useAppDispatch();
+  const { conversations } = useAppSelector(selectConversation);
+  const { caller, receiver, callType, activeConversationId, timeStartCall } =
+    useAppSelector(selectCall);
+
+  const handleCreateMessageCallVideo = async () => {
+    const conversation = conversations.get(activeConversationId ?? '');
+    if (!conversation) return;
+    const data = {
+      message_content: `You missed ${caller?.userName}'s call`,
+      // missing | accept
+      message_call: {
+        status: 'missing',
+        caller,
+        receiver,
+      },
+    };
+    await sendMessageCallVideo(
+      caller,
+      receiver,
+      callType,
+      conversation,
+      timeStartCall,
+      dispatch,
+      data
+    );
+  };
+
+  const handleCall = async (type: HandleCallType) => {
     const payload = { caller, conversationId: activeConversationId };
     switch (type) {
       case 'accept':
@@ -22,6 +99,7 @@ const CallReceiveDialog = () => {
           ? socket.emit(SocketCall.VIDEO_CALL_ACCEPTED, payload)
           : socket.emit(SocketCall.VOICE_CALL_ACCEPTED, payload);
       case 'reject':
+        await handleCreateMessageCallVideo();
         return callType === 'video'
           ? socket.emit(SocketCall.VIDEO_CALL_REJECTED, payload)
           : socket.emit(SocketCall.VOICE_CALL_REJECTED, payload);
@@ -34,8 +112,16 @@ const CallReceiveDialog = () => {
     }, 1000);
 
     if (timer <= 0) {
-      dispatch(resetState());
-      return clearInterval(interval);
+      const handleReject = async () => {
+        await handleCreateMessageCallVideo();
+        dispatch(resetState());
+        const payload = { caller, conversationId: activeConversationId };
+        callType === 'video'
+          ? socket.emit(SocketCall.VIDEO_CALL_REJECTED, payload)
+          : socket.emit(SocketCall.VOICE_CALL_REJECTED, payload);
+        return clearInterval(interval);
+      };
+      handleReject();
     }
 
     return () => {
@@ -60,25 +146,25 @@ const CallReceiveDialog = () => {
           </span>
         </div>
       </div>
-      <div className='absolute bototm-4 sm:bottom-6 flex items-center justify-center gap-6 mt-20 w-full'>
+      <div className='absolute bototm-4 sm:bottom-6 flex items-center justify-center mt-20 w-full'>
         <div
           onClick={() => handleCall('reject')}
           className='flex flex-col items-center justify-center gap-1 cursor-pointer'
         >
-          <span className='p-5 text-white text-2xl rounded-full bg-red-500'>
-            <AiOutlineClose />
-          </span>
-          <Button text={'Close'} border='border-none' color='text-[#9da2a9]' />
+          <PhoneRingingCancel />
         </div>
         <div
           onClick={() => handleCall('accept')}
           className='flex flex-col items-center justify-center gap-1'
         >
-          <span className='p-5 text-white text-2xl rounded-full bg-blue-500 cursor-pointer'>
-            <AiOutlineCheck />
-          </span>
-          <Button text={'Accept'} border='border-none' color='text-[#9da2a9]' />
+          <PhoneRinging />
         </div>
+      </div>
+      <div className='absolute top-4 right-4'>
+        <Button
+          text={'Go back'}
+          className='bg-blue-500 text-white border-none'
+        />
       </div>
     </div>
   );

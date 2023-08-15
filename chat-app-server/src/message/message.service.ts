@@ -66,6 +66,7 @@ export class MessageService {
       conversationId,
       message_received: conversation?.participants ?? participants,
       message_content_type,
+      ...data,
     };
 
     // Create new Message

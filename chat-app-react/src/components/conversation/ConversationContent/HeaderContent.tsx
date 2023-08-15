@@ -36,6 +36,60 @@ const getParticipants = (user: IUser, participants: IParticipant[]) => {
   return participants[1];
 };
 
+export const hanldeCallVideo = async (
+  conversationId: string | undefined,
+  socket: any,
+  conversation: IConversation,
+  dispatch: any
+) => {
+  if (!conversationId) return;
+  const data = {
+    conversationId: conversationId,
+    caller: convertUserToParticipant(userLocal),
+    receiver: getParticipants(userLocal, conversation.participants),
+  };
+  socket.emit(SocketCall.ON_VIDEO_CALL_REQUEST, data);
+  const constraints = { video: true, audio: true };
+  const stream = await navigator.mediaDevices.getUserMedia(constraints);
+  const payload = {
+    ...data,
+    localStream: stream,
+    isCalling: true,
+    activeConversationId: conversationId,
+    callType: 'video',
+    timeStartCall: new Date(),
+  };
+  if (!payload) throw new Error('Video Call Payload is undefined.');
+  dispatch(initiateCallState(payload));
+};
+
+export const hanldeCallAudio = async (
+  conversationId: string | undefined,
+  socket: any,
+  conversation: IConversation,
+  dispatch: any
+) => {
+  if (!conversationId) return;
+  socket.emit(SocketCall.ON_AUDIO_CALL_REQUEST, {
+    conversationId: conversationId,
+    caller: convertUserToParticipant(userLocal),
+    receiver: getParticipants(userLocal, conversation.participants),
+  });
+  const constraints = { video: false, audio: true };
+  const stream = await navigator.mediaDevices.getUserMedia(constraints);
+  const payload = {
+    localStream: stream,
+    caller: convertUserToParticipant(userLocal),
+    receiver: getParticipants(userLocal, conversation.participants),
+    isCalling: true,
+    activeConversationId: conversationId.toString(),
+    callType: 'voice',
+    timeStartCall: new Date(),
+  };
+  if (!payload) throw new Error('Audio Call Payload is undefined.');
+  dispatch(initiateCallState(payload));
+};
+
 const HeaderContent: FC<IPropHeaderContent> = memo(
   ({
     handleShowMoreConversation,
@@ -49,50 +103,6 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
     const { conversationId } = useParams();
     const dispatch = useAppDispatch();
     const socket = useContext(SocketContext);
-
-    const hanldeCallVideo = async () => {
-      if (!conversationId) return;
-      const data = {
-        conversationId: conversationId,
-        caller: convertUserToParticipant(userLocal),
-        receiver: getParticipants(userLocal, conversation.participants),
-      };
-      socket.emit(SocketCall.ON_VIDEO_CALL_REQUEST, data);
-      console.log(1);
-      const constraints = { video: true, audio: true };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      const payload = {
-        ...data,
-        localStream: stream,
-        isCalling: true,
-        activeConversationId: conversationId,
-        callType: 'video',
-      };
-      if (!payload) throw new Error('Video Call Payload is undefined.');
-      console.log('Start call...');
-      dispatch(initiateCallState(payload));
-    };
-
-    const hanldeCallAudio = async () => {
-      if (!conversationId) return;
-      socket.emit(SocketCall.ON_AUDIO_CALL_REQUEST, {
-        conversationId: conversationId,
-        caller: convertUserToParticipant(userLocal),
-        receiver: getParticipants(userLocal, conversation.participants),
-      });
-      const constraints = { video: false, audio: true };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      const payload = {
-        localStream: stream,
-        caller: convertUserToParticipant(userLocal),
-        receiver: getParticipants(userLocal, conversation.participants),
-        isCalling: true,
-        activeConversationId: conversationId.toString(),
-        callType: 'video',
-      };
-      if (!payload) throw new Error('Audio Call Payload is undefined.');
-      dispatch(initiateCallState(payload));
-    };
 
     return (
       <div className='flex items-center justify-between h-16 sm:h-[5.5rem] px-4 sm:px-8 w-full shadow-nomal'>
@@ -141,12 +151,16 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
           <ButtonRounded
             className={'text-base p-1 sm:text-lg md:text-[22px] sm:p-2'}
             icon={<IoCallOutline />}
-            onClick={hanldeCallAudio}
+            onClick={() =>
+              hanldeCallAudio(conversationId, socket, conversation, dispatch)
+            }
           />
           <ButtonRounded
             className={'text-base p-1 sm:text-lg md:text-[22px] sm:p-2'}
             icon={<IoVideocamOutline />}
-            onClick={hanldeCallVideo}
+            onClick={() =>
+              hanldeCallVideo(conversationId, socket, conversation, dispatch)
+            }
           />
           <ButtonRounded
             className={'text-base p-1 sm:text-lg md:text-[22px] sm:p-2'}

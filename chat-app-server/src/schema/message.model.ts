@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { UserJoinChat } from '../message/message.dto';
 import { MessageContentType } from '../ultils/constant/message.constant';
+import { IMessageCall } from 'src/ultils/interface';
 
 @Schema({ collection: 'Messages', timestamps: true })
 export class Messages {
@@ -23,6 +24,9 @@ export class Messages {
 
   @Prop({ required: true })
   message_received: UserJoinChat[];
+
+  @Prop({ type: Object })
+  message_call?: IMessageCall;
 }
 
 const MessagesSchema = SchemaFactory.createForClass(Messages);

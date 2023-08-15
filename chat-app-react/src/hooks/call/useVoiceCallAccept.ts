@@ -11,6 +11,7 @@ import {
   setIsCallInProgress,
   setIsCalling,
   setIsReceivingCall,
+  setTimeStartCall,
 } from '../../features/call/callSlice';
 import { getUserLocalStorageItem } from '../../ultils';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +44,7 @@ export const useVoiceCallAccept = () => {
             dispatch(setCall(newCall));
           }
         }
+        dispatch(setTimeStartCall(new Date()));
         navigate('/call/audio');
       }
     );

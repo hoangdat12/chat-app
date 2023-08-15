@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAppSelector } from '../../app/hook';
-import { selectCall } from '../../features/call/callSlice';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
+import { selectCall, setIsMini } from '../../features/call/callSlice';
 import CallControll from './VideoCallControll';
 import { getUserAvatar } from '../../pages/callerPage/AudioCall';
 import { IParticipant } from '../../ultils/interface';
 import Avatar from '../avatars/Avatar';
+import { useNavigate } from 'react-router-dom';
 
 const VoiceCallHidden = () => {
   const recRef = useRef<HTMLDivElement | null>(null);
@@ -17,6 +18,8 @@ const VoiceCallHidden = () => {
 
   const { localStream, remoteStream, caller, receiver } =
     useAppSelector(selectCall);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const handleDragStart = (e: any) => {
     if (recRef.current) {
@@ -38,6 +41,11 @@ const VoiceCallHidden = () => {
         });
       }
     }
+  };
+
+  const handleNavigate = () => {
+    dispatch(setIsMini(false));
+    navigate('/call');
   };
 
   useEffect(() => {
@@ -70,7 +78,10 @@ const VoiceCallHidden = () => {
       className='absolute flex items-center justify-center w-[240px] h-[320px] bg-[#414143] cursor-pointer rounded-md shadow-default z-[1001] hover-message-show-button'
       style={style}
     >
-      <div className='relative flex items-center justify-center w-full h-full duration-300 hover:bg-blackOverlay text-white'>
+      <div
+        className='relative flex items-center justify-center w-full h-full duration-300 hover:bg-blackOverlay text-white'
+        onClick={handleNavigate}
+      >
         <div className='relative w-full h-full flex items-center justify-center'>
           <audio
             className='w-full h-full'

@@ -8,6 +8,7 @@ import {
   setCaller,
   setIsReceivingCall,
   setReceiver,
+  setTimeStartCall,
 } from '../../features/call/callSlice';
 import { CallPayload } from '../../ultils/interface';
 import { WebsocketEvents } from '../../ultils/constant';
@@ -26,6 +27,7 @@ export function useVideoCall() {
       dispatch(setIsReceivingCall(true));
       dispatch(setCallType('video'));
       dispatch(setActiveConversationId(data.conversationId));
+      dispatch(setTimeStartCall(new Date()));
     });
 
     return () => {

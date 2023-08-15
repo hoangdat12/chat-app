@@ -1,4 +1,9 @@
-import { format, formatDistanceToNow } from 'date-fns';
+import {
+  format,
+  formatDistanceToNow,
+  formatDuration,
+  intervalToDuration,
+} from 'date-fns';
 import { MessageType } from './constant/message.constant';
 import { IConversation, IFriend, IParticipant, IUser } from './interface';
 
@@ -275,4 +280,21 @@ export const handleNavigateCallPage = () => {
     '_blank',
     `width=${desiredWidth},height=${desiredHeight}`
   );
+};
+
+export const getTimeCall = (
+  startDate: Date | undefined,
+  endDate: Date | undefined
+) => {
+  if (!startDate || !endDate) return;
+  const timeDifferenceMs = endDate.getTime() - startDate.getTime();
+  const duration = intervalToDuration({ start: 0, end: timeDifferenceMs });
+
+  if (duration.hours === 0) {
+    return formatDuration(duration, { format: ['minutes', 'seconds'] });
+  } else {
+    return formatDuration(duration, {
+      format: ['hours', 'minutes', 'seconds'],
+    });
+  }
 };

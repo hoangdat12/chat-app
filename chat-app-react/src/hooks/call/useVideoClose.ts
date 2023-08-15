@@ -1,7 +1,11 @@
 import { useEffect, useContext } from 'react';
 import { SocketContext } from '../../ultils/context/Socket';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
-import { resetState, selectCall } from '../../features/call/callSlice';
+import {
+  resetState,
+  selectCall,
+  setEndCall,
+} from '../../features/call/callSlice';
 import { WebsocketEvents } from '../../ultils/constant';
 
 export function useVideoClose() {
@@ -9,6 +13,7 @@ export function useVideoClose() {
   const dispatch = useAppDispatch();
   const { call, connection, localStream, remoteStream } =
     useAppSelector(selectCall);
+
   useEffect(() => {
     socket.on(WebsocketEvents.ON_VIDEO_CLOSE, () => {
       console.log('received onVideoCallHangUp');
@@ -28,6 +33,7 @@ export function useVideoClose() {
       call && call.close();
       connection && connection.close();
       dispatch(resetState());
+      dispatch(setEndCall(true));
     });
 
     return () => {

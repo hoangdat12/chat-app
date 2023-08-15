@@ -28,6 +28,7 @@ export interface IMessage {
   message_type: string;
   createdAt: string;
   updatedAt: string;
+  message_call?: IMessageCall;
 }
 
 export interface IParticipant {
@@ -37,7 +38,7 @@ export interface IParticipant {
   userName: string;
   enable: boolean;
   isReadLastMessage: boolean;
-  peerId :string
+  peerId: string;
 }
 
 // Group and Conversation
@@ -83,9 +84,18 @@ export interface IDataDeleteMessage {
 export interface IDataCreateMessage {
   message_type: string | null | undefined;
   message_content: string;
-  conversationId: string;
-  participants: IParticipant[] | null | undefined;
+  conversationId?: string;
+  participants?: IParticipant[] | null | undefined;
   message_content_type?: string;
+  message_call?: IMessageCall;
+  createdAt?: Date;
+}
+
+export interface IMessageCall {
+  status?: string;
+  time?: string;
+  caller: IParticipant;
+  receiver: IParticipant;
 }
 
 export interface iSocketDeleteMessage {

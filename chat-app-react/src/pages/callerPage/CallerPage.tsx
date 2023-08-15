@@ -21,6 +21,7 @@ import { useVoiceCallRejected } from '../../hooks/call/useVoiceCallRejected';
 import { useVoiceCallClose } from '../../hooks/call/useVoiceCallClose';
 import CallHidden from '../../components/call/VideoCallHidden';
 import VoiceCallHidden from '../../components/call/VoiceCallHidden';
+import CallEndNotify from '../../components/call/CallEndNotify';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -33,8 +34,9 @@ const CallerPage = () => {
     callType,
     connection,
     call,
-    isCalling,
+    isCallInProgress,
     isMini,
+    endCall,
   } = useAppSelector(selectCall);
 
   useEffect(() => {
@@ -125,9 +127,10 @@ const CallerPage = () => {
   return (
     <div className='relative h-screen overflow-hidden'>
       {isReceivingCall && caller && <CallReceiveDialog />}
-      {isCalling &&
+      {isCallInProgress &&
         isMini &&
         (callType === 'video' ? <CallHidden /> : <VoiceCallHidden />)}
+      {endCall && <CallEndNotify />}
       <Outlet />
     </div>
   );

@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { BsFillChatFill, BsFillPersonPlusFill } from 'react-icons/bs';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { resetState, selectCall } from '../../features/call/callSlice';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../../components/avatars/Avatar';
-import { Button } from './VideoCall';
 import { getUserLocalStorageItem } from '../../ultils';
 import { IParticipant } from '../../ultils/interface';
 import VoiceCallControll from '../../components/call/VoiceCallControllt';
+import CallOption from '../../components/call/CallOption';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -41,7 +40,7 @@ const AudioCall = () => {
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isCalling, localStream, remoteStream, caller, receiver } =
+  const { isCallInProgress, localStream, remoteStream, caller, receiver } =
     useAppSelector(selectCall);
 
   useEffect(() => {
@@ -54,11 +53,11 @@ const AudioCall = () => {
   }, [caller, receiver]);
 
   useEffect(() => {
-    if (!isCalling) {
+    if (!isCallInProgress) {
       dispatch(resetState());
       navigate(-1);
     }
-  }, [isCalling]);
+  }, [isCallInProgress]);
 
   useEffect(() => {
     if (localVideoRef.current && localStream) {
@@ -95,20 +94,7 @@ const AudioCall = () => {
         )}
       </div>
       <div className='sm:absolute bottom-6 sm:bottom-8 left-0 right-0 flex items-end justify-center sm:justify-between px-10'>
-        <div className='absolute sm:static top-4 left-4 flex gap-2'>
-          <Button
-            className='text-white w-10 h-10 sm:w-12 sm:h-12'
-            active={true}
-          >
-            <BsFillChatFill />
-          </Button>
-          <Button
-            className='text-white w-10 h-10 sm:w-12 sm:h-12'
-            active={true}
-          >
-            <BsFillPersonPlusFill />
-          </Button>
-        </div>
+        <CallOption />
         <VoiceCallControll
           position='absolute sm:static bottom-6 sm:bottom-8 left-0 right-0 '
           size='text-xl sm:text-2xl w-12 h-12 sm:w-14 sm:h-14'

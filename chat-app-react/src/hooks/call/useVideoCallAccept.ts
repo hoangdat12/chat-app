@@ -9,6 +9,7 @@ import {
   setIsCallInProgress,
   setIsCalling,
   setIsReceivingCall,
+  setTimeStartCall,
 } from '../../features/call/callSlice';
 import { ICallAcceptPayload } from '../../ultils/interface';
 import { getUserLocalStorageItem } from '../../ultils';
@@ -43,6 +44,7 @@ export const useVideoCallAccept = () => {
             dispatch(setCall(newCall));
           }
         }
+        dispatch(setTimeStartCall(new Date()));
         navigate('/call');
       }
     );

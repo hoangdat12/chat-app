@@ -10,6 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  CreateMessageCallData,
   CreateMessageData,
   DelelteMessageData,
   UpdateMessageData,
@@ -33,6 +34,7 @@ export class MessageController {
   @Post()
   async createMessage(@Req() req: Request, @Body() body: CreateMessageData) {
     try {
+      console.log("body::: ", body);
       const errors = await validate(body);
       if (errors.length > 0) {
         throw new Error('Missing value!');

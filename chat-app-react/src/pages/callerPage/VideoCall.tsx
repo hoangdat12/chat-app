@@ -1,10 +1,10 @@
 import { ButtonHTMLAttributes, FC, useEffect, useRef } from 'react';
-import { BsFillChatFill, BsFillPersonPlusFill } from 'react-icons/bs';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { resetState, selectCall } from '../../features/call/callSlice';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../../components/avatars/Avatar';
 import CallControll from '../../components/call/VideoCallControll';
+import CallOption from '../../components/call/CallOption';
 
 const VideoCall = () => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -12,14 +12,15 @@ const VideoCall = () => {
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isCalling, localStream, remoteStream } = useAppSelector(selectCall);
+  const { isCallInProgress, localStream, remoteStream } =
+    useAppSelector(selectCall);
 
   useEffect(() => {
-    if (!isCalling) {
+    if (!isCallInProgress) {
       dispatch(resetState());
       navigate(-1);
     }
-  }, [isCalling]);
+  }, [isCallInProgress]);
 
   useEffect(() => {
     if (localVideoRef.current && localStream) {
@@ -59,20 +60,7 @@ const VideoCall = () => {
         )}
       </div>
       <div className='sm:absolute bottom-6 sm:bottom-8 left-0 right-0 flex items-end justify-center sm:justify-between px-10'>
-        <div className='absolute sm:static top-4 left-4 flex gap-2'>
-          <Button
-            className='text-white w-10 h-10 sm:w-12 sm:h-12'
-            active={true}
-          >
-            <BsFillChatFill />
-          </Button>
-          <Button
-            className='text-white w-10 h-10 sm:w-12 sm:h-12'
-            active={true}
-          >
-            <BsFillPersonPlusFill />
-          </Button>
-        </div>
+        <CallOption />
         <CallControll
           position='absolute sm:static bottom-6 sm:bottom-8 left-0 right-0 '
           size='text-xl sm:text-2xl w-12 h-12 sm:w-14 sm:h-14'

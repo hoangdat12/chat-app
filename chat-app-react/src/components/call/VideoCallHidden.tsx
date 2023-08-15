@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAppSelector } from '../../app/hook';
-import { selectCall } from '../../features/call/callSlice';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
+import { selectCall, setIsMini } from '../../features/call/callSlice';
 import CallControll from './VideoCallControll';
+import { useNavigate } from 'react-router-dom';
 
 const CallHidden = () => {
   const recRef = useRef<HTMLDivElement | null>(null);
@@ -12,6 +13,8 @@ const CallHidden = () => {
   const [style, setStyle] = useState({ transform: `translate(100px, 100px)` });
 
   const { localStream, remoteStream } = useAppSelector(selectCall);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const handleDragStart = (e: any) => {
     if (recRef.current) {
@@ -48,6 +51,11 @@ const CallHidden = () => {
     }
   }, [remoteStream]);
 
+  const handleNavigate = () => {
+    dispatch(setIsMini(false));
+    navigate('/call');
+  };
+
   return (
     <div
       ref={recRef}
@@ -57,7 +65,10 @@ const CallHidden = () => {
       className='absolute flex items-center justify-center w-[240px] h-[320px] bg-[#414143] cursor-pointer rounded-md shadow-default z-[1001] hover-message-show-button'
       style={style}
     >
-      <div className='relative flex items-center justify-center w-full h-full duration-300 hover:bg-blackOverlay text-white'>
+      <div
+        className='relative flex items-center justify-center w-full h-full duration-300 hover:bg-blackOverlay text-white'
+        onClick={handleNavigate}
+      >
         <div>
           <video
             className='w-full h-full'

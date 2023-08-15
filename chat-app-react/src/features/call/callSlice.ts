@@ -22,6 +22,9 @@ export interface CallState {
   // callType?: CallType;
   callType?: string;
   isMini?: boolean;
+  endCall?: boolean;
+  timeStartCall?: Date;
+  timeEndCall?: Date;
 }
 
 const initialState: CallState = {
@@ -74,6 +77,15 @@ export const callSlice = createSlice({
     setIsMini: (state, action: PayloadAction<boolean>) => {
       state.isMini = action.payload;
     },
+    setEndCall: (state, action: PayloadAction<boolean>) => {
+      state.endCall = action.payload;
+    },
+    setTimeStartCall: (state, action: PayloadAction<Date>) => {
+      state.timeStartCall = action.payload;
+    },
+    setTimeEndCall: (state, action: PayloadAction<Date | undefined>) => {
+      state.timeEndCall = action.payload;
+    },
     resetState: (state) => {
       state.isCalling = false;
       state.isCallInProgress = false;
@@ -87,6 +99,7 @@ export const callSlice = createSlice({
       state.receiver = undefined;
       state.callType = undefined;
       state.isMini = undefined;
+      state.timeEndCall = new Date();
     },
     initiateCallState: (state, action: PayloadAction<CallInitiatePayload>) => {
       return {
@@ -109,6 +122,10 @@ export const {
   setIsCallInProgress,
   setActiveConversationId,
   resetState,
+  setIsMini,
+  setEndCall,
+  setTimeEndCall,
+  setTimeStartCall,
   setReceiver,
   initiateCallState,
   setCallType,

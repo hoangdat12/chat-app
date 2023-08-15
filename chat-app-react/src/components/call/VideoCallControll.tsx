@@ -9,8 +9,11 @@ import { MdCallEnd } from 'react-icons/md';
 import { FC, useContext, useState } from 'react';
 import { SocketContext } from '../../ultils/context/Socket';
 import { SocketCall } from '../../ultils/constant';
-import { useAppSelector } from '../../app/hook';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { selectCall } from '../../features/call/callSlice';
+import { selectConversation } from '../../features/conversation/conversationSlice';
+import { sendMessageCallVideo } from './CallReceiveDialog';
+import { getTimeCall } from '../../ultils';
 
 export interface IPropCallControll {
   position: string;
@@ -22,9 +25,39 @@ const VideoCallControll: FC<IPropCallControll> = ({ position, size }) => {
   const [disableVideo, setDisableVideo] = useState(false);
   const socket = useContext(SocketContext);
 
-  const { localStream, caller, receiver } = useAppSelector(selectCall);
+  const dispatch = useAppDispatch();
+  const {
+    localStream,
+    caller,
+    receiver,
+    activeConversationId,
+    callType,
+    timeStartCall,
+  } = useAppSelector(selectCall);
+  const { conversations } = useAppSelector(selectConversation);
 
-  const closeCall = () => {
+  const closeCall = async () => {
+    const conversation = conversations.get(activeConversationId ?? '');
+    if (!conversation) return;
+    const data = {
+      message_content: `End Call`,
+      // missing | accept
+      message_call: {
+        status: 'accept',
+        caller,
+        receiver,
+        time: getTimeCall(timeStartCall, new Date()),
+      },
+    };
+    await sendMessageCallVideo(
+      caller,
+      receiver,
+      callType,
+      conversation,
+      timeStartCall,
+      dispatch,
+      data
+    );
     socket.emit(SocketCall.VIDEO_CALL_CLOSE, { caller, receiver });
   };
 

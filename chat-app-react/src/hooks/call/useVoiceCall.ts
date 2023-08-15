@@ -9,6 +9,7 @@ import {
   setCaller,
   setIsReceivingCall,
   setReceiver,
+  setTimeStartCall,
 } from '../../features/call/callSlice';
 
 export const useVoiceCall = () => {
@@ -22,6 +23,7 @@ export const useVoiceCall = () => {
       dispatch(setIsReceivingCall(true));
       dispatch(setCallType('audio'));
       dispatch(setActiveConversationId(data.conversationId));
+      dispatch(setTimeStartCall(new Date()));
     });
 
     return () => {
