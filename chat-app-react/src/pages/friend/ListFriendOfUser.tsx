@@ -242,7 +242,7 @@ export const ListFriendsV2: FC<IPropListFriendsV2> = ({
             >
               <Avatar
                 avatarUrl={friend.avatarUrl}
-                className={`w-14 md:w-18 h-14 md:h-18`}
+                className={`w-14 h-14 min-h-[3.5rem] min-w-[3.5rem] md:w-18 md:h-18`}
               />
               <div>
                 <h1 className={`text-sm md:text-lg`}>{friend.userName}</h1>

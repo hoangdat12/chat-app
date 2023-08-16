@@ -125,7 +125,7 @@ const ForgotPasswordForm = () => {
                 >
                   <Avatar
                     avatarUrl={account.avatarUrl}
-                    className={`h-12 w-12 md:w-16 md:h-16`}
+                    className={`h-12 w-12 min-h-[3rem] min-w-[3rem] md:w-16 md:h-16 md:min-h-[4rem] md:min-w-[4rem]`}
                   />
                   <div className='font-poppins'>
                     <h1 className='text-xl'>{getUsername(account)}</h1>

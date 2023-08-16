@@ -8,7 +8,8 @@ import { RedisModule } from '../redis/redis.module';
 import { ProfileModule } from '../profile/profile.module';
 import { FriendRequestModel } from '../schema/friend.request.model';
 import { FriendRequestRepository } from './repository/friend.request.repository';
-import { FriendModel } from 'src/schema/friend.model';
+import { FriendModel } from '../schema/friend.model';
+import { GatewayModule } from '../gateway/gateway.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { FriendModel } from 'src/schema/friend.model';
     NotifyModule,
     RedisModule,
     ProfileModule,
+    GatewayModule,
   ],
   controllers: [FriendController],
   providers: [FriendService, FriendRepository, FriendRequestRepository],

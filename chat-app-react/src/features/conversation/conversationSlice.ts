@@ -261,6 +261,20 @@ const conversationSlice = createSlice({
         conversation.lastMessage = action.payload.lastMessage;
       }
     },
+    updateAvatarOfGroup: (
+      state,
+      action: PayloadAction<{
+        conversationId: string;
+        avatarUrl: string;
+      }>
+    ) => {
+      const foundConversation = state.conversations.get(
+        action.payload.conversationId
+      );
+      if (foundConversation) {
+        foundConversation.avatarUrl = action.payload.avatarUrl;
+      }
+    },
   },
   extraReducers: (builder) => {
     // Get last conversation
@@ -376,10 +390,12 @@ const conversationSlice = createSlice({
       .addCase(changeAvatarOfGroup.fulfilled, (state, action) => {
         state.status = 'idle';
         state.isLoading = false;
-        const conversation = state.conversations.get(action.payload._id);
+        const conversation = state.conversations.get(
+          action.payload.data.metaData._id
+        );
         if (conversation) {
-          conversation.avatarUrl = action.payload.avatarUrl;
-          conversation.lastMessage = action.payload.lastMessage;
+          conversation.avatarUrl = action.payload.data.metaData.avatarUrl;
+          conversation.lastMessage = action.payload.data.metaData.lastMessage;
         }
       })
       .addCase(changeAvatarOfGroup.rejected, (state) => {
@@ -418,7 +434,6 @@ const conversationSlice = createSlice({
       .addCase(handleDeleteConversation.fulfilled, (state, action) => {
         state.status = 'idle';
         state.isLoading = false;
-        console.log(action.payload._id);
         state.conversations.delete(action.payload._id);
       })
       .addCase(handleDeleteConversation.rejected, (state) => {
@@ -441,6 +456,7 @@ export const {
   changeEmojiOfConversation,
   changeAvatarOfConversation,
   changeNameOfConversation,
+  updateAvatarOfGroup,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

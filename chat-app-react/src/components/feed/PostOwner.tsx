@@ -10,8 +10,6 @@ import { PostMode as PostModeType, PostType } from '../../ultils/constant';
 import { postService } from '../../features/post/postService';
 import PostMode from './PostMode';
 import { postMode } from '../../ultils/list/post.list';
-import { useAppDispatch } from '../../app/hook';
-import { changePostMode } from '../../features/post/postSlice';
 
 export interface IPropPostOwner {
   post: IPost;
@@ -35,8 +33,6 @@ const PostOwner: FC<IPropPostOwner> = ({
   const [showChangePostMode, setShowChangePostMode] = useState(false);
   const [modeDefault, setModeDefault] = useState<IPostMode | null>(null);
   const optionRef = useRef<HTMLUListElement | null>(null);
-
-  const dispatch = useAppDispatch();
 
   const handleShowOptions = () => {
     setShowOptions(false);
@@ -72,9 +68,12 @@ const PostOwner: FC<IPropPostOwner> = ({
       if (modeDefault) {
         const data = {
           postId: post._id,
-          post_mode: modeDefault.title,
+          post_mode: mode.title,
         };
-        dispatch(changePostMode(data));
+        const res = await postService.changePostMode(data);
+        if (res.status === 200) {
+          setModeDefault(mode);
+        }
       }
     }
     setShowChangePostMode(false);
@@ -97,7 +96,10 @@ const PostOwner: FC<IPropPostOwner> = ({
     <div>
       <div className='flex items-center justify-between'>
         <div className='flex gap-3 items-center'>
-          <Avatar avatarUrl={post?.user?.avatarUrl} className={'w-12 h-12'} />
+          <Avatar
+            avatarUrl={post?.user?.avatarUrl}
+            className={'w-12 h-12 min-h-[3rem] min-w-[3rem]'}
+          />
           <div>
             <h1 className='text-base'>{getUsername(post?.user)}</h1>
             <div className='relative flex gap-1 items-center'>
@@ -112,7 +114,7 @@ const PostOwner: FC<IPropPostOwner> = ({
                 />
               )}
               <p className='text-sm text-[#678]'>
-                {getTimeCreatePost(post.createdAt)}
+                {getTimeCreatePost(post?.createdAt)}
               </p>
             </div>
           </div>

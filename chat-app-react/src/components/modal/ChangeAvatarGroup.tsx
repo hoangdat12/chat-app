@@ -19,6 +19,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { userService } from '../../features/user/userService';
 import { getUserLocalStorageItem } from '../../ultils';
 import { conversationService } from '../../features/conversation/conversationService';
+import { useAppDispatch } from '../../app/hook';
+import { updateAvatarOfGroup } from '../../features/conversation/conversationSlice';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -29,6 +31,7 @@ const ChangeAvatarGroup = () => {
   const [mode, setMode] = useState('crop');
   const [file, setFile] = useState<File | null>(null);
 
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -57,7 +60,7 @@ const ChangeAvatarGroup = () => {
       contrast: 0,
     });
   };
-
+  console.log(location);
   const onUpload = (blob: string) => {
     onReset();
     setMode('crop');
@@ -71,20 +74,31 @@ const ChangeAvatarGroup = () => {
   const onChangeAvatar = async () => {
     const formData = new FormData();
     if (cropperRef.current && file) {
-      let res: any;
       formData.append('file', file, 'croppedImage.jpg');
       if (location.state.conversationId) {
         formData.append('conversationId', location.state.conversationId);
-        res = await conversationService.handleChangeAvatarOfGroup(formData);
+        const res = await conversationService.handleChangeAvatarOfGroup(
+          formData
+        );
+        if (res && (res.status === 200 || res.status === 201)) {
+          URL.revokeObjectURL(src);
+          dispatch(
+            updateAvatarOfGroup({
+              conversationId: location.state.conversationId,
+              avatarUrl: res.data.metaData.avatarUrl,
+            })
+          );
+          navigate(-1);
+        }
       } else {
-        res = await userService.changeAvatar(formData);
-      }
-      if (res && (res.status === 200 || res.status === 201)) {
-        const avatar = res.data.metaData;
-        userLocal.avatarUrl = avatar;
-        localStorage.setItem('user', JSON.stringify(userLocal));
-        URL.revokeObjectURL(src);
-        navigate(-1);
+        const res = await userService.changeAvatar(formData);
+        if (res && (res.status === 200 || res.status === 201)) {
+          const avatar = res.data.metaData;
+          userLocal.avatarUrl = avatar;
+          localStorage.setItem('user', JSON.stringify(userLocal));
+          URL.revokeObjectURL(src);
+          navigate(-1);
+        }
       }
     }
   };

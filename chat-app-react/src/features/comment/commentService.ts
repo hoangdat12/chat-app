@@ -29,19 +29,16 @@ const getListComment = async (
 
 const updateComment = async (data: IDataUpdateComment) => {
   const res = await myAxios.patch('/comment', data);
-  console.log(res);
   return res;
 };
 
 const deleteComment = async (data: IDataDeleteComment) => {
   const res = await myAxios.delete('/comment', { data });
-  console.log(res);
   return res;
 };
 
 const likeComment = async (data: IDataDeleteComment) => {
   const res = await myAxios.post('/comment/like', data);
-  console.log(res);
   return res;
 };
 

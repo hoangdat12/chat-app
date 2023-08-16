@@ -12,6 +12,7 @@ export interface IFriendBoxProp {
   fontSize?: string;
   margin?: string;
   onClick?: any;
+  onlineStatus?: string;
 }
 
 const FriendBox: FC<IFriendBoxProp> = ({
@@ -41,15 +42,21 @@ export const FriendBoxCircle: FC<IFriendBoxProp> = ({
   avatarUrl,
   className,
   status,
+  onlineStatus,
 }) => {
   return (
-    <div className='flex gap-2 items-center'>
+    <div className='flex gap-2 items-center cursor-pointer'>
       <AvatarOnline
         avatarUrl={avatarUrl}
         className={className}
         status={status}
       />
-      <p className='text-base'>{userName}</p>
+      <div>
+        <h1 className='text-sm'>{userName}</h1>
+        {onlineStatus && (
+          <p className='text-xs text-gray-500'>{onlineStatus}</p>
+        )}
+      </div>
     </div>
   );
 };

@@ -5,7 +5,11 @@ import { Post } from '../schema/post.model';
 import { IPost, IUserCreated, Pagination } from '../ultils/interface';
 import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { PostMode, PostType } from '../ultils/constant';
-import { getUsername, objectNotContainNull } from '../ultils';
+import {
+  checkNegativeNumber,
+  getUsername,
+  objectNotContainNull,
+} from '../ultils';
 
 @Injectable()
 export class PostRepository {
@@ -42,25 +46,9 @@ export class PostRepository {
       .exec();
   }
 
-  async findByUserIdV2(
-    user: IUserCreated,
-    postUserId: string,
-    pagiantion: Pagination,
-  ) {
+  async findByUserIdV2(user: IUserCreated, pagiantion: Pagination, match: any) {
     const { limit, page, sortBy } = pagiantion;
     const offset = (page - 1) * limit;
-    const objectIdUserId = new mongoose.Types.ObjectId(postUserId);
-    const match =
-      user._id === postUserId
-        ? {
-            user: objectIdUserId,
-            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
-          }
-        : {
-            user: objectIdUserId,
-            post_mode: PostMode.PUBLIC,
-            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
-          };
 
     const posts = await this.postModel.aggregate([
       {
@@ -74,22 +62,6 @@ export class PostRepository {
           as: 'userObj',
         },
       },
-      // {
-      //   $lookup: {
-      //     from: 'Comment',
-      //     localField: '_id',
-      //     foreignField: 'comment_post_id',
-      //     as: 'commentsArr',
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'Post',
-      //     localField: 'post_share',
-      //     foreignField: '_id',
-      //     as: 'post_share_obj',
-      //   },
-      // },
       {
         $addFields: {
           user: { $arrayElemAt: ['$userObj', 0] },
@@ -104,14 +76,11 @@ export class PostRepository {
               },
             },
           },
-          // comments: { $slice: ['$commentsArr', 5] },
-          // post_share: { $arrayElemAt: ['$post_share_obj', 0] },
         },
       },
       {
         $project: {
           userObj: 0,
-          // commentsArr: 0
         },
       },
       {

@@ -34,7 +34,6 @@ export const useVideoCallAccept = () => {
         dispatch(setActiveConversationId(data.conversation._id));
         if (!peer) return console.log('No peer....');
         if (data.caller.userId === userLocal!._id) {
-          console.log('data.acceptor.peerId:::: ', data.acceptor.peerId);
           const connection = peer.connect(data.acceptor.peerId);
           console.log('connection::: ', connection);
           dispatch(setConnection(connection));

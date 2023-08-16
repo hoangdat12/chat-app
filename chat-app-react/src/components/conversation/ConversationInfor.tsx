@@ -44,7 +44,10 @@ const ConversationInfor: FC<IPropConversation> = ({
       }`}
     >
       {true ? (
-        <Avatar avatarUrl={avatarUrl} className='h-9 w-9 md:h-11 md:w-11' />
+        <Avatar
+          avatarUrl={avatarUrl}
+          className='h-9 w-9 min-w-[2.25rem] min-h-[2.25rem] md:h-11 md:w-11 md:min-w-[2.75rem] md:min-h-[2.75rem]'
+        />
       ) : (
         <Avatar avatarUrl={avatarUrl} />
       )}

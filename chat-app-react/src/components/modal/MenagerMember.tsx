@@ -73,7 +73,7 @@ const MenagerMember: FC<IPropMenagerMember> = memo(
                   >
                     <Avatar
                       avatarUrl={creator.avatarUrl}
-                      className='w-10 h-10'
+                      className='w-10 h-10 min-h-[2.5rem] min-w-[2.5rem]'
                     />
                     <h1 className='min-w-[200px]'>{creator.userName}</h1>
                   </div>
@@ -93,7 +93,7 @@ const MenagerMember: FC<IPropMenagerMember> = memo(
                     >
                       <Avatar
                         avatarUrl={participant.avatarUrl}
-                        className='w-10 h-10'
+                        className='w-10 h-10 min-h-[2.5rem] min-w-[2.5rem]'
                       />
                       <h1 className='min-w-[200px]'>{participant.userName}</h1>
                       {isValidSendMessage && (

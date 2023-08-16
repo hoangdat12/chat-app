@@ -57,7 +57,6 @@ export const Content: FC<IPropComment> = memo(
         parentCommentId: comment._id,
       };
       const res = await commentService.getListComment(data);
-      console.log('child comment', res);
       setChildComments(res.data.metaData.comments);
       setRemainChildComment(res.data.metaData.remainComment);
     };
@@ -134,7 +133,7 @@ export const Content: FC<IPropComment> = memo(
         <div className={`flex ${space ?? 'gap-3'} py-1`}>
           <Avatar
             avatarUrl={comment.comment_user_id.avatarUrl}
-            className={sizeAvatar ?? 'w-10 h-10'}
+            className={sizeAvatar ?? 'w-10 h-10 min-h-[2.5rem] min-w-[2.5rem]'}
           />
           <div className='max-w-[80%]'>
             <div className='relative hover-parent px-3 py-2 text-sm rounded-lg bg-white'>

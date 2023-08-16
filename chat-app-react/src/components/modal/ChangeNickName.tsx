@@ -37,7 +37,7 @@ const ChangeNickName: FC<IChangeNickNameProp> = memo(
                   <div>
                     <Avatar
                       avatarUrl={participant.avatarUrl}
-                      className='w-10 h-10'
+                      className='w-10 h-10 min-h-[2.5rem] min-w-[2.5rem]'
                     />
                   </div>
                   <Input

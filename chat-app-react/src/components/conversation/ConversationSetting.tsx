@@ -12,7 +12,6 @@ import AvatarEdit from '../avatars/AvatarEdit';
 import CreateNewGroup from '../modal/CreateNewGroup';
 import ChangeNickName from '../modal/ChangeNickName';
 import ChangeEmoji from '../modal/ChangeEmoji';
-import ChangeAvatarGroup from '../modal/ChangeAvatarGroup';
 import { CiEdit } from 'react-icons/ci';
 import useClickOutside from '../../hooks/useClickOutside';
 import { conversationService } from '../../features/conversation/conversationService';
@@ -22,7 +21,6 @@ import NotAllowed from '../NotAllowed';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { useNavigate } from 'react-router-dom';
 import {
-  changeAvatarOfGroup,
   handleDeleteConversation,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
@@ -57,7 +55,6 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
       useState(false);
     const [isShowRenameGroup, setIsShowRenameGroup] = useState(false);
     const [newNameGroup, setNewNameGroup] = useState(userName);
-    const [image, setViewImage] = useState<string | ArrayBuffer | null>(null);
     const [isShowManagerMember, setIsShowManagerMember] = useState(false);
     const [isShowConfirm, setIsShowConfirm] = useState<string>('');
 
@@ -157,7 +154,6 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
 
     // Handle leave messages
     const handleLeaveConversation = async () => {
-      console.log('Leave');
       if (conversation) {
         await conversationService.handleLeaveGroup(conversation?._id);
         setIsShowConfirm('');
@@ -165,13 +161,6 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
     };
 
     useClickOutside(inputRef, changeNameGroup, 'mousedown');
-
-    useEffect(() => {
-      if (image) {
-        setShowMoreConversation(false);
-        setIsShowChangeAvatarOfGroup(true);
-      }
-    }, [image]);
 
     useEffect(() => {
       if (showMoreConversation) {
@@ -228,7 +217,7 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
                 <AvatarEdit
                   className={'w-20 h-20'}
                   avatarUrl={avatarUrl ?? ''}
-                  setViewImage={setViewImage}
+                  conversation={conversation}
                 />
               </div>
               <h1 className='flex items-center justify-center gap-4 w-full'>
@@ -357,17 +346,6 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
           <ChangeEmoji
             isShow={isShowChangeEmoji}
             setIsShow={setIsShowChangeEmoji}
-          />
-        )}
-        {isShowChangeAvatarOfGroup && (
-          <ChangeAvatarGroup
-            imageUrl={image}
-            setViewImage={setViewImage}
-            isShow={isShowChangeAvatarOfGroup}
-            setIsShow={setIsShowChangeAvatarOfGroup}
-            handleChangeAvatar={(formData: FormData) =>
-              dispatch(changeAvatarOfGroup(formData))
-            }
           />
         )}
         {isShowManagerMember && (

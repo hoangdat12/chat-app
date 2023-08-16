@@ -65,7 +65,6 @@ export class CommentService {
     parentCommentId: string,
     pagination: Pagination,
   ) {
-    console.log(parentCommentId);
     const foundPost = await this.postRepository.findById(postId);
     if (!foundPost)
       throw new HttpException('Post not found!', HttpStatus.BAD_REQUEST);
@@ -85,7 +84,6 @@ export class CommentService {
       );
       if (!foundParentComment)
         throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
-      console.log(foundParentComment);
       comments = await this.commentRepository.findChildCommentV2(
         user,
         postId,
@@ -94,10 +92,8 @@ export class CommentService {
         foundParentComment.comment_right,
         pagination,
       );
-      console.log(comments);
       parentComment = foundParentComment;
     }
-
     if (comments.length <= 10)
       return {
         parentComment,

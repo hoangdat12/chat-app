@@ -85,7 +85,7 @@ export const FriendBoxDetail: FC<IPropFriendBoxDetial> = ({ friend }) => {
         <Avatar
           onClick={handleNavigate}
           avatarUrl={friend.avatarUrl}
-          className='w-12 h-12'
+          className='w-12 h-12 min-h-[3rem] min-w-[3rem]'
         />
         <div className='flex flex-col'>
           <span onClick={handleNavigate} className='cursor-pointer'>

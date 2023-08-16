@@ -110,7 +110,7 @@ const ConversationList: FC<IPropConversationList> = ({
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ele) => (
               <div className='relative' key={ele}>
                 <Avatar
-                  className={'h-12 w-12'}
+                  className={'h-12 w-12 min-h-[3rem] min-w-[3rem]'}
                   avatarUrl={
                     'https://i.pinimg.com/originals/2b/0f/7a/2b0f7a9533237b7e9b49f62ba73b95dc.jpg'
                   }

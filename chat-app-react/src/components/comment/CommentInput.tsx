@@ -89,7 +89,7 @@ const CommentInput: FC<IPropCommentInput> = memo(
           avatarUrl={
             'https://toigingiuvedep.vn/wp-content/uploads/2021/01/avatar-dep-cute.jpg'
           }
-          className={sizeAvatar ?? 'w-12 h-12'}
+          className={sizeAvatar ?? 'w-12 h-12 min-h-[3rem] min-w-[3rem]'}
         />
         <div className='w-full'>
           <div className='flex items-center gap-2 sm:gap-4 pl-3 sm:pl-4 w-full bg-white rounded-lg overflow-hidden'>

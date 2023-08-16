@@ -125,7 +125,7 @@ const CallerPage = () => {
   }, [connection]);
 
   return (
-    <div className='relative h-screen overflow-hidden'>
+    <div className='relative'>
       {isReceivingCall && caller && <CallReceiveDialog />}
       {isCallInProgress &&
         isMini &&

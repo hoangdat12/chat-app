@@ -26,7 +26,6 @@ const getPostSaveOfUser = async (
   userId: string
 ): Promise<IResponse<IPost[]>> => {
   const res = await myAxios.get(`/post/save/${userId}`);
-  console.log(res);
   return res;
 };
 
@@ -48,12 +47,19 @@ const changePostMode = async (
 ): Promise<IResponse<IPost>> => {
   const { postId, post_mode } = data;
   const res = await myAxios.patch(`/post/change-mode/${postId}`, { post_mode });
-  console.log(res);
   return res;
 };
 
 const getPostOfFriend = async () => {
   const res = await myAxios.get('/post/friends');
+  return res;
+};
+
+const getAllPost = async (pagiantion?: IPagination) => {
+  const { limit = 20, page = 1, sortedBy = 'ctime' } = pagiantion || {};
+  const res = await myAxios.get(
+    `/post/all?page=${page}&limit=${limit}&sortBy=${sortedBy}`
+  );
   return res;
 };
 
@@ -65,4 +71,5 @@ export const postService = {
   likePost,
   checkLikePost,
   changePostMode,
+  getAllPost,
 };

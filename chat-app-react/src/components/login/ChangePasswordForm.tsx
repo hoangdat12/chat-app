@@ -20,7 +20,6 @@ const ChangePasswordForm = () => {
         rePassword,
       };
       const res = await authService.getPassword(data);
-      console.log('Login res:::: ', res);
       if (res.status === 200 || res.status === 201) {
         setIsSuccess(true);
       } else {

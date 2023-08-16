@@ -25,6 +25,26 @@ import { multerOptions } from '../ultils/constant';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @Get('/all')
+  async getAllPost(
+    @Req() req: Request,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+    @Query('sortBy') sortBy: string = 'ctime',
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      const pagination = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy,
+      };
+      return new Ok(await this.postService.getAllPost(user, pagination));
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Post()
   @UseInterceptors(FileInterceptor('file', multerOptions))
   async createPost(

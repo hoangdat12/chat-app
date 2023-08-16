@@ -7,6 +7,8 @@ import {
   Req,
   Query,
   Delete,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { IUserCreated } from '../ultils/interface';
@@ -165,16 +167,25 @@ export class FriendController {
     }
   }
 
-  @Get('/test')
-  async test(@Req() req: Request) {
-    const user = req.user as IUserCreated;
-    return await this.friendService.test(user._id);
-  }
-
   @Get('/:userId')
   async getFriends(@Param('userId') userId: string) {
     try {
       return new Ok(await this.friendService.getFriends(userId));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/all/status/:userId')
+  async getFriendOnlineAndOffline(
+    @Req() req: Request,
+    @Param('userId') userId: string,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      if (user._id !== userId)
+        throw new HttpException('Your not permission!', HttpStatus.BAD_REQUEST);
+      return new Ok(await this.friendService.getFriendOnlineAndOffline(userId));
     } catch (error) {
       throw error;
     }

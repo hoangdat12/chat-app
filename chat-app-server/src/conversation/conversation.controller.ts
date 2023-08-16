@@ -264,7 +264,6 @@ export class ConversationController {
   @Patch('/change-name-group')
   async renameGroup(@Req() req: Request, @Body() data: RenameGroup) {
     try {
-      console.log(data);
       const errors = await validate(data);
       if (errors.length > 0) {
         throw new Error('Missing value!');

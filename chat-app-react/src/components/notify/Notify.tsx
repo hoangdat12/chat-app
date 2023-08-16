@@ -45,7 +45,7 @@ export const Notify: FC<IPropNotify> = ({
       <Avatar
         onClick={handleViewProfile}
         avatarUrl={notify.notify_image}
-        className={`h-16 w-16 md:h-18 md:w-18`}
+        className={`h-16 w-16 min-h-[4rem] min-w-[4rem]`}
       />
 
       <div className='text-black font-poppins'>

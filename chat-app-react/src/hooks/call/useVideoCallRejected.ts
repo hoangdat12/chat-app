@@ -18,7 +18,6 @@ export const useVideoCallRejected = () => {
       if (data.caller.userId === userLocal._id) {
         localStream &&
           localStream.getTracks().forEach((track) => {
-            console.log(localStream.id);
             track.stop();
           });
       }

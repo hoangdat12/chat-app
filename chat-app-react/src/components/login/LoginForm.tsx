@@ -48,7 +48,6 @@ const LoginForm = () => {
       window.location.href = 'http://localhost:5173';
     };
     if (status === 'succeeded') {
-      console.log(user);
       updateAuthUser(user);
       handleNavigate();
     }

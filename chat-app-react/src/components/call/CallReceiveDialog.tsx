@@ -45,9 +45,7 @@ export const sendMessageCallVideo = async (
       ...data,
       createdAt: timeStartCall,
     };
-    console.log(body);
     const res = await messageService.createNewMessage(body);
-    console.log(res);
     if (res.status === 201) {
       dispatch(createNewMessage(res.data.metaData));
       const dataUpdate = {
@@ -136,7 +134,7 @@ const CallReceiveDialog = () => {
           avatarUrl={
             'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien-600x600.jpg'
           }
-          className='w-32 h-32'
+          className='w-32 h-32 min-h-[8rem] min-w-[8rem]'
         />
         <div className='flex gap-3 flex-col items-center mt-4'>
           <p className='text-lg text-[#9da2a9]'>Incoming call</p>

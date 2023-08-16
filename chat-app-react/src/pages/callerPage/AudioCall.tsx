@@ -85,7 +85,7 @@ const AudioCall = () => {
           <div className='absolute top-0 left-0 right-0 bottom-0 w-full h-full flex flex-col gap-2 items-center justify-center'>
             <Avatar
               avatarUrl={friend.avatarUrl}
-              className='w-32 h-32 object-cover overflow-hidden'
+              className='w-32 h-32 min-h-[8rem] min-w-[8rem] object-cover overflow-hidden'
             />
             <h1 className='px-4 py-1 rounded text-white text-lg sm:text-xl'>
               {friend.userName}
@@ -101,7 +101,10 @@ const AudioCall = () => {
         />
         <div className='absolute sm:static top-4 right-4 flex items-center gap-3'>
           {owner && (
-            <Avatar avatarUrl={owner.avatarUrl} className='w-20 h-20' />
+            <Avatar
+              avatarUrl={owner.avatarUrl}
+              className='w-20 h-20 min-h-[5rem] min-w-[5rem]'
+            />
           )}
         </div>
       </div>

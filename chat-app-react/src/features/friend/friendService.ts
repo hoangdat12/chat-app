@@ -2,6 +2,7 @@ import { IResponse } from '../../ultils/interface';
 import {
   IAddFriendResponse,
   ICheckFriendResponse,
+  IDataGetFriendOnline,
   IFriend,
 } from '../../ultils/interface/friend.interface';
 import myAxios from '../../ultils/myAxios';
@@ -64,6 +65,13 @@ const getListPendingAddFriend = async () => {
   return res;
 };
 
+const findFriendOnlineAndOffline = async (
+  userId: string
+): Promise<IResponse<IDataGetFriendOnline>> => {
+  const res = await myAxios.get(`/friend/all/status/${userId}`);
+  return res;
+};
+
 export const friendService = {
   getFriendOfUser,
   addFriend,
@@ -73,5 +81,6 @@ export const friendService = {
   searchFriendByUserName,
   getListRequestAddFriend,
   getListPendingAddFriend,
+  findFriendOnlineAndOffline,
   deleteFriend,
 };

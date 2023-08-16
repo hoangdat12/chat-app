@@ -65,7 +65,6 @@ export class AuthRepository {
         $limit: limit,
       },
     ]);
-    console.log(users);
     return {
       users,
       keyword,

@@ -113,7 +113,6 @@ export const ButtonCall = () => {
 
   const deafenUser = () => {
     if (remoteStream) {
-      console.log(remoteStream.getAudioTracks());
       remoteStream.getAudioTracks()[0].enabled =
         !remoteStream.getAudioTracks()[0].enabled;
     }

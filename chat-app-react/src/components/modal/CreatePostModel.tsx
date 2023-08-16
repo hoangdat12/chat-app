@@ -123,7 +123,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
             avatarUrl={
               'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
             }
-            className='w-12 h-12'
+            className='w-12 h-12 min-h-[3rem] min-w-[3rem]'
           />
           <div>
             <div className='flex items-center gap-1'>

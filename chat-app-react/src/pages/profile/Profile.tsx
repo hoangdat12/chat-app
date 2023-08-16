@@ -5,7 +5,7 @@ import { getUserLocalStorageItem } from '../../ultils';
 import { friendService } from '../../features/friend/friendService';
 import { ICheckFriendResponse } from '../../ultils/interface/friend.interface';
 import UserInformation from '../../components/user/UserInformation';
-import ListFriend from '../friend/ListFriend';
+import ListFriend from '../friend/ListFriendOfUser';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { getPostOfUser, selectPost } from '../../features/post/postSlice';
 

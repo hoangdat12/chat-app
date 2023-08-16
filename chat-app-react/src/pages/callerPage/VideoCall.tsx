@@ -51,7 +51,7 @@ const VideoCall = () => {
               avatarUrl={
                 'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien-600x600.jpg'
               }
-              className='w-32 h-32'
+              className='w-32 h-32 min-h-[8rem] min-w-[8rem]'
             />
             <h1 className='px-4 py-1 rounded text-white text-lg sm:text-xl'>
               Hoang Dat

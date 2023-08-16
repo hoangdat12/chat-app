@@ -131,7 +131,9 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
         <div className='flex w-full gap-3 cursor-pointer '>
           <div className=''>
             <Avatar
-              className={'md:w-14 md:h-14 h-12 w-12'}
+              className={
+                'md:min-h-[3.5rem] md:min-w-[3.5rem] md:w-14 md:h-14 min-h-[3rem] min-w-[3rem] h-12 w-12'
+              }
               avatarUrl={avatarUrl ?? ''}
             />
           </div>

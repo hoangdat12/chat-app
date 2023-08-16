@@ -20,7 +20,6 @@ export function useVideoCall() {
 
   useEffect(() => {
     socket.on(WebsocketEvents.ON_VIDEO_CALL, (data: CallPayload) => {
-      console.log('Receiving call:::: ', data);
       if (isReceivingCall) return;
       dispatch(setCaller(data.caller));
       dispatch(setReceiver(data.receiver));

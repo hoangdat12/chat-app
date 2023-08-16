@@ -29,7 +29,7 @@ const CreateFeed: FC<IPropCreateFeed> = ({ mode, placeHolder, user }) => {
           avatarUrl={
             'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
           }
-          className='w-12 h-12'
+          className='w-12 h-12 min-h-[3rem] min-w-[3rem]'
         />
         <div className='flex items-center w-full'>
           <input

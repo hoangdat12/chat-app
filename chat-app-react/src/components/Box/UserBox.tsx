@@ -17,7 +17,10 @@ const UserBox: FC<IUserBoxProp> = ({ avatarUrl, userName, status }) => {
           status={status}
         />
       ) : (
-        <Avatar avatarUrl={avatarUrl} className={`h-14 w-14 md:h-11 md:w-11`} />
+        <Avatar
+          avatarUrl={avatarUrl}
+          className={`h-14 w-14 min-w-[3.5rem] min-h-[3.5rem] md:h-11 md:w-11 md:min-w-[2.75rem] md:min-h-[2.75rem]`}
+        />
       )}
       <div className='text-black font-poppins'>
         <h1 className='text-lg'>{userName}</h1>

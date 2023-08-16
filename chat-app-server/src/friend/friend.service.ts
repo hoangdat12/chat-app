@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IParticipant, IUserCreated, Pagination } from 'src/ultils/interface';
 import { IFriend } from '../ultils/interface/friend.interface';
 import { AuthRepository } from '../auth/repository/auth.repository';
@@ -9,7 +9,8 @@ import { NotifyType } from '../ultils/constant/notify.constant';
 import { RedisService } from '../redis/redis.service';
 import { ProfileRepository } from '../profile/repository/profile.repository';
 import { FriendRequestRepository } from './repository/friend.request.repository';
-import { FriendStatus } from 'src/ultils/constant';
+import { FriendStatus, Services } from '../ultils/constant';
+import { IGatewaySessionManager } from '../gateway/gateway.sesstion';
 
 @Injectable()
 export class FriendService {
@@ -20,6 +21,8 @@ export class FriendService {
     private readonly notifyService: NotifyService,
     private readonly redisService: RedisService,
     private readonly profileRepository: ProfileRepository,
+    @Inject(Services.GATEWAY_SESSION_MANAGER)
+    private readonly gatewaySession: IGatewaySessionManager,
   ) {}
 
   async statusFriend(user: IUserCreated, friendId: string) {
@@ -271,6 +274,26 @@ export class FriendService {
       this.profileRepository.increQuantityFriend(userId, -1);
       this.profileRepository.increQuantityFriend(friendId, -1);
     }
+  }
+
+  async getFriendOnlineAndOffline(userId: string) {
+    const friends = await this.friendRepository.findFriendsV2(userId);
+    let onlineFriends = [],
+      offlineFriends = [];
+    for (let friend of friends) {
+      if (this.gatewaySession.getUserSocket(friend._id.toString())) {
+        onlineFriends.push(friend);
+      } else {
+        offlineFriends.push(friend);
+      }
+    }
+    const responseData = {
+      onlineFriends,
+      offlineFriends,
+    };
+    // const key = `friend:online:user:${userId}`;
+    // this.redisService.set(key, JSON.stringify(responseData), 300);
+    return responseData;
   }
 
   // Bug

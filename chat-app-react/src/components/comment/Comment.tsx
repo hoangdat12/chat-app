@@ -13,14 +13,22 @@ export interface IPropCommentContent {
 const Comment: FC<IPropCommentContent> = memo(
   ({ comments, setComments, remainComment, post }) => {
     return (
-      <div className='flex flex-col gap-2 mt-6'>
+      <div
+        className={`flex flex-col ${comments?.length !== 0 && 'gap-2'} mt-6`}
+      >
         <h1 className='text-lg cursor-pointer mb-2'>Comment</h1>
-        <CommentContent
-          comments={comments}
-          setComments={setComments}
-          post={post}
-        />
-        <div className='flex flex-col gap-2 max-h-[340px] overflow-y-scroll mt-1'>
+        {comments?.length !== 0 && (
+          <CommentContent
+            comments={comments}
+            setComments={setComments}
+            post={post}
+          />
+        )}
+        <div
+          className={`flex flex-col gap-2 max-h-[340px] overflow-y-scroll ${
+            comments?.length !== 0 && 'mt-1'
+          }`}
+        >
           <div
             className={`${
               remainComment === 0 && 'hidden'

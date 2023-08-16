@@ -72,7 +72,6 @@ const VideoCallControll: FC<IPropCallControll> = ({ position, size }) => {
   const handleDisableAudio = () => {
     localStream &&
       setDisableAudio((prev) => {
-        console.log(prev);
         localStream.getAudioTracks()[0].enabled = prev;
         return !prev;
       });

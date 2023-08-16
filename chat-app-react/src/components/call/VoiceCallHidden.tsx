@@ -93,7 +93,7 @@ const VoiceCallHidden = () => {
             <div className='absolute top-0 left-0 right-0 bottom-0 w-full h-full flex flex-col gap-2 items-center justify-center'>
               <Avatar
                 avatarUrl={friend.avatarUrl}
-                className='w-20 h-20 object-cover overflow-hidden'
+                className='w-20 h-20 min-h-[5rem] min-w-[5rem] object-cover overflow-hidden'
               />
               <h1 className='px-4 py-1 rounded text-white sm:text-lg'>
                 {friend.userName}

@@ -33,3 +33,8 @@ export interface IDataGetAllFriendOfUser {
   mutualFriends: IFriend[] | null;
   friends: IFriend[] | null;
 }
+
+export interface IDataGetFriendOnline {
+  onlineFriends: IFriend[];
+  offlineFriends: IFriend[];
+}

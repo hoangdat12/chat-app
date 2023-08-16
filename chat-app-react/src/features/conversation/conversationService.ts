@@ -89,9 +89,9 @@ const handleChangeEmoji = async (
 
 const handleChangeAvatarOfGroup = async (
   data: FormData
-): Promise<IConversation> => {
+): Promise<IResponse<IConversation>> => {
   const res = await myAxios.patch('/conversation/change-avatar-group', data);
-  return res.data.metaData;
+  return res;
 };
 
 const handleChangeNameOfGroup = async (

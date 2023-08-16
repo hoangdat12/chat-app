@@ -2,10 +2,10 @@ import { FC } from 'react';
 import { CiEdit } from 'react-icons/ci';
 import { IPropAvatar } from './Avatar';
 import { IConversation } from '../../ultils/interface';
+import { useNavigate } from 'react-router-dom';
 
 export interface IPropAvatarEdit extends IPropAvatar {
   conversation?: IConversation | undefined;
-  setViewImage: (value: string | ArrayBuffer | null) => void;
 }
 
 const allowedFileTypes = 'image/gif, image/png, image/jpeg, image/x-png';
@@ -13,16 +13,16 @@ const allowedFileTypes = 'image/gif, image/png, image/jpeg, image/x-png';
 const AvatarEdit: FC<IPropAvatarEdit> = ({
   avatarUrl,
   className,
-  setViewImage,
+  conversation,
 }) => {
+  const navigate = useNavigate();
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const image = e.target.files?.[0];
     if (image) {
-      const imageReader = new FileReader();
-      imageReader.readAsDataURL(image);
-      imageReader.onloadend = () => {
-        setViewImage(imageReader.result);
-      };
+      navigate('/crop/avatar', {
+        state: { file: image, conversationId: conversation?._id },
+      });
     }
   };
 

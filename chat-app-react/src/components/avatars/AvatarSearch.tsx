@@ -21,7 +21,6 @@ export const AvatarSearch: FC<IPropAvatarSearch> = ({
   const [add, setAdd] = useState(false);
   const handleAddUser = (data: IFriend) => {
     const friendAdd: IParticipant = convertFriendToParticipant(data);
-    console.log(friendAdd);
     if (setListUserAddGroup) {
       if (!add) {
         setListUserAddGroup((prev) => [...prev, friendAdd]);

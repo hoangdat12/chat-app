@@ -4,8 +4,9 @@ import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { PostRepository } from './post.repository';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { RedisService } from '../redis/redis.service';
-import { PostType } from '../ultils/constant';
+import { PostMode, PostType } from '../ultils/constant';
 import { ProfileRepository } from '../profile/repository/profile.repository';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class PostService {
@@ -27,10 +28,23 @@ export class PostService {
     if (!foundUser)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
+    const objectIdUserId = new mongoose.Types.ObjectId(postUserId);
+    const match =
+      user._id === postUserId
+        ? {
+            user: objectIdUserId,
+            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
+          }
+        : {
+            user: objectIdUserId,
+            post_mode: PostMode.PUBLIC,
+            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
+          };
+
     const posts = await this.postReposotpory.findByUserIdV2(
       user,
-      postUserId,
       pagination,
+      match,
     );
 
     for (let post of posts) {
@@ -147,7 +161,6 @@ export class PostService {
       throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
     if (foundPost.user._id.toString() !== user._id)
       throw new HttpException('You not permission!', HttpStatus.BAD_REQUEST);
-
     return await this.postReposotpory.changePostMode(
       user._id,
       postId,
@@ -157,6 +170,31 @@ export class PostService {
 
   async getPostOfFriend(user: IUserCreated, pagination: Pagination) {
     return await this.postReposotpory.getPostOfFriend(user, pagination);
+  }
+
+  async getAllPost(user: IUserCreated, pagination: Pagination) {
+    const match = {
+      $and: [
+        {
+          $or: [{ post_mode: PostMode.FRIEND }, { post_mode: PostMode.PUBLIC }],
+        },
+        {
+          $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
+        },
+      ],
+    };
+    const posts = await this.postReposotpory.findByUserIdV2(
+      user,
+      pagination,
+      match,
+    );
+    for (let post of posts) {
+      if (post.post_type !== PostType.POST) {
+        post.post_share = await this.postReposotpory.findById(post.post_share);
+      }
+    }
+
+    return posts;
   }
 
   // Private

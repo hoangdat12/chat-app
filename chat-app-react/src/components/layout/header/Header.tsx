@@ -132,7 +132,6 @@ const Header: FC<IPropHeader> = memo(
       const handleSearchUser = async () => {
         setIsLoading(true);
         const res = await userService.findUserByName(searchValue.trim());
-        console.log(res);
         if (res.status === 200) {
           setUserSearch(res.data.metaData.users);
           setIsShowSearchModal(true);
@@ -255,7 +254,7 @@ const Header: FC<IPropHeader> = memo(
 
             <div onClick={handleShowModel} className='relative float-right'>
               <Avatar
-                className={' w-[42px] h-[42px]'}
+                className={'w-[42px] h-[42px] min-h-[42px] min-w-[42px]'}
                 avatarUrl={
                   'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
                 }

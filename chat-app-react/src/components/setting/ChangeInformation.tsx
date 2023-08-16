@@ -168,7 +168,10 @@ const ChangeInformation = () => {
           </div>
         ) : (
           <>
-            <Avatar avatarUrl={userLocal.avatarUrl} className='w-16 h-16' />
+            <Avatar
+              avatarUrl={userLocal.avatarUrl}
+              className='w-16 h-16 min-h-[4rem] min-w-[4rem]'
+            />
             <div>
               <h2 className='text-lg'>{getUsername(userLocal)}</h2>
               <p className='text-sm text-[#8995a7]'>

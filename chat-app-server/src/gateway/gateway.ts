@@ -61,9 +61,7 @@ export class MessagingGateway implements OnModuleInit {
   private readonly server: Server;
 
   @SubscribeMessage('createMessage')
-  onMessage(@MessageBody() body: any) {
-    console.log(body);
-  }
+  onMessage(@MessageBody() body: any) {}
 
   @OnEvent('message.create')
   handleMessageCreateEvent(payload: Messages) {
@@ -266,7 +264,6 @@ export class MessagingGateway implements OnModuleInit {
     @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
     const { caller, receiver } = data;
-    console.log('close data::: ', data);
     if (socket.user._id === caller.userId) {
       const receiverSocket = this.sessions.getUserSocket(receiver.userId);
       socket.emit(WebsocketEvents.ON_VIDEO_CLOSE);

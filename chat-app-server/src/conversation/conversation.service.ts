@@ -506,7 +506,6 @@ export class ConversationService {
       for (let participant of conversation.participants) {
         const user = await this.authRepository.findById(participant.userId);
         participant.peerId = user.peer;
-        console.log(participant);
       }
       await conversation.save();
     }
