@@ -8,7 +8,6 @@ import {
 } from 'src/ultils/interface/notify.interface';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { NotifyType } from '../ultils/constant/notify.constant';
-import { getUsername } from '../ultils';
 import { DataCreateNotify } from './notify.dto';
 
 @Injectable()
@@ -99,6 +98,8 @@ export class NotifyService {
     switch (notifyType) {
       case NotifyType.ADD_FRIEND:
         return `**${userName}** sent you a friend request`;
+      case NotifyType.CONFIRM_FRIEND:
+        return `**${userName}** has accepted your friend request`;
       case NotifyType.COMMENT:
         return `**${userName}** commented on **your photo**`;
       case NotifyType.COMMENT_REPLY:
@@ -107,12 +108,17 @@ export class NotifyService {
         return `**${userName}** express your feelings about your comment about **${post.userName}'s post**`;
       case NotifyType.LIKE_IMAGE:
         return `**${userName}** liked **your photo**`;
+      default:
+        console.log('Not valid type!');
+        return;
     }
   }
 
   getNotifyLink(notifyLink: INotifyLink, notifyType: string) {
     switch (notifyType) {
       case NotifyType.ADD_FRIEND:
+        return null;
+      case NotifyType.CONFIRM_FRIEND:
         return null;
       case NotifyType.COMMENT:
         if (notifyLink.parrentCommentId) {
@@ -126,6 +132,9 @@ export class NotifyService {
         return `${notifyLink.postId}/${notifyLink.parrentCommentId}/${notifyLink.commentId}`;
       case NotifyType.LIKE_IMAGE:
         return `${notifyLink.postId}`;
+      default:
+        console.log('Type invalid!');
+        return;
     }
   }
 }

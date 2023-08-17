@@ -179,8 +179,7 @@ export const ListFriends: FC<IPropListFriends> = ({ friends, isLoading }) => {
         friends?.map((friend) => (
           <div key={friend._id} className='flex flex-col'>
             <FriendBox
-              avatarUrl={friend.avatarUrl}
-              userName={friend.userName}
+              friend={friend}
               width={'w-16 md:w-20'}
               height={'h-16 md:h-20'}
               fontSize={'text-sm md:text-md'}

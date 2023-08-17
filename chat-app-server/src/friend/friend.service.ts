@@ -11,6 +11,7 @@ import { ProfileRepository } from '../profile/repository/profile.repository';
 import { FriendRequestRepository } from './repository/friend.request.repository';
 import { FriendStatus, Services } from '../ultils/constant';
 import { IGatewaySessionManager } from '../gateway/gateway.sesstion';
+import { DataCreateNotify } from 'src/notify/notify.dto';
 
 @Injectable()
 export class FriendService {
@@ -122,32 +123,50 @@ export class FriendService {
   }
 
   // The action of user received request add friend
-  async confirmFriend(userId: string, friendId: string) {
+  async confirmFriend(user: IUserCreated, friendId: string) {
     const foundUser = await this.authRepository.findById(friendId);
     if (!foundUser)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
     const foundRequest = await this.friendRequestRepository.findById(
-      userId,
+      user._id,
       friendId,
     );
     if (!foundRequest)
       throw new HttpException('Request not found', HttpStatus.BAD_REQUEST);
 
     // Create new Friend
-    await this.friendRepository.confirmFriend(userId, friendId);
+    await this.friendRepository.confirmFriend(user._id, friendId);
 
-    // Delete Notify
-    this.notifyService.deleteNotifyAddFriend(userId, friendId);
+    // Delete older Notify
+    this.notifyService.deleteNotifyAddFriend(user._id, friendId);
 
-    this.changeQuantityFriend(userId, friendId);
+    this.changeQuantityFriend(user._id, friendId);
 
     // Delete Friend Request;
-    await this.friendRequestRepository.refuseFriend(userId, friendId);
+    this.friendRequestRepository.refuseFriend(user._id, friendId);
 
     // Create new notify
+    const notifyData: DataCreateNotify = {
+      notifyType: NotifyType.CONFIRM_FRIEND,
+      ownerNotify: { userId: friendId },
+      notify_friend: convertUserToFriend(foundUser),
+      notifyLink: undefined,
+      post: undefined,
+    };
+    const notify = await this.notifyService.createNotify(
+      {
+        userId: user._id,
+        userName: getUsername(user),
+        avatarUrl: user.avatarUrl,
+      },
+      notifyData,
+    );
 
-    return foundUser;
+    return {
+      friendData: foundUser,
+      notify,
+    };
   }
 
   // The action of user received request add friend
@@ -167,7 +186,7 @@ export class FriendService {
     await this.friendRequestRepository.refuseFriend(userId, friendId);
 
     // Delete Notify
-    await this.notifyService.deleteNotifyAddFriend(userId, friendId);
+    this.notifyService.deleteNotifyAddFriend(userId, friendId);
 
     return 'Refuse friend successfully!';
   }

@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { IDataCreateNotify } from '../ultils/interface/notify.interface';
 import { IUserCreated, Pagination } from '../ultils/interface';
 import { checkNegativeNumber } from '../ultils';
+import { NotifyType } from '../ultils/constant';
 
 @Injectable()
 export class NotifyRepository {
@@ -34,14 +35,15 @@ export class NotifyRepository {
   async deleteNotifyAddFriend(userId: string, friendId: string) {
     return await this.notifyModel.deleteOne({
       user_id: userId,
-      'notify_friend.userId': friendId,
+      'notify_friend._id': friendId,
+      notify_type: NotifyType.ADD_FRIEND,
     });
   }
 
   async findNotifyAddFriend(userId: string, friendId: string) {
     return await this.notifyModel.findOne({
       user_id: userId,
-      'notify_friend.userId': friendId,
+      'notify_friend._id': friendId,
     });
   }
 

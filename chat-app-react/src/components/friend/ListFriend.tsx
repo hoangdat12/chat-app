@@ -35,8 +35,7 @@ const ListFriendOfUser = memo(() => {
         {onlineFriends &&
           onlineFriends.map((online) => (
             <FriendBoxCircle
-              avatarUrl={online.avatarUrl}
-              userName={online.userName}
+              friend={online}
               className='w-10 h-10'
               status={'online'}
               onlineStatus='Tired!'
@@ -61,8 +60,7 @@ const ListFriendOfUser = memo(() => {
         {offlineFriends &&
           offlineFriends.map((offline) => (
             <FriendBoxCircle
-              avatarUrl={offline.avatarUrl}
-              userName={offline.userName}
+              friend={offline}
               className='w-10 h-10'
               status={'offline'}
               onlineStatus='Tired!'

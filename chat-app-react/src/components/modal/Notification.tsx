@@ -1,9 +1,8 @@
-import { FC, memo, useContext, useEffect } from 'react';
+import { FC, memo, useContext, useEffect, useState } from 'react';
 import Button from '../button/Button';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { confirmFriend, refuseFriend } from '../../features/friend/friendSlice';
 import Loading from '../button/Loading';
-import { IFriend } from '../../ultils/interface/friend.interface';
 import { SocketContext } from '../../ultils/context/Socket';
 import { INotify } from '../../ultils/interface';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +13,7 @@ import {
   selectNotify,
 } from '../../features/notify/notifySlice';
 import { Notify } from '../notify/Notify';
+import { NotifyAlert } from '../alert/Alert';
 
 export interface INotificationProps {
   showNotification: boolean;
@@ -22,6 +22,8 @@ export interface INotificationProps {
 
 const Notification: FC<INotificationProps> = memo(
   ({ showNotification, setShowNotification }) => {
+    const [showNotify, setShowNotify] = useState(false);
+
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const socket = useContext(SocketContext);
@@ -29,13 +31,15 @@ const Notification: FC<INotificationProps> = memo(
     const { notifies, isLoading } = useAppSelector(selectNotify);
 
     // Confirm add friend
-    const handleConfirm = async (userAddFriend: IFriend) => {
-      dispatch(confirmFriend(userAddFriend));
+    const handleConfirm = async (notify: INotify) => {
+      dispatch(confirmFriend(notify.notify_friend));
+      dispatch(deleteNotify(notify));
     };
 
     // Refuse add friend
-    const handleDelete = (userAddFriend: IFriend) => {
-      dispatch(refuseFriend(userAddFriend));
+    const handleDelete = (notify: INotify) => {
+      dispatch(refuseFriend(notify.notify_friend));
+      dispatch(deleteNotify(notify));
     };
 
     // View Profile's friend
@@ -46,6 +50,7 @@ const Notification: FC<INotificationProps> = memo(
 
     // Socket received request add friend
     const handleReceivedNotify = (data: INotify) => {
+      setShowNotify(true);
       dispatch(receivedNotify(data));
     };
 
@@ -58,6 +63,17 @@ const Notification: FC<INotificationProps> = memo(
     useEffect(() => {
       dispatch(getAllNotify());
     }, []);
+
+    useEffect(() => {
+      if (showNotify) {
+        const timer = setTimeout(() => {
+          setShowNotify(false);
+        }, 2000);
+
+        return () => clearTimeout(timer);
+      }
+    }, [showNotify]);
+
     useEffect(() => {
       socket.on('connection', (data: any) => {
         console.log(data);
@@ -93,12 +109,10 @@ const Notification: FC<INotificationProps> = memo(
                     >
                       <Notify
                         notify={notify}
-                        handleConfirm={() =>
-                          handleConfirm(notify.notify_friend)
-                        }
-                        handleDelete={() => handleDelete(notify.notify_friend)}
+                        handleConfirm={() => handleConfirm(notify)}
+                        handleDelete={() => handleDelete(notify)}
                         handleViewProfile={() =>
-                          handleViewProfile(notify.notify_friend.userId)
+                          handleViewProfile(notify.notify_friend._id)
                         }
                       />
                     </div>
@@ -121,6 +135,7 @@ const Notification: FC<INotificationProps> = memo(
             !showNotification && 'hidden'
           } absolute top-[130%] -translate-y-[100%] right-[50%] translate-x-1/2 border-8 border-transparent border-b-gray-50 duration-300`}
         ></div>
+        {showNotify && <NotifyAlert msg={'You have some new notify'} />}
       </>
     );
   }

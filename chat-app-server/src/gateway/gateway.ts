@@ -19,6 +19,7 @@ import {
   ICallClosePayload,
   IConversation,
   IMessage,
+  INotify,
   IRejectVideoPayload,
   ISocketCallInitiate,
   ISocketChangeEmoji,
@@ -172,6 +173,12 @@ export class MessagingGateway implements OnModuleInit {
         participantSocket.emit('onChangeNameGroup', conversation);
       }
     }
+  }
+
+  @OnEvent('friend.confirm')
+  handleConfirmFriend(payload: INotify) {
+    const authSocket = this.sessions.getUserSocket(payload.user_id);
+    if (authSocket) authSocket.emit('receivedNotify', payload);
   }
 
   @OnEvent('friend.received.add')

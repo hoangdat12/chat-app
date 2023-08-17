@@ -1,10 +1,17 @@
 import { FC } from 'react';
 import AvatarSquare from '../avatars/AvatarSquare';
 import { AvatarOnline } from '../avatars/Avatar';
+import { useNavigate } from 'react-router-dom';
+import { conversationService } from '../../features/conversation/conversationService';
+import { IConversation, IFriend } from '../../ultils/interface';
+import {
+  convertFriendToParticipant,
+  convertUserToParticipant,
+  getUserLocalStorageItem,
+} from '../../ultils';
 
 export interface IFriendBoxProp {
-  avatarUrl: string;
-  userName: string;
+  friend: IFriend;
   status?: string;
   className?: string;
   width?: string;
@@ -15,9 +22,10 @@ export interface IFriendBoxProp {
   onlineStatus?: string;
 }
 
+const userLocal = getUserLocalStorageItem();
+
 const FriendBox: FC<IFriendBoxProp> = ({
-  avatarUrl,
-  userName,
+  friend,
   width,
   height,
   fontSize,
@@ -27,32 +35,66 @@ const FriendBox: FC<IFriendBoxProp> = ({
   return (
     <div onClick={onClick} className='flex flex-col flex-wrap'>
       <AvatarSquare
-        avatarUrl={avatarUrl}
+        avatarUrl={friend.avatarUrl}
         className={`${width ?? 'w-full'} ${height ?? 'h-full'}`}
       />
       <h1 className={`${fontSize ?? 'text-base'} ${margin ?? 'mt-2'}`}>
-        {userName}
+        {friend.userName}
       </h1>
     </div>
   );
 };
 
 export const FriendBoxCircle: FC<IFriendBoxProp> = ({
-  userName,
-  avatarUrl,
+  friend,
   className,
   status,
   onlineStatus,
 }) => {
+  const navigate = useNavigate();
+
+  const handleChat = async () => {
+    const res = await conversationService.findMatchConversation(friend._id);
+    console.log(res);
+    if (res.status === 200) {
+      const foundConversation = res.data.metaData;
+      if (foundConversation) {
+        navigate(`/conversation/${foundConversation._id}`);
+      } else {
+        const fakeConversation: IConversation = {
+          _id: friend._id,
+          conversation_type: 'conversation',
+          participants: [
+            convertFriendToParticipant(friend),
+            convertUserToParticipant(userLocal),
+          ],
+          lastMessage: undefined,
+          updatedAt: new Date().toString(),
+          createdAt: new Date().toString(),
+          nameGroup: undefined,
+          userId: [],
+          avatarUrl: '',
+          collection: '',
+        };
+        navigate(`/conversation/${friend._id}`, {
+          state: { fakeConversation },
+        });
+      }
+    }
+  };
+
   return (
-    <div className='flex gap-2 items-center cursor-pointer'>
+    <div
+      onClick={handleChat}
+      className='flex gap-2 items-center cursor-pointer'
+    >
       <AvatarOnline
-        avatarUrl={avatarUrl}
+        avatarUrl={friend.avatarUrl}
         className={className}
         status={status}
       />
       <div>
-        <h1 className='text-sm'>{userName}</h1>
+        <h1 className='text-sm'>{friend.userName}</h1>
         {onlineStatus && (
           <p className='text-xs text-gray-500'>{onlineStatus}</p>
         )}

@@ -127,8 +127,12 @@ export class FriendController {
   async confirmFriend(@Req() req: Request, @Body('friendId') friendId: string) {
     try {
       const user = req.user as IUserCreated;
-      // this.eventEmitter.emit('friend.confirm', )
-      return new Ok(await this.friendService.confirmFriend(user._id, friendId));
+      const { friendData, notify } = await this.friendService.confirmFriend(
+        user,
+        friendId,
+      );
+      this.eventEmitter.emit('friend.confirm', notify);
+      return new Ok(friendData);
     } catch (error) {
       throw error;
     }

@@ -86,6 +86,10 @@ const UserInformation: FC<IUserInformationProp> = memo(
                   lastMessage: undefined,
                   updatedAt: new Date().toString(),
                   createdAt: new Date().toString(),
+                  nameGroup: undefined,
+                  userId: [],
+                  avatarUrl: '',
+                  collection: '',
                 };
                 navigate(`/conversation/${profile?.profile_user._id}`, {
                   state: { fakeConversation },
@@ -93,8 +97,6 @@ const UserInformation: FC<IUserInformationProp> = memo(
               }
             }
           }
-
-          console.log('chat now');
         } else {
           // Follow
         }
