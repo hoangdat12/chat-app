@@ -19,6 +19,7 @@ import {
   deleteMemberOfGroup,
   leaveGroup,
   selectConversation,
+  updateConversationIdOfFakeConversation,
   updateLastMessage,
 } from '../../../features/conversation/conversationSlice';
 import {
@@ -72,14 +73,14 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const socket = useContext(SocketContext);
   const dispatch = useAppDispatch();
 
-  const { conversationId } = useParams();
+  let { conversationId } = useParams();
   const { conversations } = useAppSelector(selectConversation);
   const conversation = conversations.get(conversationId ?? '') as IConversation;
 
   const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
     conversation,
   ]);
-  const { userName, status, avatarUrl } = getInforChatFromConversation(
+  const { userName, status, avatarUrl, userId } = getInforChatFromConversation(
     user,
     conversation
   ) as IInforConversation;
@@ -117,11 +118,21 @@ const ConversationContent: FC<IPropConversationContent> = ({
           message_content_type: MessageContentType.MESSAGE,
         };
         const res = await messageService.createNewMessage(body);
+        const data = getUserNameAndAvatarUrl(user, conversation);
+        // Fix error
+        if (conversation && data?.userId === conversation?._id) {
+          dispatch(
+            updateConversationIdOfFakeConversation({
+              fakeConversationId: conversation?._id,
+              newConversationId: res.data.metaData.message_conversation,
+            })
+          );
+        }
         if (res.status === 201) {
           dispatch(createNewMessage(res.data.metaData));
           const dataUpdate = {
             lastMessage: res.data.metaData,
-            conversationId: conversation?._id,
+            conversationId: res.data.metaData.message_conversation,
           };
           dispatch(createNewMessageOfConversation(dataUpdate));
         }
@@ -336,6 +347,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         avatarUrl={avatarUrl}
         status={status}
         conversation={conversation}
+        userId={userId}
       />
 
       <MessageContent />

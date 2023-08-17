@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 
 import Layout from '../../components/layout/Layout';
 import './conversation.scss';
-import { Route, Routes, useParams } from 'react-router-dom';
+import { Route, Routes, useLocation, useParams } from 'react-router-dom';
 import ConversationList from '../../components/conversation/ConversationList';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
+  createFakeConversation,
   fetchConversationOfUser,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
@@ -20,12 +21,13 @@ import { IConversation } from '../../ultils/interface';
 const Conversation = () => {
   const [showListConversationSM, setShowListConversationSM] = useState(false);
   const [showMoreConversation, setShowMoreConversation] = useState(false);
-  const ditpatch = useAppDispatch();
+  const dispatch = useAppDispatch();
   const { conversations } = useAppSelector(selectConversation);
 
   const innerWitdh = useInnerWidth();
   const user = getUserLocalStorageItem();
   const { conversationId } = useParams();
+  const location = useLocation();
   const conversation = conversations.get(conversationId ?? '');
 
   const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
@@ -65,11 +67,18 @@ const Conversation = () => {
 
   useEffect(() => {
     const fetchListConversationOfUser = async () => {
-      await ditpatch(fetchConversationOfUser(user?._id ? user?._id : ' '));
+      await dispatch(fetchConversationOfUser(user?._id ? user?._id : ' '));
     };
 
     fetchListConversationOfUser();
   }, []);
+
+  useEffect(() => {
+    if (location?.state?.fakeConversation) {
+      dispatch(createFakeConversation(location.state.fakeConversation));
+      location.state.fakeConversation = undefined;
+    }
+  }, [location]);
 
   return (
     <Layout>

@@ -4,6 +4,7 @@ import { AvatarOnline } from '../avatars/Avatar';
 import { calculatorTime } from '../../ultils';
 import OptionMessage from '../modal/OptionMessage';
 import { MessageContentType } from '../../ultils/constant/message.constant';
+import { useNavigate } from 'react-router-dom';
 
 export interface IMessageBoxGroupProp {
   isOwn: boolean;
@@ -15,7 +16,7 @@ export const MessageBoxGroup: FC<IMessageBoxGroupProp> = ({
   message,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const navigate = useNavigate();
   const [showItem, setShowItem] = useState('');
   // const [updateMessage, setUpdateMessage] = useState(false);
   const [updateMessageValue, setUpdateMessageValue] = useState('');
@@ -40,7 +41,12 @@ export const MessageBoxGroup: FC<IMessageBoxGroupProp> = ({
         </div>
       ) : (
         <>
-          <div className={`${isOwn && 'order-2'}`}>
+          <div
+            onClick={() =>
+              navigate(`/profile/${message.message_sender_by.userId}`)
+            }
+            className={`${isOwn && 'order-2'}`}
+          >
             <AvatarOnline
               className={'w-8 h-8 sm:w-10 sm:h-10 '}
               avatarUrl={message.message_sender_by.avatarUrl}

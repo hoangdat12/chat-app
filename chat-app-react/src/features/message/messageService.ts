@@ -7,6 +7,7 @@ import {
   IDataReceived,
   IDataUpdateMessageOfConversation,
   IMessage,
+  IResponse,
 } from '../../ultils/interface';
 import myAxios from '../../ultils/myAxios';
 
@@ -86,12 +87,16 @@ const fetchMessageOfConversation = async (
   }
 };
 
-const createNewMessage = async (data: IDataCreateMessage) => {
+const createNewMessage = async (
+  data: IDataCreateMessage
+): Promise<IResponse<IMessage>> => {
   const res = await myAxios.post('/message', data);
   return res;
 };
 
-const createNewMessageImage = async (data: FormData) => {
+const createNewMessageImage = async (
+  data: FormData
+): Promise<IResponse<IMessage>> => {
   const res = await myAxios.post('/message/image', data);
   return res;
 };

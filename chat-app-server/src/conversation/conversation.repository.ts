@@ -296,6 +296,16 @@ export class ConversationRepository {
     );
   }
 
+  async findMatchConversation(userId: string, matchId: string) {
+    return await this.conversationModel.findOne({
+      conversation_type: 'conversation',
+      $and: [
+        { 'participants.userId': userId },
+        { 'participants.userId': matchId },
+      ],
+    });
+  }
+
   // ULTILS
   modifyDataPaticipants(participants: IParticipant[], userId: string) {
     for (let participant of participants) {

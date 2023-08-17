@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { IPost } from '../ultils/interface';
+import { IFriend, IPost } from '../ultils/interface';
 
 export class DataCreatePost {
   post_content: string;
@@ -8,6 +8,7 @@ export class DataCreatePost {
   @IsNotEmpty()
   post_mode: string;
   post_share: IPost | null;
+  post_tag?: IFriend[];
 }
 
 export class IDataUpdatePost {

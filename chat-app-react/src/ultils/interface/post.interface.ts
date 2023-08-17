@@ -1,4 +1,4 @@
-import { IUser } from '.';
+import { IFriend, IUser } from '.';
 
 export interface PostMode {
   title: string;
@@ -16,7 +16,7 @@ export interface IPost {
   post_comments_num: number;
   post_likes_num: number;
   post_share_num: string;
-  post_tag: FriendTag[];
+  post_tag: IFriend[];
   createdAt: string;
   updatedAt: string;
   liked?: boolean;

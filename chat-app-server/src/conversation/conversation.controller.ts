@@ -345,6 +345,21 @@ export class ConversationController {
     }
   }
 
+  @Get('/match/:matchId')
+  async getMatchConversation(
+    @Req() req: Request,
+    @Param('matchId') matchId: string,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(
+        await this.conversationService.getMatchConversation(user._id, matchId),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get('/bug/fix')
   async fixBug() {
     return await this.conversationService.fixBug();

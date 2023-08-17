@@ -6,7 +6,7 @@ import { IoIosInformationCircleOutline } from 'react-icons/io';
 import { FC, MouseEventHandler, memo, useContext } from 'react';
 import { ButtonRounded } from '../../button/ButtonRounded';
 import { IConversation, IParticipant, IUser } from '../../../ultils/interface';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { SocketContext } from '../../../ultils/context/Socket';
 import { initiateCallState } from '../../../features/call/callSlice';
 import { useAppDispatch } from '../../../app/hook';
@@ -24,6 +24,7 @@ export interface IPropHeaderContent {
   avatarUrl: string | null;
   status?: string | null;
   conversation: IConversation;
+  userId?: string | null;
 }
 
 const userLocal = getUserLocalStorageItem();
@@ -99,8 +100,10 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
     avatarUrl,
     status,
     conversation,
+    userId,
   }) => {
     const { conversationId } = useParams();
+    const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const socket = useContext(SocketContext);
 
@@ -129,7 +132,7 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
         </div>
         {/* All */}
         <div className='flex w-full gap-3 cursor-pointer '>
-          <div className=''>
+          <div onClick={() => navigate(`/profile/${userId}`)}>
             <Avatar
               className={
                 'md:min-h-[3.5rem] md:min-w-[3.5rem] md:w-14 md:h-14 min-h-[3rem] min-w-[3rem] h-12 w-12'
@@ -179,6 +182,7 @@ export interface IInforConversation {
   userName: string | null;
   avatarUrl: string | null;
   status: string | null;
+  userId?: string | null;
 }
 
 export default HeaderContent;

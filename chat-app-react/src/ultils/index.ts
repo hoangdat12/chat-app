@@ -221,6 +221,7 @@ export const getUserNameAndAvatarUrl = (
         userName: conversation.nameGroup,
         avatarUrl: conversation.avatarUrl,
         status: null,
+        userId: null,
       };
     } else {
       for (let received of conversation.participants) {
@@ -229,6 +230,7 @@ export const getUserNameAndAvatarUrl = (
             userName: received.userName,
             avatarUrl: received.avatarUrl,
             status: 'online',
+            userId: received.userId,
           };
         }
       }
@@ -265,9 +267,21 @@ export const convertUserToParticipant = (user: IUser): IParticipant => {
     email: user.email,
     avatarUrl: user.avatarUrl,
     userName: getUsername(user),
-    enable: false,
-    isReadLastMessage: false,
+    enable: true,
+    isReadLastMessage: true,
     peerId: user.peer,
+  };
+};
+
+export const convertUserToFriend = (user: IUser): IFriend => {
+  return {
+    _id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    peerId: user.peer,
+    userName: getUsername(user),
+    email: user.email,
+    avatarUrl: user.avatarUrl,
   };
 };
 

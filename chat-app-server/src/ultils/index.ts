@@ -1,5 +1,11 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { IMessage, IParticipant, IUserCreated, Pagination } from './interface';
+import {
+  IFriend,
+  IMessage,
+  IParticipant,
+  IUserCreated,
+  Pagination,
+} from './interface';
 import * as _ from 'lodash';
 import { Types, isValidObjectId } from 'mongoose';
 
@@ -73,6 +79,18 @@ export const getMessageNotify = (
       } others to the group`
     );
   }
+};
+
+export const convertUserToFriend = (user: IUserCreated): IFriend => {
+  return {
+    _id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    peerId: user.peer,
+    userName: getUsername(user),
+    email: user.email,
+    avatarUrl: user.avatarUrl,
+  };
 };
 
 export const objectNotContainNull = (obj: any) => {

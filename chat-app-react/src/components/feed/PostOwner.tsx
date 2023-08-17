@@ -10,6 +10,7 @@ import { PostMode as PostModeType, PostType } from '../../ultils/constant';
 import { postService } from '../../features/post/postService';
 import PostMode from './PostMode';
 import { postMode } from '../../ultils/list/post.list';
+import CreatePostWith from './CreatePostWith';
 
 export interface IPropPostOwner {
   post: IPost;
@@ -101,9 +102,17 @@ const PostOwner: FC<IPropPostOwner> = ({
             className={'w-12 h-12 min-h-[3rem] min-w-[3rem]'}
           />
           <div>
-            <h1 className='text-base'>{getUsername(post?.user)}</h1>
+            <div className='flex items-center'>
+              <h1 className='text-base'>{getUsername(post?.user)}</h1>
+              {post && post.post_tag && (
+                <CreatePostWith listFriendTag={post.post_tag} />
+              )}
+            </div>
             <div className='relative flex gap-1 items-center'>
-              <span onClick={handleShowPostMode} className='cursor-pointer'>
+              <span
+                onClick={handleShowPostMode}
+                className='text-sm cursor-pointer text-[#565252]'
+              >
                 {modeDefault && <modeDefault.Icon />}
               </span>
               {isOwner && showChangePostMode && (
@@ -113,7 +122,7 @@ const PostOwner: FC<IPropPostOwner> = ({
                   position={'top-6 left-0'}
                 />
               )}
-              <p className='text-sm text-[#678]'>
+              <p className='text-xs text-[#678]'>
                 {getTimeCreatePost(post?.createdAt)}
               </p>
             </div>

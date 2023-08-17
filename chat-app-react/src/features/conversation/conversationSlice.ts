@@ -275,6 +275,23 @@ const conversationSlice = createSlice({
         foundConversation.avatarUrl = action.payload.avatarUrl;
       }
     },
+    createFakeConversation: (state, action: PayloadAction<IConversation>) => {
+      state.conversations.set(action.payload._id, action.payload);
+    },
+    updateConversationIdOfFakeConversation: (
+      state,
+      action: PayloadAction<{
+        fakeConversationId: string;
+        newConversationId: string;
+      }>
+    ) => {
+      const foundConversation = state.conversations.get(
+        action.payload.fakeConversationId
+      );
+      if (foundConversation) {
+        foundConversation._id = action.payload.newConversationId;
+      }
+    },
   },
   extraReducers: (builder) => {
     // Get last conversation
@@ -457,6 +474,8 @@ export const {
   changeAvatarOfConversation,
   changeNameOfConversation,
   updateAvatarOfGroup,
+  createFakeConversation,
+  updateConversationIdOfFakeConversation,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

@@ -11,6 +11,7 @@ import { IUserCreated } from '../ultils/interface';
 import {
   CreateMessageData,
   DelelteMessageData,
+  PayloadCreateMessage,
   UpdateMessageData,
 } from '../message/message.dto';
 import { MessageType } from '../ultils/constant';
@@ -40,6 +41,7 @@ export class MessageService {
       user._id,
     );
     // Not found group
+    let newConversation = null;
     if (message_type === MessageType.GROUP && !conversation)
       throw new HttpException(
         'Conversation not found!',
@@ -54,21 +56,20 @@ export class MessageService {
         avatarUrl: null,
         nameGroup: null,
       };
-      const newConversation = await this.conversationService.createConversation(
+      newConversation = await this.conversationService.createConversation(
         user,
         payload,
       );
-      conversationId = newConversation._id.toString();
     }
-    const payload = {
+    const payload: PayloadCreateMessage = {
       message_type,
       message_content,
-      conversationId,
+      conversationId: newConversation
+        ? newConversation._id.toString()
+        : conversationId,
       message_received: conversation?.participants ?? participants,
       message_content_type,
-      ...data,
     };
-
     // Create new Message
     const message = await this.messageRepository.createMessageConversation(
       user,
@@ -84,7 +85,7 @@ export class MessageService {
     // Update last message
     await this.conversationRepository.updateLastConversationMessage(
       user,
-      conversationId,
+      newConversation ? newConversation._id.toString() : conversationId,
       this.convertObjectIdToString(message),
     );
 

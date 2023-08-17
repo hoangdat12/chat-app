@@ -117,6 +117,13 @@ const handleLeaveGroup = async (
   return res.data.metaData;
 };
 
+const findMatchConversation = async (
+  userId?: string
+): Promise<IResponse<IConversation>> => {
+  const res = await myAxios.get(`/conversation/match/${userId}`);
+  return res;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
   searchConversationByName,
@@ -131,4 +138,5 @@ export const conversationService = {
   handleChangeNameOfGroup,
   handleDeleteConversation,
   handleLeaveGroup,
+  findMatchConversation,
 };

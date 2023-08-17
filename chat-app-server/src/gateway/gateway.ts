@@ -177,14 +177,14 @@ export class MessagingGateway implements OnModuleInit {
   @OnEvent('friend.received.add')
   handleSendConfirmToFriend(payload: ISocketAddFriend) {
     const { user, friend } = payload;
-    const friendSocket = this.sessions.getUserSocket(friend.userId);
+    const friendSocket = this.sessions.getUserSocket(friend._id);
     if (friendSocket) friendSocket.emit('onAddFriend', user);
   }
 
   @OnEvent('friend.user.cancel')
   handleUserCancelAddFriend(payload: ISocketAddFriend) {
     const { user, friend } = payload;
-    const friendSocket = this.sessions.getUserSocket(friend.userId);
+    const friendSocket = this.sessions.getUserSocket(friend._id);
     if (friendSocket) friendSocket.emit('onCancelFriend', user);
   }
 

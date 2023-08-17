@@ -17,24 +17,28 @@ const CreatePostWith: FC<IPropCreatePostWith> = memo(({ listFriendTag }) => {
       {listFriendTag.map((friend, idx) => {
         if (idx === 0)
           return (
-            <div key={idx}>
-              <span className='text-sm'>With</span>
-              <Username
-                userName={friend.userName}
-                userId={friend.userId}
-                border={true}
-              />
+            <div key={idx} className='flex'>
+              <span className='flex items-center text-xs pr-2'>With</span>
+              <div className='px-2 py-1 text-sm rounded bg-gray-300'>
+                <Username
+                  userName={friend.userName}
+                  userId={friend._id}
+                  border={true}
+                />
+              </div>
             </div>
           );
         else if (idx === 1)
           return (
             <>
               <span className='text-sm'>and</span>
-              <Username
-                userName={friend.userName}
-                userId={friend.userId}
-                border={true}
-              />
+              <div className='px-2 py-1 text-sm rounded bg-gray-300'>
+                <Username
+                  userName={friend.userName}
+                  userId={friend._id}
+                  border={true}
+                />
+              </div>
             </>
           );
         else
@@ -56,7 +60,7 @@ const CreatePostWith: FC<IPropCreatePostWith> = memo(({ listFriendTag }) => {
                   {listFriendTag.slice(2).map((other) => (
                     <Username
                       userName={other.userName}
-                      userId={other.userId}
+                      userId={other._id}
                       padding={2}
                       hover={'bg-gray-100 duration-300'}
                     />

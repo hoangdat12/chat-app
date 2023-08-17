@@ -3,7 +3,7 @@ import { IParticipant, IUserCreated, Pagination } from 'src/ultils/interface';
 import { IFriend } from '../ultils/interface/friend.interface';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { FriendRepository } from './repository/friend.repository';
-import { getUsername } from '../ultils';
+import { convertUserToFriend, getUsername } from '../ultils';
 import { NotifyService } from '../notify/notify.service';
 import { NotifyType } from '../ultils/constant/notify.constant';
 import { RedisService } from '../redis/redis.service';
@@ -104,10 +104,7 @@ export class FriendService {
     const data = {
       notifyType: NotifyType.ADD_FRIEND,
       ownerNotify: { userId: friendId },
-      notify_friend: {
-        ...userNotify,
-        email: user.email,
-      },
+      notify_friend: convertUserToFriend(user),
       notifyLink: null,
       post: null,
     };

@@ -483,6 +483,13 @@ export class ConversationService {
     return foundConversation;
   }
 
+  async getMatchConversation(userId: string, matchId: string) {
+    return await this.conversationRepository.findMatchConversation(
+      userId,
+      matchId,
+    );
+  }
+
   // Private
   async checkUserIsAdmin(user: IUserCreated, conversation: any) {
     let isValid = false;

@@ -1,6 +1,10 @@
 import { FC, memo, useEffect, useRef, useState } from 'react';
 import { CiEdit } from 'react-icons/ci';
-import { getUsername } from '../../ultils';
+import {
+  convertUserToParticipant,
+  getUserLocalStorageItem,
+  getUsername,
+} from '../../ultils';
 import Button from '../button/Button';
 import { StatusFriend } from '../../pages/profile/Profile';
 import { FaUserCheck, FaUserPlus } from 'react-icons/fa';
@@ -9,6 +13,8 @@ import { friendService } from '../../features/friend/friendService';
 import useClickOutside from '../../hooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
 import { IProfile } from '../../ultils/interface/profile.interface';
+import { conversationService } from '../../features/conversation/conversationService';
+import { IConversation } from '../../ultils/interface';
 
 export interface IUserInformationProp {
   profile: IProfile | null;
@@ -18,6 +24,8 @@ export interface IUserInformationProp {
   showDeleteFriend: boolean | null;
   setShowDeleteFriend: (value: boolean) => void;
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const UserInformation: FC<IUserInformationProp> = memo(
   ({
@@ -50,6 +58,46 @@ const UserInformation: FC<IUserInformationProp> = memo(
       const file = e.target.files?.[0];
       if (file) {
         setFile(file);
+      }
+    };
+
+    const handleClickButton2 = async () => {
+      if (isOwner) {
+        navigate('/setting');
+      } else {
+        if (statusFriend === StatusFriend.FRIEND) {
+          const res = await conversationService.findMatchConversation(
+            profile?.profile_user._id
+          );
+          console.log(res);
+          if (res.status === 200) {
+            const foundConversation = res.data.metaData;
+            if (foundConversation) {
+              navigate(`/conversation/${foundConversation._id}`);
+            } else {
+              if (profile) {
+                const fakeConversation: IConversation = {
+                  _id: profile?.profile_user._id,
+                  conversation_type: 'conversation',
+                  participants: [
+                    convertUserToParticipant(profile.profile_user),
+                    convertUserToParticipant(userLocal),
+                  ],
+                  lastMessage: undefined,
+                  updatedAt: new Date().toString(),
+                  createdAt: new Date().toString(),
+                };
+                navigate(`/conversation/${profile?.profile_user._id}`, {
+                  state: { fakeConversation },
+                });
+              }
+            }
+          }
+
+          console.log('chat now');
+        } else {
+          // Follow
+        }
       }
     };
 
@@ -135,7 +183,7 @@ const UserInformation: FC<IUserInformationProp> = memo(
               )}
             </div>
             <Button
-              onClick={isOwner ? () => navigate('/setting') : undefined}
+              onClick={handleClickButton2}
               className={'min-w-[120px] gap-1 px-3'}
               paddingY={'py-[6px]'}
               fontSize={'sm:text-base'}

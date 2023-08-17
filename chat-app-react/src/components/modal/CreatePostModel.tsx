@@ -5,7 +5,7 @@ import Button from '../button/Button';
 import {
   IFriend,
   IPost,
-  PostMode as PostModeType,
+  PostMode as PostModeInterface,
 } from '../../ultils/interface';
 import useClickOutside from '../../hooks/useClickOutside';
 import CreatePostWith from '../feed/CreatePostWith';
@@ -16,7 +16,8 @@ import { createPost } from '../../features/post/postSlice';
 import PostMode from '../feed/PostMode';
 import { postMode } from '../../ultils/list/post.list';
 import { IPropCreateFeed, ModeCreateFeed } from '../feed/CreateFeed';
-import { getUsername } from '../../ultils';
+import { convertUserToFriend } from '../../ultils';
+import { PostMode as PostModeType } from '../../ultils/constant/index';
 
 export interface IPropCreatePostModel extends IPropCreateFeed {
   setShow: (value: boolean) => void;
@@ -36,10 +37,11 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
   const [file, setFile] = useState<File | null>(null);
   const [previewPicture, setPreviewPicture] = useState<string | null>(null);
   const [listFriendTag, setListFriendTag] = useState<IFriend[]>([]);
-  const [postModeDefault, setPostModeDefault] = useState<PostModeType>(
+  const [postModeDefault, setPostModeDefault] = useState<PostModeInterface>(
     postMode[0]
   );
   const [showChangePostMode, setShowChangePostMode] = useState(false);
+  const [msgError, setMsgError] = useState('');
 
   const modalRef = useRef<HTMLDivElement | null>(null);
 
@@ -55,7 +57,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
     setPostContent((prev) => `${prev ?? ''}${emoji.native}`);
   };
 
-  const handleChangePostMode = (mode: PostModeType) => {
+  const handleChangePostMode = (mode: PostModeInterface) => {
     setPostModeDefault(mode);
     setShowChangePostMode(false);
   };
@@ -66,9 +68,19 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
       const data = {
         post_content: postContent,
         post_type: type,
+        // If have friend tag, only public or friend
         post_mode: postModeDefault.title.toLowerCase(),
         post_share: post?.post_type === PostType.POST ? post : post?.post_share,
+        post_tag: listFriendTag.length !== 0 ? listFriendTag : undefined,
       };
+      if (
+        listFriendTag.length !== 0 &&
+        postModeDefault.title.toLowerCase() === PostModeType.PRIVATE
+      ) {
+        // handle Error
+        setMsgError('Can only be set as Public mode or Friend mode');
+        return;
+      }
       if (file) formData.append('file', file);
       formData.append('data', JSON.stringify(data));
       dispatch(createPost(formData));
@@ -94,12 +106,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
       listFriendTag.length === 0 &&
       user
     ) {
-      const friend = {
-        userId: user._id,
-        userName: getUsername(user),
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-      };
+      const friend = convertUserToFriend(user);
       setListFriendTag([friend]);
     }
   }, [mode]);
@@ -201,16 +208,19 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
           type={type}
         />
 
-        <Button
-          text={'Post'}
-          className={'w-full'}
-          paddingY={'py-2'}
-          background={'bg-blue-500'}
-          border={'border-none'}
-          color={'text-white'}
-          hover={'hover:bg-blue-700 duration-300'}
-          onClick={handleCreatePost}
-        />
+        <div>
+          <Button
+            text={'Post'}
+            className={'w-full'}
+            paddingY={'py-2'}
+            background={'bg-blue-500'}
+            border={'border-none'}
+            color={'text-white'}
+            hover={'hover:bg-blue-700 duration-300'}
+            onClick={handleCreatePost}
+          />
+          {msgError && <p className='text-red-500 text-xs'>{msgError}</p>}
+        </div>
       </div>
     </div>
   );

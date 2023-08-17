@@ -5,6 +5,7 @@ import { IMessage } from '../../ultils/interface';
 import MessageBox from './MessageBox';
 import { MessageContentType } from '../../ultils/constant';
 import CallMessage from './CallMessage';
+import { useNavigate } from 'react-router-dom';
 
 export interface IPropMessage {
   className?: string;
@@ -16,6 +17,8 @@ export interface IPropMessage {
 export const Message: FC<IPropMessage> = memo(
   ({ messages, className, myMessage, timeSendMessage }) => {
     const [showItem, setShowItem] = useState('');
+    const navigate = useNavigate();
+
     return (
       <>
         <div className='flex items-center justify-center mt-6 text-[12px] '>
@@ -26,12 +29,18 @@ export const Message: FC<IPropMessage> = memo(
             myMessage && 'flex-col-reverse'
           } items-end justify-center mt-2`}
         >
-          <Avatar
-            className={`${
-              myMessage ? 'hidden' : 'flex'
-            } w-8 h-8 min-w-[32px] min-h-[32px] sm:w-10 sm:h-10 sm:min-h-[40px] sm:min-w-[40px] items-end`}
-            avatarUrl={messages[0].message_sender_by?.avatarUrl}
-          />
+          <div
+            onClick={() =>
+              navigate(`/profile/${messages[0].message_sender_by.userId}`)
+            }
+          >
+            <Avatar
+              className={`${
+                myMessage ? 'hidden' : 'flex'
+              } w-8 h-8 min-w-[32px] min-h-[32px] sm:w-10 sm:h-10 sm:min-h-[40px] sm:min-w-[40px] items-end`}
+              avatarUrl={messages[0].message_sender_by?.avatarUrl}
+            />
+          </div>
           <div
             className={`relative hover-message-show-time flex flex-col-reverse ${
               myMessage && 'items-end'

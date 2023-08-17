@@ -32,13 +32,33 @@ export class PostService {
     const match =
       user._id === postUserId
         ? {
-            user: objectIdUserId,
-            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
+            $or: [
+              {
+                user: objectIdUserId,
+                $or: [
+                  { post_type: PostType.POST },
+                  { post_type: PostType.SHARE },
+                ],
+              },
+              {
+                'post_tag._id': postUserId,
+              },
+            ],
           }
         : {
-            user: objectIdUserId,
-            post_mode: PostMode.PUBLIC,
-            $or: [{ post_type: PostType.POST }, { post_type: PostType.SHARE }],
+            $or: [
+              {
+                user: objectIdUserId,
+                post_mode: PostMode.PUBLIC,
+                $or: [
+                  { post_type: PostType.POST },
+                  { post_type: PostType.SHARE },
+                ],
+              },
+              {
+                'post_tag._id': postUserId,
+              },
+            ],
           };
 
     const posts = await this.postReposotpory.findByUserIdV2(
@@ -80,7 +100,7 @@ export class PostService {
   async createPost(
     user: IUserCreated,
     data: DataCreatePost,
-    post_image: string,
+    post_image: string | null,
   ) {
     if (data.post_type === PostType.SHARE && !data.post_share)
       throw new HttpException('Missing request value!', HttpStatus.BAD_REQUEST);
@@ -88,11 +108,7 @@ export class PostService {
     if (!data.post_content && !post_image && data.post_type === PostType.POST)
       throw new HttpException('Missing request value!', HttpStatus.BAD_REQUEST);
 
-    let newPost = (await this.postReposotpory.create(
-      user,
-      data,
-      post_image,
-    )) as any;
+    let newPost = await this.postReposotpory.create(user, data, post_image);
 
     if (!newPost)
       throw new HttpException('Db error!', HttpStatus.INTERNAL_SERVER_ERROR);

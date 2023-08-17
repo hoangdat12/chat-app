@@ -39,14 +39,20 @@ const Feed: FC<IFeedProp> = memo(
               saved={postType === PostType.SAVE}
             />
             <div className='mt-6'>
-              <p className='text-[#678]'>{post?.post_content}</p>
-              <div className='bg-black flex items-center justify-center rounded overflow-hidden gap-2 mt-4 border'>
-                <img
-                  src={post?.post_image}
-                  alt=''
-                  className='max-h-[50vh] min-h-[250px] max-w-[80vh] min-w-[200px]'
-                />
-              </div>
+              <p
+                className={`${post && !post.post_image && 'px-4'} text-[#678]`}
+              >
+                {post?.post_content}
+              </p>
+              {post && post.post_image && (
+                <div className='bg-black flex items-center justify-center rounded overflow-hidden gap-2 mt-4 border'>
+                  <img
+                    src={post?.post_image}
+                    alt=''
+                    className='max-h-[50vh] min-h-[250px] max-w-[80vh] min-w-[200px]'
+                  />
+                </div>
+              )}
             </div>
             {!shared && <PostLikeShareComment post={post} />}
           </div>
@@ -96,7 +102,7 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
 
   return (
     <>
-      <div className='flex items-center justify-between px-2 sm:px-4 py-2 mt-4 border-y'>
+      <div className='flex items-center justify-between px-2 sm:px-4 py-2 mt-4 border-y border-[#b9b9b9]'>
         <div className='flex gap-1 sm:gap-2 items-center cursor-pointer'>
           <span
             onClick={handleLikePost}

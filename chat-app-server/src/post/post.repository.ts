@@ -159,6 +159,7 @@ export class PostRepository {
       post_mode = PostMode.PUBLIC,
       post_type = PostType.POST,
       post_share = null,
+      post_tag,
     } = data;
     return await this.postModel.create({
       user: user._id,
@@ -167,6 +168,7 @@ export class PostRepository {
       post_type,
       post_mode,
       post_share,
+      post_tag,
     });
   }
 

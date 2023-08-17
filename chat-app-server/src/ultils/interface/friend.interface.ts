@@ -1,12 +1,14 @@
 import { IUserCreated } from './auth.interface';
 
 export interface IFriend {
-  userId: string;
+  _id: string;
   email: string;
   userName: string;
   avatarUrl: string;
-  createdAt?: Date;
-  isWatched?: boolean;
+  firstName: string;
+  lastName: string;
+  isFriend?: boolean;
+  peerId: string;
 }
 
 export interface ISocketAddFriend {
