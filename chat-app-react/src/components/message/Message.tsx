@@ -47,23 +47,35 @@ export const Message: FC<IPropMessage> = memo(
             } w-full`}
           >
             {messages.map((message) => {
-              return message.message_content_type ===
-                MessageContentType.VIDEO_CALL ||
-                message.message_content_type ===
-                  MessageContentType.VOICE_CALL ? (
-                <div key={message._id} className='w-full'>
-                  <CallMessage myMessage={myMessage} message={message} />
-                </div>
-              ) : (
-                <div key={message._id} className='w-full'>
-                  <MessageBox
-                    message={message}
-                    myMessage={myMessage}
-                    showItem={showItem}
-                    setShowItem={setShowItem}
-                  />
-                </div>
-              );
+              switch (message.message_content_type) {
+                case MessageContentType.VIDEO_CALL ||
+                  MessageContentType.VOICE_CALL:
+                  return (
+                    <div key={message._id} className='w-full'>
+                      <CallMessage myMessage={myMessage} message={message} />
+                    </div>
+                  );
+                case MessageContentType.NOTIFY:
+                  return (
+                    <div
+                      key={message._id}
+                      className='flex w-full items-center justify-center text-xs text-gray-500'
+                    >
+                      {message.message_content}
+                    </div>
+                  );
+                default:
+                  return (
+                    <div key={message._id} className='w-full'>
+                      <MessageBox
+                        message={message}
+                        myMessage={myMessage}
+                        showItem={showItem}
+                        setShowItem={setShowItem}
+                      />
+                    </div>
+                  );
+              }
             })}
           </div>
         </div>

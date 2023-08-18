@@ -119,6 +119,15 @@ export class UserController {
     }
   }
 
+  @Get('/status/:userId')
+  async checkStatusUser(@Param('userId') userId: string) {
+    try {
+      return new Ok(await this.userService.checkUserOnline(userId));
+    } catch (err) {
+      throw err;
+    }
+  }
+
   @Get('/bug/fix')
   async fixBug(@Req() req: Request) {
     return await this.userService.fixBug();

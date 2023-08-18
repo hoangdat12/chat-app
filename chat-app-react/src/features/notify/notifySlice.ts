@@ -48,6 +48,9 @@ const notifySlice = createSlice({
         state.numberNotifyUnRead -= 1;
       }
     },
+    increNotifyNumber: (state) => {
+      state.numberNotifyUnRead++;
+    },
   },
   extraReducers: (builder) => {
     builder

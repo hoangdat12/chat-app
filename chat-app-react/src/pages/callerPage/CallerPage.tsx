@@ -9,7 +9,7 @@ import {
   setRemoteStream,
 } from '../../features/call/callSlice';
 import { useVideoCall } from '../../hooks/call/useVideoCall';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getUserLocalStorageItem } from '../../ultils';
 import Peer from 'peerjs';
 import { useVideoCallAccept } from '../../hooks/call/useVideoCallAccept';
@@ -22,10 +22,17 @@ import { useVoiceCallClose } from '../../hooks/call/useVoiceCallClose';
 import CallHidden from '../../components/call/VideoCallHidden';
 import VoiceCallHidden from '../../components/call/VoiceCallHidden';
 import CallEndNotify from '../../components/call/CallEndNotify';
+import { useNotify } from '../../hooks/notify/useNotify';
+import { NotifyAlert } from '../../components/alert/Alert';
+import { useConversation } from '../../hooks/conversation/useConversation';
 
 const userLocal = getUserLocalStorageItem();
 
 const CallerPage = () => {
+  const [showNotify, setShowNotify] = useState(false);
+  const [showNewMessageConversation, setShowNewMessageConversation] =
+    useState(false);
+
   const dispatch = useAppDispatch();
   const {
     isReceivingCall,
@@ -41,7 +48,6 @@ const CallerPage = () => {
 
   useEffect(() => {
     if (!userLocal) return;
-    console.log('Listening peer with Id:::: ', userLocal.peer);
     const newPeer = new Peer(userLocal.peer, {
       config: {
         iceServers: [
@@ -54,7 +60,6 @@ const CallerPage = () => {
         ],
       },
     });
-    console.log('set peer successfully!');
     dispatch(setPeer(newPeer));
   }, [userLocal]);
 
@@ -100,9 +105,7 @@ const CallerPage = () => {
 
   useEffect(() => {
     if (connection) {
-      console.log('connection is defined....');
       if (connection) {
-        console.log('connection is defined...');
         connection.on('open', () => {
           console.log('connection was opened');
         });
@@ -124,6 +127,9 @@ const CallerPage = () => {
     }
   }, [connection]);
 
+  useNotify(showNotify, setShowNotify);
+  useConversation(showNewMessageConversation, setShowNewMessageConversation);
+
   return (
     <div className='relative'>
       {isReceivingCall && caller && <CallReceiveDialog />}
@@ -131,6 +137,10 @@ const CallerPage = () => {
         isMini &&
         (callType === 'video' ? <CallHidden /> : <VoiceCallHidden />)}
       {endCall && <CallEndNotify />}
+      {showNotify && <NotifyAlert msg={'You have some new notify'} />}
+      {showNewMessageConversation && (
+        <NotifyAlert msg={'You have some new message'} />
+      )}
       <Outlet />
     </div>
   );

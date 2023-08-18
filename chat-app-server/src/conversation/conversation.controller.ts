@@ -274,7 +274,7 @@ export class ConversationController {
         data,
       );
       this.eventEmiter.emit('conversation.changeNameGroup', responseData);
-      return new Ok(responseData);
+      return new Ok(responseData.conversation);
     } catch (err) {
       throw err;
     }
@@ -354,6 +354,24 @@ export class ConversationController {
       const user = req.user as IUserCreated;
       return new Ok(
         await this.conversationService.getMatchConversation(user._id, matchId),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('/change/notification/:conversationId')
+  async changeNotification(
+    @Req() req: Request,
+    @Param('conversationId') conversationId: string,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(
+        await this.conversationService.changeNotification(
+          user._id,
+          conversationId,
+        ),
       );
     } catch (error) {
       throw error;

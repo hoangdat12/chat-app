@@ -39,9 +39,17 @@ const changeAvatar = async (formData: FormData): Promise<IResponse<string>> => {
   return res;
 };
 
+const checkUserOnline = async (
+  conversationUserId: string
+): Promise<IResponse<{ isOnline: boolean }>> => {
+  const res = await myAxios.get(`/user/status/${conversationUserId}`);
+  return res;
+};
+
 export const userService = {
   findUserByName,
   updateSocialLink,
   findUserByEmail,
   changeAvatar,
+  checkUserOnline,
 };

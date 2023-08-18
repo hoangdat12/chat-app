@@ -1,10 +1,14 @@
-import { FC, memo, useEffect, useRef, useState } from 'react';
+import { FC, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
-import { MdNotificationsNone, MdOutlineArrowBack } from 'react-icons/md';
+import {
+  MdNotificationsNone,
+  MdOutlineArrowBack,
+  MdOutlineNotificationsOff,
+} from 'react-icons/md';
 import { CgProfile } from 'react-icons/cg';
 import { AiOutlinePlusCircle } from 'react-icons/Ai';
 
-import { ListDetailSetting } from '../../ultils/list/setting.list';
+import { getListSetting } from '../../ultils/list/setting.list';
 import { IConversation } from '../../ultils/interface';
 import { MessageType } from '../../ultils/constant/message.constant';
 import { ButtonRounded } from '../button/ButtonRounded';
@@ -26,23 +30,23 @@ import {
 } from '../../features/conversation/conversationSlice';
 import { deleteAllMessageOfConversation } from '../../features/message/messageSlice';
 import { ListConversationSetting } from '../../ultils/constant/setting.constant';
+import { IInforConversation } from './ConversationContent/HeaderContent';
+import { getUserLocalStorageItem, getUserNameAndAvatarUrl } from '../../ultils';
+import InputAutoFocus from '../input/InputAutoFocus';
 
 export interface IPropConversationSetting {
   showMoreConversation?: boolean;
   setShowMoreConversation: (value: boolean) => void;
-  userName: string;
-  avatarUrl: string | null;
-  status?: string | null;
   conversation: IConversation | undefined;
   isValidSendMessage: boolean;
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const ConversationSetting: FC<IPropConversationSetting> = memo(
   ({
     showMoreConversation,
     setShowMoreConversation,
-    userName,
-    avatarUrl,
     conversation,
     isValidSendMessage,
   }) => {
@@ -54,9 +58,26 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
     const [isShowChangeAvatarOfGroup, setIsShowChangeAvatarOfGroup] =
       useState(false);
     const [isShowRenameGroup, setIsShowRenameGroup] = useState(false);
-    const [newNameGroup, setNewNameGroup] = useState(userName);
+
+    const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
+      conversation,
+    ]);
+    const {
+      userName,
+      avatarUrl,
+      userId,
+      receiveNotification: isReceiveNotification,
+    } = getInforChatFromConversation(
+      userLocal,
+      conversation
+    ) as unknown as IInforConversation;
+
+    const [newNameGroup, setNewNameGroup] = useState<string>(userName ?? '');
     const [isShowManagerMember, setIsShowManagerMember] = useState(false);
     const [isShowConfirm, setIsShowConfirm] = useState<string>('');
+    const [receiveNotification, setReceiveNotification] = useState(
+      isReceiveNotification
+    );
 
     const modelRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -133,10 +154,13 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
         newNameGroup?.trim() !== '' &&
         conversation
       ) {
-        await conversationService.handleChangeNameOfGroup({
+        const res = await conversationService.handleChangeNameOfGroup({
           conversationId: conversation?._id,
           nameGroup: newNameGroup,
         });
+        if (res.status === 200) {
+          setNewNameGroup(res.data.metaData.nameGroup ?? '');
+        }
       }
       setIsShowRenameGroup(false);
     };
@@ -160,7 +184,18 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
       }
     };
 
-    useClickOutside(inputRef, changeNameGroup, 'mousedown');
+    const handleTurnOnOffNotification = async () => {
+      if (conversation) {
+        const res = await conversationService.changeNotification(
+          conversation._id
+        );
+        if (res.status === 200 || res.status === 201) {
+          setReceiveNotification((prev) => !prev);
+        }
+      }
+    };
+
+    useClickOutside(inputRef, changeNameGroup, 'mousedown', newNameGroup);
 
     useEffect(() => {
       if (showMoreConversation) {
@@ -220,25 +255,25 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
                   conversation={conversation}
                 />
               </div>
-              <h1 className='flex items-center justify-center gap-4 w-full'>
+              <h1 className='flex items-center justify-center gap-4 w-full text-[#282525]'>
                 {isShowRenameGroup ? (
-                  <input
-                    type='text'
-                    className={`outline-none bg-transparent`}
-                    value={newNameGroup}
-                    onChange={(e) => setNewNameGroup(e.target.value)}
-                    ref={inputRef}
-                    autoFocus
+                  <InputAutoFocus
+                    newNameGroup={newNameGroup}
+                    setNewNameGroup={setNewNameGroup}
+                    inputRef={inputRef}
+                    handlerEnter={changeNameGroup}
                   />
                 ) : (
-                  <span className='text-2xl font-medium '> {userName}</span>
+                  <span className='text-2xl font-medium'> {userName}</span>
                 )}
-                <span
-                  onClick={handleChangeNameGroup}
-                  className='text-black text-lg p-1 rounded-full bg-gray-300'
-                >
-                  <CiEdit />
-                </span>
+                {conversation?.conversation_type === 'group' && (
+                  <span
+                    onClick={handleChangeNameGroup}
+                    className='text-black text-lg p-1 rounded-full bg-gray-300'
+                  >
+                    <CiEdit />
+                  </span>
+                )}
               </h1>
 
               <div className='flex gap-20 mt-2 lg:mt-0 text-lg text-[#3a393c]'>
@@ -251,16 +286,24 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
                       </div>
                     </div>
                   ) : (
-                    <>
+                    <div onClick={() => navigate(`/profile/${userId}`)}>
                       <ButtonRounded icon={<CgProfile />} />
                       <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
                         Profile
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
-                <div className='relative'>
-                  <ButtonRounded icon={<MdNotificationsNone />} />
+                <div onClick={handleTurnOnOffNotification} className='relative'>
+                  <ButtonRounded
+                    icon={
+                      receiveNotification ? (
+                        <MdNotificationsNone />
+                      ) : (
+                        <MdOutlineNotificationsOff />
+                      )
+                    }
+                  />
                   <div className='absolute -bottom-6 whitespace-nowrap left-[50%] -translate-x-1/2 text-sm'>
                     Notification
                   </div>
@@ -269,62 +312,70 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
             </div>
 
             <ul className='mt-16 max-h-[calc(100vh-20rem)] pb-12 overflow-y-scroll'>
-              {ListDetailSetting.map((element, idx) => (
-                <li className={`${idx === 0 ? '' : 'mt-5'} px-8`} key={idx}>
-                  <div className='relative flex items-center justify-between cursor-pointer'>
-                    <span
-                      onClick={() => handleShow(idx)}
-                      className='text-base w-full'
-                    >
-                      {element.SubMenu.title}
-                    </span>
-                    <span
-                      className={`${
-                        show.includes(idx)
-                          ? 'animate__animated animate__rotateIn'
-                          : ''
-                      }`}
-                    >
-                      {show.includes(idx) ? <BsChevronUp /> : <BsChevronDown />}
-                    </span>
-                  </div>
-
-                  <ul
-                    className={`${
-                      show.includes(idx) ? 'block' : ' hidden'
-                    } relative px-2 text-base font-light`}
-                  >
-                    {element.SubMenu.title ===
-                      ListConversationSetting.CUSTOME_CONVERSATION && (
-                      <NotAllowed isValidSendMessage={!isValidSendMessage} />
-                    )}
-
-                    {element.List.map((item, index) => (
-                      <li className='relative' key={index}>
-                        {(item.title === ListConversationSetting.LEAVE_GROUP ||
-                          item.title === ListConversationSetting.MEMBER) && (
-                          <NotAllowed
-                            isValidSendMessage={!isValidSendMessage}
-                          />
+              {getListSetting(conversation?.conversation_type).map(
+                (element, idx) => (
+                  <li className={`${idx === 0 ? '' : 'mt-5'} px-8`} key={idx}>
+                    <div className='relative flex items-center justify-between cursor-pointer'>
+                      <span
+                        onClick={() => handleShow(idx)}
+                        className='text-base w-full'
+                      >
+                        {element.SubMenu.title}
+                      </span>
+                      <span
+                        className={`${
+                          show.includes(idx)
+                            ? 'animate__animated animate__rotateIn'
+                            : ''
+                        }`}
+                      >
+                        {show.includes(idx) ? (
+                          <BsChevronUp />
+                        ) : (
+                          <BsChevronDown />
                         )}
-                        <div
-                          onClick={() => handleClick(item.title)}
-                          className='flex items-center gap-2 mt-3 cursor-pointer'
-                        >
-                          <span>
-                            {item.title === ListConversationSetting.CHANGE_EMOJI
-                              ? conversation?.emoji ?? '👍'
-                              : item.icon}
-                          </span>
-                          <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
-                            {item.title}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
+                      </span>
+                    </div>
+
+                    <ul
+                      className={`${
+                        show.includes(idx) ? 'block' : ' hidden'
+                      } relative px-2 text-base font-light`}
+                    >
+                      {element.SubMenu.title ===
+                        ListConversationSetting.CUSTOME_CONVERSATION && (
+                        <NotAllowed isValidSendMessage={!isValidSendMessage} />
+                      )}
+
+                      {element.List.map((item, index) => (
+                        <li className='relative' key={index}>
+                          {(item?.title ===
+                            ListConversationSetting.LEAVE_GROUP ||
+                            item?.title === ListConversationSetting.MEMBER) && (
+                            <NotAllowed
+                              isValidSendMessage={!isValidSendMessage}
+                            />
+                          )}
+                          <div
+                            onClick={() => handleClick(item?.title ?? '')}
+                            className='flex items-center gap-2 mt-2 cursor-pointer'
+                          >
+                            <span className='text-[#514a4a]'>
+                              {item?.title ===
+                              ListConversationSetting.CHANGE_EMOJI
+                                ? conversation?.emoji ?? '👍'
+                                : item?.icon}
+                            </span>
+                            <span className='whitespace-nowrap overflow-hidden text-ellipsis'>
+                              {item?.title}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                )
+              )}
             </ul>
           </div>
         </div>

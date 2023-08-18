@@ -26,6 +26,7 @@ export interface IConversation {
 
 export interface IParticipant extends UserJoinChat {
   isReadLastMessage?: boolean;
+  receiveNotification?: boolean;
 }
 
 export interface IPayloadCreateConversation {

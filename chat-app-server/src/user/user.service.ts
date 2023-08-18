@@ -1,18 +1,20 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from '../ultils/response';
 import { ConversationRepository } from '../conversation/conversation.repository';
 import { IUserCreated, Pagination } from '../ultils/interface';
-import { RedisService } from '../redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
+import { IGatewaySessionManager } from '../gateway/gateway.sesstion';
+import { Services } from 'src/ultils/constant';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly conversationRepository: ConversationRepository,
-    private readonly redisService: RedisService,
+    @Inject(Services.GATEWAY_SESSION_MANAGER)
+    private readonly socketSession: IGatewaySessionManager,
   ) {}
 
   async getAllUser() {
@@ -65,6 +67,12 @@ export class UserService {
     const user = await this.authRepository.findByEmail(email);
     delete user.password;
     return { user };
+  }
+
+  async checkUserOnline(userId: string) {
+    const found = this.socketSession.getUserSocket(userId);
+    if (found) return { isOnline: true };
+    else return { isOnline: false };
   }
 
   async fixBug() {

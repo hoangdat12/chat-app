@@ -3,7 +3,15 @@ import Avatar from '../../avatars/Avatar';
 import { IoCallOutline, IoVideocamOutline } from 'react-icons/io5';
 import { BsPinAngle } from 'react-icons/bs';
 import { IoIosInformationCircleOutline } from 'react-icons/io';
-import { FC, MouseEventHandler, memo, useContext } from 'react';
+import {
+  FC,
+  MouseEventHandler,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { ButtonRounded } from '../../button/ButtonRounded';
 import { IConversation, IParticipant, IUser } from '../../../ultils/interface';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -13,16 +21,15 @@ import { useAppDispatch } from '../../../app/hook';
 import {
   convertUserToParticipant,
   getUserLocalStorageItem,
+  getUserNameAndAvatarUrl,
 } from '../../../ultils';
 import { SocketCall } from '../../../ultils/constant';
+import { userService } from '../../../features/user/userService';
 
 export interface IPropHeaderContent {
   handleShowMoreConversation: MouseEventHandler<HTMLAnchorElement>;
   handleShowListConversation?: () => void;
   showListConversationSM?: boolean;
-  userName: string | null;
-  avatarUrl: string | null;
-  status?: string | null;
   conversation: IConversation;
   userId?: string | null;
 }
@@ -96,16 +103,39 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
     handleShowMoreConversation,
     handleShowListConversation,
     showListConversationSM,
-    userName,
-    avatarUrl,
-    status,
     conversation,
     userId,
   }) => {
+    const [isOnline, setIsOnline] = useState(false);
     const { conversationId } = useParams();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const socket = useContext(SocketContext);
+
+    const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
+      conversation,
+    ]);
+    const {
+      userName,
+      avatarUrl,
+      userId: conversationUserId,
+    } = getInforChatFromConversation(
+      userLocal,
+      conversation
+    ) as IInforConversation;
+
+    useEffect(() => {
+      const handleCheckUserOnline = async () => {
+        if (conversationUserId) {
+          const res = await userService.checkUserOnline(conversationUserId);
+          if (res.status === 200) {
+            setIsOnline(res.data.metaData.isOnline);
+          }
+        }
+      };
+
+      handleCheckUserOnline();
+    }, [conversation]);
 
     return (
       <div className='flex items-center justify-between h-16 sm:h-[5.5rem] px-4 sm:px-8 w-full shadow-nomal'>
@@ -145,9 +175,15 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
               <h1 className='text-base sm:text-lg md:text-xl font-bold'>
                 {userName}
               </h1>
-              <span className='text-[10px] sm:text-[12px] font-medium '>
-                {status}
-              </span>
+              {conversation?.conversation_type === 'conversation' && (
+                <span
+                  className={`${
+                    isOnline && 'text-green-500'
+                  } text-[10px] sm:text-[12px] font-medium`}
+                >
+                  {isOnline ? 'online' : 'offline'}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -183,6 +219,7 @@ export interface IInforConversation {
   avatarUrl: string | null;
   status: string | null;
   userId?: string | null;
+  receiveNotification?: boolean;
 }
 
 export default HeaderContent;

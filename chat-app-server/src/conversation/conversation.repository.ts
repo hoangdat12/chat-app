@@ -100,6 +100,7 @@ export class ConversationRepository {
     for (let participant of payload.participants) {
       participant.enable = true;
       participant.isReadLastMessage = false;
+      participant.receiveNotification = true;
     }
     return await this.conversationModel.create(payload);
   }
@@ -175,6 +176,12 @@ export class ConversationRepository {
     conversationId: string,
     participants: IParticipant[],
   ) {
+    for (let participant of participants) {
+      participant.receiveNotification = true;
+      participant.enable = true;
+      participant.isReadLastMessage = false;
+    }
+
     return await this.conversationModel.findOneAndUpdate(
       {
         _id: conversationId,
@@ -333,6 +340,22 @@ export class ConversationRepository {
         $addToSet: {
           'participants.peer': user.peer,
         },
+      },
+    );
+  }
+
+  async changeNotification(userId: string, conversationId: string) {
+    return await this.conversationModel.findOneAndUpdate(
+      {
+        _id: convertObjectId(conversationId),
+        'participants.userId': userId,
+      },
+      {
+        'participants.$.receiveNotification': false,
+      },
+      {
+        new: true,
+        upsert: true,
       },
     );
   }

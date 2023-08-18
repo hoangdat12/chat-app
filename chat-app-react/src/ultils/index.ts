@@ -213,33 +213,53 @@ export const getUsername = (user: IUser | null) => {
 
 export const getUserNameAndAvatarUrl = (
   user: IUser | null,
-  conversation: IConversation | undefined
+  conversation: IConversation | undefined,
+  getReceive?: boolean | false
 ) => {
   if (conversation) {
     if (conversation.conversation_type === MessageType.GROUP) {
-      return {
+      let response = {
         userName: conversation.nameGroup,
         avatarUrl: conversation.avatarUrl,
         status: null,
         userId: null,
+        receiveNotification: true,
       };
-    } else {
-      for (let received of conversation.participants) {
-        if (received.userId !== user?._id) {
-          return {
-            userName: received.userName,
-            avatarUrl: received.avatarUrl,
-            status: 'online',
-            userId: received.userId,
-          };
+      if (getReceive) {
+        for (let participant of conversation.participants) {
+          if (participant.userId === user?._id) {
+            response = {
+              ...response,
+              receiveNotification: participant.receiveNotification ?? true,
+            };
+          }
         }
       }
+      return response;
+    } else {
+      let responseData = null;
+      let receiveNotification = null;
+      for (let participant of conversation.participants) {
+        if (participant.userId !== user?._id) {
+          responseData = {
+            userName: participant.userName,
+            avatarUrl: participant.avatarUrl,
+            status: 'online',
+            userId: participant.userId,
+          };
+        } else {
+          receiveNotification = participant.receiveNotification;
+        }
+      }
+      return { ...responseData, receiveNotification };
     }
   } else {
     return {
       userName: null,
       avatarUrl: null,
       status: null,
+      userId: null,
+      receiveNotification: null,
     };
   }
 };

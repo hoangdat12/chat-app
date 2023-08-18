@@ -1,19 +1,16 @@
-import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
+import { FC, memo, useEffect, useRef } from 'react';
 import Button from '../button/Button';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { confirmFriend, refuseFriend } from '../../features/friend/friendSlice';
 import Loading from '../button/Loading';
-import { SocketContext } from '../../ultils/context/Socket';
 import { INotify } from '../../ultils/interface';
 import { useNavigate } from 'react-router-dom';
 import {
   deleteNotify,
   getAllNotify,
-  receivedNotify,
   selectNotify,
 } from '../../features/notify/notifySlice';
 import { Notify } from '../notify/Notify';
-import { NotifyAlert } from '../alert/Alert';
 import useClickOutside from '../../hooks/useClickOutside';
 
 export interface INotificationProps {
@@ -23,11 +20,8 @@ export interface INotificationProps {
 
 const Notification: FC<INotificationProps> = memo(
   ({ showNotification, setShowNotification }) => {
-    const [showNotify, setShowNotify] = useState(false);
-
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const socket = useContext(SocketContext);
     const modelRef = useRef<HTMLDivElement | null>(null);
 
     const { notifies, isLoading } = useAppSelector(selectNotify);
@@ -50,45 +44,11 @@ const Notification: FC<INotificationProps> = memo(
       navigate(`/profile/${friendId}`);
     };
 
-    // Socket received request add friend
-    const handleReceivedNotify = (data: INotify) => {
-      setShowNotify(true);
-      dispatch(receivedNotify(data));
-    };
-
-    // Socket received Friend cancel request
-    const handleDeleteNotify = (data: INotify) => {
-      dispatch(deleteNotify(data));
-    };
-
     useClickOutside(modelRef, () => setShowNotification(false), 'mousedown');
 
     // Get list request add friend
     useEffect(() => {
       dispatch(getAllNotify());
-    }, []);
-
-    useEffect(() => {
-      if (showNotify) {
-        const timer = setTimeout(() => {
-          setShowNotify(false);
-        }, 2000);
-
-        return () => clearTimeout(timer);
-      }
-    }, [showNotify]);
-
-    useEffect(() => {
-      socket.on('connection', (data: any) => {
-        console.log(data);
-      });
-      socket.on('receivedNotify', handleReceivedNotify);
-      socket.on('deleteNotify', handleDeleteNotify);
-
-      return () => {
-        socket.off('receivedNotify');
-        socket.off('deleteNotify');
-      };
     }, []);
 
     return (
@@ -145,7 +105,6 @@ const Notification: FC<INotificationProps> = memo(
             !showNotification && 'hidden'
           } absolute top-[130%] -translate-y-[100%] right-[50%] translate-x-1/2 border-8 border-transparent border-b-gray-50 duration-300`}
         ></div>
-        {showNotify && <NotifyAlert msg={'You have some new notify'} />}
       </>
     );
   }

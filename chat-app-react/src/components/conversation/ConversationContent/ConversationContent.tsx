@@ -80,7 +80,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
     conversation,
   ]);
-  const { userName, status, avatarUrl, userId } = getInforChatFromConversation(
+  const { userName, userId } = getInforChatFromConversation(
     user,
     conversation
   ) as IInforConversation;
@@ -343,9 +343,6 @@ const ConversationContent: FC<IPropConversationContent> = ({
         handleShowMoreConversation={handleShowMoreConversation}
         handleShowListConversation={handleShowListConversation}
         showListConversationSM={showListConversationSM}
-        userName={userName}
-        avatarUrl={avatarUrl}
-        status={status}
         conversation={conversation}
         userId={userId}
       />
@@ -367,9 +364,6 @@ const ConversationContent: FC<IPropConversationContent> = ({
 
       {innerWitdh < 640 && userName && (
         <ConversationSetting
-          userName={userName}
-          avatarUrl={avatarUrl}
-          status={status}
           showMoreConversation={showMoreConversation}
           setShowMoreConversation={setShowMoreConversation}
           conversation={conversation}

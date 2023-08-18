@@ -124,6 +124,15 @@ const findMatchConversation = async (
   return res;
 };
 
+const changeNotification = async (
+  conversationId: string
+): Promise<IResponse<{ receiveNotification: boolean }>> => {
+  const res = await myAxios.post(
+    `/conversation/change/notification/${conversationId}`
+  );
+  return res;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
   searchConversationByName,
@@ -139,4 +148,5 @@ export const conversationService = {
   handleDeleteConversation,
   handleLeaveGroup,
   findMatchConversation,
+  changeNotification,
 };

@@ -3,9 +3,10 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { ConversationModule } from '../conversation/conversation.module';
 import { RedisModule } from '../redis/redis.module';
+import { GatewayModule } from '../gateway/gateway.module';
 
 @Module({
-  imports: [ConversationModule, RedisModule],
+  imports: [ConversationModule, RedisModule, GatewayModule],
   providers: [UserService],
   controllers: [UserController],
 })

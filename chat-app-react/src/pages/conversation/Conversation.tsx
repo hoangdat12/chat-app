@@ -10,12 +10,11 @@ import {
   fetchConversationOfUser,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
-import { getUserLocalStorageItem, getUserNameAndAvatarUrl } from '../../ultils';
+import { getUserLocalStorageItem } from '../../ultils';
 import ConversationContent from '../../components/conversation/ConversationContent/ConversationContent';
 import myAxios from '../../ultils/myAxios';
 import useInnerWidth from '../../hooks/useInnterWidth';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
-import { IInforConversation } from '../../components/conversation/ConversationContent/HeaderContent';
 import { IConversation } from '../../ultils/interface';
 
 const Conversation = () => {
@@ -29,14 +28,6 @@ const Conversation = () => {
   const { conversationId } = useParams();
   const location = useLocation();
   const conversation = conversations.get(conversationId ?? '');
-
-  const getInforChatFromConversation = useCallback(getUserNameAndAvatarUrl, [
-    conversation,
-  ]);
-  const { userName, status, avatarUrl } = getInforChatFromConversation(
-    user,
-    conversation
-  ) as IInforConversation;
 
   const userPermissionChat = useCallback(
     (userId: string | undefined, conversation: IConversation | undefined) => {
@@ -124,11 +115,8 @@ const Conversation = () => {
               showMoreConversation={showMoreConversation}
               setShowMoreConversation={setShowMoreConversation}
             />
-            {userName && (
+            {conversation && (
               <ConversationSetting
-                userName={userName}
-                avatarUrl={avatarUrl}
-                status={status}
                 showMoreConversation={showMoreConversation}
                 setShowMoreConversation={setShowMoreConversation}
                 conversation={conversation}

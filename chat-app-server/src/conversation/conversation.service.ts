@@ -490,6 +490,19 @@ export class ConversationService {
     );
   }
 
+  async changeNotification(userId: string, conversationId: string) {
+    const foundConversation = await this.conversationRepository.findById(
+      conversationId,
+    );
+    if (!foundConversation)
+      throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
+
+    return await this.conversationRepository.changeNotification(
+      userId,
+      conversationId,
+    );
+  }
+
   // Private
   async checkUserIsAdmin(user: IUserCreated, conversation: any) {
     let isValid = false;
@@ -511,8 +524,7 @@ export class ConversationService {
       await this.conversationRepository.findAllConversaiton();
     for (let conversation of conversations) {
       for (let participant of conversation.participants) {
-        const user = await this.authRepository.findById(participant.userId);
-        participant.peerId = user.peer;
+        participant = { ...participant, receiveNotification: true };
       }
       await conversation.save();
     }
