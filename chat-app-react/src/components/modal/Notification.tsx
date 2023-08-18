@@ -1,4 +1,4 @@
-import { FC, memo, useContext, useEffect, useState } from 'react';
+import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
 import Button from '../button/Button';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { confirmFriend, refuseFriend } from '../../features/friend/friendSlice';
@@ -14,6 +14,7 @@ import {
 } from '../../features/notify/notifySlice';
 import { Notify } from '../notify/Notify';
 import { NotifyAlert } from '../alert/Alert';
+import useClickOutside from '../../hooks/useClickOutside';
 
 export interface INotificationProps {
   showNotification: boolean;
@@ -27,6 +28,7 @@ const Notification: FC<INotificationProps> = memo(
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const socket = useContext(SocketContext);
+    const modelRef = useRef<HTMLDivElement | null>(null);
 
     const { notifies, isLoading } = useAppSelector(selectNotify);
 
@@ -59,6 +61,8 @@ const Notification: FC<INotificationProps> = memo(
       dispatch(deleteNotify(data));
     };
 
+    useClickOutside(modelRef, () => setShowNotification(false), 'mousedown');
+
     // Get list request add friend
     useEffect(() => {
       dispatch(getAllNotify());
@@ -90,6 +94,7 @@ const Notification: FC<INotificationProps> = memo(
     return (
       <>
         <div
+          ref={modelRef}
           className={`${
             !showNotification && 'hidden'
           } absolute top-[130%] right-0 h-[500px] min-w-[340px] rounded-md rounded-tr-none bg-gray-50 duration-300 shadow-default `}
@@ -101,7 +106,7 @@ const Notification: FC<INotificationProps> = memo(
               </div>
             ) : (
               <div className='h-[464px] border-b overflow-y-scroll overflow-x-hidden'>
-                {notifies &&
+                {notifies && notifies.length !== 0 ? (
                   notifies.map((notify) => (
                     <div
                       key={notify._id}
@@ -116,7 +121,12 @@ const Notification: FC<INotificationProps> = memo(
                         }
                       />
                     </div>
-                  ))}
+                  ))
+                ) : (
+                  <div className='flex items-center justify-center w-full h-full text-gray-600 text-sm'>
+                    You don't have any notifications
+                  </div>
+                )}
               </div>
             )}
             <div className='flex items-center justify-center h-[36px]'>

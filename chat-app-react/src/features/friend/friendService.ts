@@ -50,6 +50,13 @@ const searchFriendByUserName = async (
   return res;
 };
 
+const searchFriendOnlOffByUserName = async (
+  keyword: string
+): Promise<IResponse<IDataGetFriendOnline>> => {
+  const res = await myAxios.get(`/friend/search/status?q=${keyword.trim()}`);
+  return res;
+};
+
 const deleteFriend = async (friendId: string) => {
   const res = await myAxios.delete(`/friend/${friendId}`);
   return res;
@@ -82,5 +89,6 @@ export const friendService = {
   getListRequestAddFriend,
   getListPendingAddFriend,
   findFriendOnlineAndOffline,
+  searchFriendOnlOffByUserName,
   deleteFriend,
 };

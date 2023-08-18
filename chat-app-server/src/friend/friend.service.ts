@@ -312,6 +312,31 @@ export class FriendService {
     return responseData;
   }
 
+  async findFriendOnlineOfflineByName(
+    user: IUserCreated,
+    keyword: string,
+    pagination: Pagination,
+  ) {
+    const { friends } = await this.findFriend(user, keyword, pagination);
+
+    let onlineFriends = [],
+      offlineFriends = [];
+    for (let friend of friends) {
+      if (this.gatewaySession.getUserSocket(friend._id.toString())) {
+        onlineFriends.push(friend);
+      } else {
+        offlineFriends.push(friend);
+      }
+    }
+
+    const responseData = {
+      onlineFriends,
+      offlineFriends,
+    };
+
+    return responseData;
+  }
+
   // Bug
   async getFriendIds(userId: string) {
     const key1 = `friendIds:${userId}`;

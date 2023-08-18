@@ -194,4 +194,31 @@ export class FriendController {
       throw error;
     }
   }
+
+  @Get('/search/status')
+  async findFriendOnlineOfflineByName(
+    @Req() req: Request,
+    @Query('q') keyword: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+    @Query('sortBy') sortBy: string = 'name',
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      const pagination = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sortBy: sortBy,
+      };
+      return new Ok(
+        await this.friendService.findFriendOnlineOfflineByName(
+          user,
+          keyword.trim(),
+          pagination,
+        ),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
 }

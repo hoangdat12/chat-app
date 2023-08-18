@@ -1,6 +1,5 @@
 import Avatar from '../components/avatars/Avatar';
 import Layout from '../components/layout/Layout';
-import { AiOutlineSearch } from 'react-icons/Ai';
 
 import happyBirthday from '../assets/happyBirthday.png';
 import CreateFeed, { ModeCreateFeed } from '../components/feed/CreateFeed';
@@ -53,20 +52,7 @@ const Home = () => {
             </div>
           </div>
 
-          <div className='flex flex-col bg-gray-100 p-3 rounded-md'>
-            <div className='flex gap-4 items-center'>
-              <div className='flex items-center gap-2 w-full bg-white pl-3 pr-2 rounded-md'>
-                <input
-                  className='outline-none text-sm py-1 rounded w-full bg-transparent'
-                  type='text'
-                />
-                <span className='text-xl'>
-                  <AiOutlineSearch />
-                </span>
-              </div>
-            </div>
-            <ListFriendOfUser />
-          </div>
+          <ListFriendOfUser />
         </div>
       </div>
     </Layout>
