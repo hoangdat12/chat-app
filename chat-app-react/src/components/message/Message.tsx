@@ -48,8 +48,13 @@ export const Message: FC<IPropMessage> = memo(
           >
             {messages.map((message) => {
               switch (message.message_content_type) {
-                case MessageContentType.VIDEO_CALL ||
-                  MessageContentType.VOICE_CALL:
+                case MessageContentType.VIDEO_CALL:
+                  return (
+                    <div key={message._id} className='w-full'>
+                      <CallMessage myMessage={myMessage} message={message} />
+                    </div>
+                  );
+                case MessageContentType.VOICE_CALL:
                   return (
                     <div key={message._id} className='w-full'>
                       <CallMessage myMessage={myMessage} message={message} />

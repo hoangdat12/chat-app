@@ -128,3 +128,7 @@ export const convertUserToIParticipant = (user: IUserCreated): IParticipant => {
     peerId: user.peer,
   };
 };
+
+export const getUrlImage = (filename: string) => {
+  return `https://res.cloudinary.com/dayktieu5/image/upload/v1692493008/${filename}`;
+};

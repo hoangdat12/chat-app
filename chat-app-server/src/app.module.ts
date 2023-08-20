@@ -24,6 +24,7 @@ import { PostModule } from './post/post.module';
 import { RedisModule } from './redis/redis.module';
 import { CommentModule } from './comment/comment.module';
 import { ProfileModule } from './profile/profile.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ProfileModule } from './profile/profile.module';
     PostModule,
     CommentModule,
     ProfileModule,
+    CloudinaryModule,
   ],
   controllers: [],
   providers: [],

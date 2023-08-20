@@ -21,37 +21,41 @@ const ButtonOptions: FC<IPropButtonOptions> = ({
   index,
   participant,
 }) => {
-  //   const optionsRef = useRef<HTMLDivElement | null>(null);
+  // const optionsRef = useRef<HTMLDivElement | null>(null);
 
-  //   useClickOutside(optionsRef, () => setShowOptions(null), 'mousedown');
+  // useClickOutside(optionsRef, () => setShowOptions(-1), 'mousedown');
 
   return (
     <div className='relative text-lg cursor-pointer'>
-      <span onClick={() => setShowOptions(index)}>
+      <span className='z-10' onClick={() => setShowOptions(index)}>
         <FiMoreHorizontal />
       </span>
       <div
-        // ref={optionsRef}
-        className={`absolute top-[120%] left-[50%] -translate-x-1/2 ${
-          showOptions === index ? 'flex' : 'hidden'
-        } flex-col min-w-[160px] bg-white rounded shadow-default z-10`}
+        className={`absolute top-[120%] left-[50%] -translate-x-1/2 bg-white ${
+          showOptions === index ? 'block' : 'hidden'
+        }`}
       >
-        <Button
-          text={'Kick out of group'}
-          fontSize={'text-sm'}
-          border={'border-none'}
-          hover={'hover:bg-gray-200 duration-300'}
-          paddingY={'py-2'}
-          onClick={() => handleKickUserFromGroup(participant)}
-        />
-        <Button
-          text={'Promoted admin'}
-          fontSize={'text-sm'}
-          border={'border-none'}
-          hover={'hover:bg-gray-200 duration-300'}
-          paddingY={'py-2'}
-          onClick={() => handlePromoted(participant)}
-        />
+        <div
+          // ref={optionsRef}
+          className='flex flex-col min-w-[160px] bg-white rounded shadow-default z-[1002]'
+        >
+          <Button
+            text={'Kick out of group'}
+            fontSize={'text-sm'}
+            border={'border-none'}
+            hover={'hover:bg-gray-200 duration-300'}
+            paddingY={'py-2'}
+            onClick={() => handleKickUserFromGroup(participant)}
+          />
+          <Button
+            text={'Promoted admin'}
+            fontSize={'text-sm'}
+            border={'border-none'}
+            hover={'hover:bg-gray-200 duration-300'}
+            paddingY={'py-2'}
+            onClick={() => handlePromoted(participant)}
+          />
+        </div>
       </div>
     </div>
   );

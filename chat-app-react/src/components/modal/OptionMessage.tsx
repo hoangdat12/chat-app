@@ -49,7 +49,10 @@ const OptionMessage: FC<IPropOptionMessage> = memo(
           conversationId: message.message_conversation,
         };
         const response = await messageService.deleteMessageOfConversation(data);
-        if (conversation?.lastMessage._id === message._id) {
+        if (
+          conversation.lastMessage &&
+          conversation?.lastMessage._id === message._id
+        ) {
           const payload = {
             conversationId: conversation._id,
             lastMessage: convertMessageObjectIdToString(

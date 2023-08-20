@@ -47,6 +47,7 @@ import { MessageContentType } from '../../../ultils/constant/message.constant';
 import { getUserNameAndAvatarUrl } from '../../../ultils';
 import ConversationSetting from '../ConversationSetting';
 import useEnterListener from '../../../hooks/useEnterEvent';
+import Loading from '../../button/Loading';
 
 export interface IPropConversationContent {
   user: IUser | null;
@@ -68,6 +69,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const [fileImageMessage, setFileImageMessage] = useState<FileList | null>(
     null
   );
+  const [isLoadingSendImage, setIsLoadingSendImage] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const innterWidth = useInnerWidth();
   const socket = useContext(SocketContext);
@@ -138,6 +140,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         }
       }
       if (fileImageMessage?.length) {
+        setIsLoadingSendImage(true);
         for (let file of fileImageMessage) {
           const formData = new FormData();
           formData.append('file', file);
@@ -159,6 +162,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
             dispatch(createNewMessageOfConversation(dataUpdate));
           }
         }
+        setIsLoadingSendImage(false);
       }
       setImages([]);
       setFileImageMessage(null);
@@ -247,12 +251,14 @@ const ConversationContent: FC<IPropConversationContent> = ({
     for (let received of message_received) {
       if (received.userId === user?._id) {
         dispatch(deleteMessage(message));
-        dispatch(
-          deleteLastMessage({
-            conversationId: message_conversation,
-            lastMessage,
-          })
-        );
+        if (lastMessage) {
+          dispatch(
+            deleteLastMessage({
+              conversationId: message_conversation,
+              lastMessage,
+            })
+          );
+        }
         return;
       }
     }
@@ -291,7 +297,13 @@ const ConversationContent: FC<IPropConversationContent> = ({
   };
 
   // Handle event Enter
-  useEnterListener(handleSendMessage, messageValue);
+  useEnterListener(
+    handleSendMessage,
+    messageValue,
+    true,
+    fileImageMessage ? fileImageMessage.length !== 0 : false,
+    fileImageMessage
+  );
 
   // Get message of conversation
   useEffect(() => {
@@ -369,6 +381,15 @@ const ConversationContent: FC<IPropConversationContent> = ({
           conversation={conversation}
           isValidSendMessage={isValid}
         />
+      )}
+
+      {isLoadingSendImage && (
+        <div className='fixed top-0 bottom-0 left-0 right-0 bg-blackOverlay flex items-center justify-center'>
+          <div className='flex flex-col items-center justify-center w-2/5 h-2/5 lg:w-[30%] lg:h-[30%] bg-white rounded-lg'>
+            <h1>Please wait 10 seconds :))</h1>
+            <Loading />
+          </div>
+        </div>
       )}
     </div>
   );

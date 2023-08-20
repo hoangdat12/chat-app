@@ -9,6 +9,7 @@ import {
 } from './message.dto';
 import { IUserCreated, Pagination } from '../ultils/interface';
 import { checkNegativeNumber, getUsername } from '../ultils';
+import { MessageContentType } from '../ultils/constant';
 
 export interface IDataDeleteMessage {
   messageType: string;
@@ -135,5 +136,12 @@ export class MessageRepository {
       .limit(2)
       .lean()
       .exec();
+  }
+
+  async findAllImageOfConversation(conversationId: string) {
+    return await this.messageModel.find({
+      message_conversation: conversationId,
+      message_content_type: MessageContentType.IMAGE,
+    });
   }
 }

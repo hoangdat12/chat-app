@@ -5,12 +5,14 @@ import { ConversationRepository } from './conversation.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConversationModel } from '../schema/conversation.model';
 import { MessageModule } from '../message/message.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Global()
 @Module({
   imports: [
     MongooseModule.forFeature([ConversationModel]),
     forwardRef(() => MessageModule),
+    CloudinaryModule,
   ],
   providers: [ConversationService, ConversationRepository],
   controllers: [ConversationController],

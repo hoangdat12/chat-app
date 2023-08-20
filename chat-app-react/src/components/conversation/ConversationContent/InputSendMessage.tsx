@@ -1,4 +1,4 @@
-import { FC, memo, useRef, useState } from 'react';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import { MdOutlineInsertEmoticon } from 'react-icons/md';
 import { AiOutlineFileImage, AiOutlineClose } from 'react-icons/Ai';
 
@@ -49,6 +49,9 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
     // Close image not upload
     const handleDeleteImage = (imageDeleted: string) => {
       const updateImages = images.filter((image) => image !== imageDeleted);
+      if (files?.length === 1) {
+        setFiles(null);
+      }
       setImages(updateImages);
       URL.revokeObjectURL(imageDeleted);
     };
@@ -61,6 +64,12 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
       setCurrentEmoji(emoji);
       setMessageValue((prev: string) => `${prev}${emoji.emoji}`);
     };
+
+    useEffect(() => {
+      if (inputRef.current) {
+        inputRef.current?.focus();
+      }
+    }, []);
 
     return (
       <div
@@ -82,6 +91,7 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
             setImages={setImages}
             files={files}
             setFiles={setFiles}
+            inputRef={inputRef}
           />
           <ButtonRounded
             className={'text-base p-1 sm:text-[22px] sm:p-2'}
@@ -103,7 +113,7 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
           <div
             className={`${
               images.length !== 0 ? 'block' : 'hidden'
-            } absolute bottom-[40px] left-0 grid grid-cols-4 gap-2 bg-gray-100 w-full p-4 rounded-tl rounded-tr`}
+            } absolute bottom-[40px] left-0 grid grid-cols-4 gap-2 bg-gray-50 w-full p-4 rounded-tl-lg rounded-tr-lg`}
           >
             {images.length !== 0 &&
               images.map((image) => (
@@ -118,7 +128,11 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
                 </div>
               ))}
           </div>
-          <div className='flex items-center gap-2 sm:gap-4 pl-3 sm:pl-4 w-full bg-[#f2f3f4] rounded-lg overflow-hidden'>
+          <div
+            className={`flex items-center gap-2 sm:gap-4 pl-3 sm:pl-4 w-full bg-[#f2f3f4] ${
+              files ? 'rounded-bl-lg rounded-br-lg' : 'rounded-lg'
+            } overflow-hidden`}
+          >
             <input
               type='text'
               value={messageValue}
@@ -127,12 +141,21 @@ const InputSendMessage: FC<IPropInputSendMessage> = memo(
               placeholder='Enter your message...'
               className='text-sm sm:text-base font-medium w-full py-2 outline-none bg-transparent'
             />
-            <button
-              onClick={() => handleSendEmoji(conversation?.emoji ?? '👍')}
-              className='p-1 text-xl sm:text-2xl text-white'
-            >
-              {conversation?.emoji ?? '👍'}
-            </button>
+            {files ? (
+              <button
+                // onClick={hanleSendMessage}
+                className='py-1 px-2 rounded text-sm text-white bg-blue-500 mr-1'
+              >
+                Send
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSendEmoji(conversation?.emoji ?? '👍')}
+                className='p-1 text-xl sm:text-2xl text-white'
+              >
+                {conversation?.emoji ?? '👍'}
+              </button>
+            )}
           </div>
         </div>
       </div>

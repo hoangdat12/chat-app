@@ -11,6 +11,6 @@ export enum ListConversationSetting {
   SEARCH_IN_CONVERSATION = 'Search in conversation',
 
   SHARED = 'Shared',
-  FILE = 'File',
+  IMAGE = 'Image',
   VIDEO = 'Video',
 }

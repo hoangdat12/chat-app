@@ -8,3 +8,4 @@ export * from './comment.interface';
 export * from './profile.interface';
 export * from './socket.interface';
 export * from './call.interface';
+export * from './cloudinary.interface';

@@ -33,7 +33,8 @@ const MenagerMember: FC<IPropMenagerMember> = memo(
           conversationId: conversation?._id,
           participant,
         });
-        handleCloseModel();
+        // handleCloseModel();
+        setShowOptions(-1);
       }
     };
 
@@ -45,7 +46,8 @@ const MenagerMember: FC<IPropMenagerMember> = memo(
             participant,
           })
         );
-        handleCloseModel();
+        // handleCloseModel();
+        setShowOptions(-1);
       }
     };
 
@@ -68,7 +70,7 @@ const MenagerMember: FC<IPropMenagerMember> = memo(
                 if (!creator.enable) return;
                 return (
                   <div
-                    key={creator.userId}
+                    key={`${creator.userId} ${Math.random()}`}
                     className='flex items-center justify-start gap-4 py-[6px]'
                   >
                     <Avatar
@@ -88,7 +90,7 @@ const MenagerMember: FC<IPropMenagerMember> = memo(
                     return;
                   return (
                     <div
-                      key={participant.userId}
+                      key={`${participant.userId} ${Math.random()}`}
                       className='flex items-center justify-start gap-4 py-[6px]'
                     >
                       <Avatar

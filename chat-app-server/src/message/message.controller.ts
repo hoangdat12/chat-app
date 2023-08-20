@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -10,7 +11,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
-  CreateMessageCallData,
   CreateMessageData,
   DelelteMessageData,
   UpdateMessageData,
@@ -22,13 +22,16 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
-import { multerOptions } from 'src/ultils/constant/multer.config';
+import { multerOptions } from '../ultils/constant/multer.config';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { getUrlImage } from 'src/ultils';
 
 @Controller('message')
 export class MessageController {
   constructor(
     private readonly messageService: MessageService,
     private readonly evenEmiter: EventEmitter2,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Post()
@@ -48,7 +51,7 @@ export class MessageController {
   }
 
   @Post('/image')
-  @UseInterceptors(FileInterceptor('file', multerOptions))
+  @UseInterceptors(FileInterceptor('file'))
   async createMessageImage(
     @Req() req: Request,
     @Body('body') body: string,
@@ -61,7 +64,8 @@ export class MessageController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      data.message_content = `http://localhost:8080/assets/${file.filename}`;
+      const image = await this.cloudinaryService.uploadFile(file);
+      data.message_content = image.url;
       const newMessage = await this.messageService.createMessage(user, data);
       this.evenEmiter.emit('message.create', newMessage);
       return new Ok<any>(newMessage);
@@ -97,6 +101,24 @@ export class MessageController {
       const messageDelete = await this.messageService.delete(user, body);
       this.evenEmiter.emit('message.delete', messageDelete);
       return new Ok(messageDelete);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  @Get('/image/:conversationId')
+  async getMessageImageOfConversation(
+    @Req() req: Request,
+    @Param('conversationId') conversationId: string,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(
+        await this.messageService.getImageOfConversation(
+          user._id,
+          conversationId,
+        ),
+      );
     } catch (err) {
       throw err;
     }

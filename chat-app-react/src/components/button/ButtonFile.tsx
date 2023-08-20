@@ -14,6 +14,7 @@ export interface IPropButtonFile {
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
   files: FileList | null;
   setFiles: React.Dispatch<React.SetStateAction<FileList | null>>;
+  inputRef?: any;
 }
 
 export const ButtonFile: FC<IPropButtonFile> = ({
@@ -24,6 +25,7 @@ export const ButtonFile: FC<IPropButtonFile> = ({
   setImages,
   files,
   setFiles,
+  inputRef,
 }) => {
   useEffect(() => {
     if (!files) {
@@ -51,6 +53,9 @@ export const ButtonFile: FC<IPropButtonFile> = ({
     }
 
     setFiles(selectedFiles);
+    if (inputRef) {
+      inputRef?.current?.focus();
+    }
   };
 
   return (

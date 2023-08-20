@@ -115,6 +115,13 @@ const updateMessageOfConversation = async (
   return res;
 };
 
+const getMessageImageOfConversation = async (
+  conversationId: string
+): Promise<IResponse<IMessage[]>> => {
+  const res = await myAxios.get(`message/image/${conversationId}`);
+  return res;
+};
+
 export const messageService = {
   fetchMessageOfConversation,
   formatMessage,
@@ -122,4 +129,5 @@ export const messageService = {
   createNewMessage,
   createNewMessageImage,
   updateMessageOfConversation,
+  getMessageImageOfConversation,
 };

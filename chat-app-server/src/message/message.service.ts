@@ -180,6 +180,27 @@ export class MessageService {
     }
   }
 
+  async getImageOfConversation(userId: string, conversationId: string) {
+    const foundConversation = await this.conversationRepository.findById(
+      conversationId,
+    );
+    if (!foundConversation)
+      throw new HttpException('Conversation not found!', HttpStatus.NOT_FOUND);
+
+    let isExistInConversation = false;
+    for (let participant of foundConversation.participants) {
+      if (participant.userId === userId) {
+        isExistInConversation = true;
+      }
+    }
+    if (!isExistInConversation)
+      throw new HttpException('You not permission!', HttpStatus.BAD_REQUEST);
+
+    return await this.messageRepository.findAllImageOfConversation(
+      conversationId,
+    );
+  }
+
   convertObjectIdToString(message: any) {
     const {
       _id,

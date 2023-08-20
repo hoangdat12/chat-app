@@ -33,6 +33,7 @@ import { ListConversationSetting } from '../../ultils/constant/setting.constant'
 import { IInforConversation } from './ConversationContent/HeaderContent';
 import { getUserLocalStorageItem, getUserNameAndAvatarUrl } from '../../ultils';
 import InputAutoFocus from '../input/InputAutoFocus';
+import MessageImge from '../message/MessageImge';
 
 export interface IPropConversationSetting {
   showMoreConversation?: boolean;
@@ -78,6 +79,7 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
     const [receiveNotification, setReceiveNotification] = useState(
       isReceiveNotification
     );
+    const [showListImages, setShowListImages] = useState(false);
 
     const modelRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -140,6 +142,9 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
           break;
         case ListConversationSetting.LEAVE_GROUP:
           handleShowConfirm(title);
+          break;
+        case ListConversationSetting.IMAGE:
+          setShowListImages(true);
           break;
         default:
           break;
@@ -226,14 +231,14 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
           className={`${
             showMoreConversation
               ? 'absolute top-0 right-0 flex flex-row-reverse bg-blackOverlay'
-              : 'hidden xl:block xl:col-span-3 py-6 border-[#f2f3f4]'
+              : 'hidden xl:block xl:col-span-3 border-[#f2f3f4]'
           } h-full w-full xl:border-l overflow-y-scroll sm:overflow-hidden scrollbar-hide font-poppins`}
         >
           <div
             className={`${
               showMoreConversation &&
-              'animate__animated animate__fadeInRight w-full sm:w-[350px] bg-[#f2f3f4] py-6'
-            } relative`}
+              'animate__animated animate__fadeInRight w-full sm:w-[350px] h-full bg-[#f2f3f4] py-6'
+            } relative py-6`}
             ref={modelRef}
           >
             <div className='absolute top-0 left-4 flex sm:hidden'>
@@ -377,6 +382,13 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
                 )
               )}
             </ul>
+
+            {showListImages && (
+              <MessageImge
+                conversationId={conversation?._id}
+                setShowListImage={setShowListImages}
+              />
+            )}
           </div>
         </div>
         {isShowAddNewMember && (

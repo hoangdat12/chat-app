@@ -66,7 +66,7 @@ export const getListSetting = (type: string | undefined) => {
       },
       List: [
         {
-          title: ListConversationSetting.FILE,
+          title: ListConversationSetting.IMAGE,
           icon: <AiFillFileImage />,
         },
         {
@@ -77,60 +77,3 @@ export const getListSetting = (type: string | undefined) => {
     },
   ];
 };
-
-export const ListDetailSetting = [
-  {
-    SubMenu: {
-      title: ListConversationSetting.CHAT_DETAIL,
-      icon: <BsChevronDown />,
-    },
-    List: [
-      { title: ListConversationSetting.MEMBER, icon: <BsFillPeopleFill /> },
-      {
-        title: ListConversationSetting.DELETE_MESSAGES,
-        icon: <AiFillDelete />,
-      },
-      { title: ListConversationSetting.LEAVE_GROUP, icon: <BiLogOutCircle /> },
-    ],
-  },
-  {
-    SubMenu: {
-      title: ListConversationSetting.CUSTOME_CONVERSATION,
-      icon: <BsChevronDown />,
-    },
-    List: [
-      {
-        title: ListConversationSetting.CHANGE_THEME,
-        icon: <FaPushed />,
-      },
-      {
-        title: ListConversationSetting.CHANGE_EMOJI,
-        icon: <AiOutlineLike />,
-      },
-      {
-        title: ListConversationSetting.CHANGE_USERNAME,
-        icon: <VscTextSize />,
-      },
-      {
-        title: ListConversationSetting.SEARCH_IN_CONVERSATION,
-        icon: <IoSearchSharp />,
-      },
-    ],
-  },
-  {
-    SubMenu: {
-      title: ListConversationSetting.SHARED,
-      icon: <BsChevronDown />,
-    },
-    List: [
-      {
-        title: ListConversationSetting.FILE,
-        icon: <AiFillFileImage />,
-      },
-      {
-        title: ListConversationSetting.VIDEO,
-        icon: <MdVideoLibrary />,
-      },
-    ],
-  },
-];

@@ -30,13 +30,15 @@ import { Ok } from '../ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '../ultils/constant/multer.config';
-import { MessageType } from 'src/ultils/constant';
+import { MessageType } from '../ultils/constant';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('conversation')
 export class ConversationController {
   constructor(
     private readonly conversationService: ConversationService,
     private readonly eventEmiter: EventEmitter2,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Post()
@@ -281,7 +283,7 @@ export class ConversationController {
   }
 
   @Patch('/change-avatar-group')
-  @UseInterceptors(FileInterceptor('file', multerOptions))
+  @UseInterceptors(FileInterceptor('file'))
   async changeAvatarGroup(
     @Req() req: Request,
     @Body('conversationId') conversationId: string,
@@ -298,6 +300,7 @@ export class ConversationController {
         user,
         conversation: responseData,
       });
+      this.cloudinaryService.uploadFile(file);
       return new Ok(responseData);
     } catch (err) {
       throw err;

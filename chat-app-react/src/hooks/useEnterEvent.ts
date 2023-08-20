@@ -3,10 +3,12 @@ import { useEffect } from 'react';
 const useEnterListener = (
   handleEnter: any,
   dependence: string | any,
-  condition: boolean = true
+  condition: boolean = true,
+  otherCondition?: boolean,
+  otherDependence?: any
 ) => {
   useEffect(() => {
-    if (dependence.trim() !== '' && condition) {
+    if ((dependence.trim() !== '' && condition) || otherCondition) {
       const handleEnterEvent = (e: any) => {
         if (e.key === 'Enter' || e.keyCode === 13) {
           handleEnter();
@@ -19,7 +21,7 @@ const useEnterListener = (
         window.removeEventListener('keydown', handleEnterEvent);
       };
     }
-  }, [dependence]);
+  }, [dependence, otherDependence]);
 };
 
 export default useEnterListener;
