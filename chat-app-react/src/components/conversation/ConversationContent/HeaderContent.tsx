@@ -25,6 +25,7 @@ import {
 } from '../../../ultils';
 import { SocketCall } from '../../../ultils/constant';
 import { userService } from '../../../features/user/userService';
+import NotAllowed from '../../NotAllowed';
 
 export interface IPropHeaderContent {
   handleShowMoreConversation: MouseEventHandler<HTMLAnchorElement>;
@@ -32,6 +33,7 @@ export interface IPropHeaderContent {
   showListConversationSM?: boolean;
   conversation: IConversation;
   userId?: string | null;
+  isValidSendMessage?: boolean;
 }
 
 const userLocal = getUserLocalStorageItem();
@@ -105,6 +107,7 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
     showListConversationSM,
     conversation,
     userId,
+    isValidSendMessage,
   }) => {
     const [isOnline, setIsOnline] = useState(false);
     const { conversationId } = useParams();
@@ -138,7 +141,7 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
     }, [conversation]);
 
     return (
-      <div className='flex items-center justify-between h-16 sm:h-[5.5rem] px-4 sm:px-8 w-full shadow-nomal'>
+      <div className='relative flex items-center justify-between h-16 sm:h-[5.5rem] px-4 sm:px-8 w-full shadow-nomal'>
         {/* Mobile */}
         <div className='mr-2 block sm:hidden'>
           <ButtonRounded
@@ -209,6 +212,7 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
             onClick={handleShowMoreConversation}
           />
         </div>
+        <NotAllowed isValidSendMessage={!isValidSendMessage} />
       </div>
     );
   }

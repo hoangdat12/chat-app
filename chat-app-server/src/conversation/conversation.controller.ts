@@ -29,7 +29,6 @@ import { validate } from 'class-validator';
 import { Ok } from '../ultils/response';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from '../ultils/constant/multer.config';
 import { MessageType } from '../ultils/constant';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
@@ -52,14 +51,15 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      const responseData = await this.conversationService.createConversation(
-        user,
-        body,
-      );
-      if (responseData.conversation_type === MessageType.GROUP) {
-        this.eventEmiter.emit('conversation.create', responseData);
+      const { conversation, lastMessage } =
+        await this.conversationService.createConversation(user, body);
+      if (conversation.conversation_type === MessageType.GROUP) {
+        this.eventEmiter.emit('conversation.create', {
+          conversation,
+          lastMessage,
+        });
       }
-      return new Ok(responseData);
+      return new Ok(conversation);
     } catch (err) {
       throw err;
     }

@@ -25,6 +25,7 @@ import {
   ISocketCallInitiate,
   ISocketChangeEmoji,
   ISocketChangeUsername,
+  ISocketCreateConversation,
   ISocketDeleteMember,
   ISocketLeaveMember,
   ISocketReceivedNotify,
@@ -99,8 +100,8 @@ export class MessagingGateway implements OnModuleInit {
   }
 
   @OnEvent('conversation.create')
-  handleCreateGroup(payload: IConversation) {
-    for (let participant of payload.participants) {
+  handleCreateGroup(payload: ISocketCreateConversation) {
+    for (let participant of payload.conversation.participants) {
       const participantSocket = this.sessions.getUserSocket(participant.userId);
       if (participantSocket)
         participantSocket.emit('createConversation', payload);

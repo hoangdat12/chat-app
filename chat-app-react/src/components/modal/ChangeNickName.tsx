@@ -32,20 +32,23 @@ const ChangeNickName: FC<IChangeNickNameProp> = memo(
         >
           <div className='flex flex-col gap-4 h-[calc(100%-40px)] mb-2 overflow-y-scroll'>
             {conversation &&
-              conversation.participants.map((participant) => (
-                <div key={participant.userId} className='flex gap-4'>
-                  <div>
-                    <Avatar
-                      avatarUrl={participant.avatarUrl}
-                      className='w-10 h-10 min-h-[2.5rem] min-w-[2.5rem]'
-                    />
-                  </div>
-                  <Input
-                    defaultValue={participant.userName}
-                    participant={participant}
-                  />
-                </div>
-              ))}
+              conversation.participants.map((participant) => {
+                if (participant.enable)
+                  return (
+                    <div key={participant.userId} className='flex gap-4'>
+                      <div>
+                        <Avatar
+                          avatarUrl={participant.avatarUrl}
+                          className='w-10 h-10 min-h-[2.5rem] min-w-[2.5rem]'
+                        />
+                      </div>
+                      <Input
+                        defaultValue={participant.userName}
+                        participant={participant}
+                      />
+                    </div>
+                  );
+              })}
           </div>
           <div className='flex items-center justify-end min-h-[40px]'>
             <div className='flex gap-3'>

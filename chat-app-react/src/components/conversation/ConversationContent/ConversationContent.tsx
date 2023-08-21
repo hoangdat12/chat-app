@@ -57,6 +57,7 @@ export interface IPropConversationContent {
   showListConversationSM?: boolean;
   showMoreConversation: boolean;
   setShowMoreConversation: (value: boolean) => void;
+  isValidSendMessage?: boolean;
 }
 
 const ConversationContent: FC<IPropConversationContent> = ({
@@ -65,6 +66,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
   showListConversationSM,
   showMoreConversation,
   setShowMoreConversation,
+  isValidSendMessage,
 }) => {
   const [messageValue, setMessageValue] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -106,8 +108,19 @@ const ConversationContent: FC<IPropConversationContent> = ({
   const isValid = userPermissionChat(user?._id, conversation);
 
   // Socket received create new group
-  const handleCreateConversation = (payload: IConversation) => {
-    dispatch(createConversation(payload));
+  const handleCreateConversation = (payload: {
+    conversation: IConversation;
+    lastMessage: IMessage | null;
+  }) => {
+    dispatch(createConversation(payload.conversation));
+    if (payload.lastMessage) {
+      dispatch(
+        createNewMessageOfConversation({
+          conversationId: payload.conversation._id,
+          lastMessage: payload.lastMessage,
+        })
+      );
+    }
   };
 
   // Send message
@@ -357,6 +370,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
       socket.off('onMessageUpdate');
       socket.off('onMessageDelete');
       socket.off('onUserLeaveGroup');
+      socket.off('createConversation');
       socket.off('onChangeUsernameOfConversation');
       socket.off('onChangeEmojiOfConversation');
       socket.off('onChangeAvatarOfGroup');
@@ -373,6 +387,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
         showListConversationSM={showListConversationSM}
         conversation={conversation}
         userId={userId}
+        isValidSendMessage={isValidSendMessage}
       />
 
       <MessageContent />

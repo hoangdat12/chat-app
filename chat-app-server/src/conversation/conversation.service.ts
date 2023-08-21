@@ -40,6 +40,7 @@ export class ConversationService {
   ) {
     // Creator group
     const { conversation_type, avatarUrl } = payload;
+    let lastMessage = null;
     if (conversation_type === MessageType.GROUP) {
       const creator = {
         userId: user._id,
@@ -62,7 +63,28 @@ export class ConversationService {
         'Server Error!',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
-    else return newConversation;
+    else {
+      if (conversation_type === MessageType.GROUP) {
+        const data = {
+          message_type: MessageType.GROUP,
+          message_content: `${getUsername(user)} created ${
+            payload.nameGroup
+          } group`,
+          conversationId: newConversation._id.toString(),
+          message_received: newConversation.participants,
+          message_content_type: MessageContentType.NOTIFY,
+        };
+        lastMessage = await this.messageRepository.createMessageConversation(
+          user,
+          data,
+        );
+      }
+
+      return {
+        conversation: newConversation,
+        lastMessage,
+      };
+    }
   }
 
   async getMessageOfConversation(

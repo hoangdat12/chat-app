@@ -58,9 +58,12 @@ export interface ISocketDeleteMember {
   conversation: IConversation;
 }
 
-export interface ISocketAddMember {
+export interface ISocketCreateConversation {
   conversation: IConversation;
   lastMessage: IMessage | null;
+}
+
+export interface ISocketAddMember extends ISocketCreateConversation {
   newMember: IParticipant[];
 }
 

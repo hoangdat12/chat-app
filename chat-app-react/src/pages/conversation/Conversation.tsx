@@ -114,6 +114,7 @@ const Conversation = () => {
               showListConversationSM={showListConversationSM}
               showMoreConversation={showMoreConversation}
               setShowMoreConversation={setShowMoreConversation}
+              isValidSendMessage={isValid}
             />
             {conversation && (
               <ConversationSetting
