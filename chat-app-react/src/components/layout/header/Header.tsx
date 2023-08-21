@@ -1,10 +1,6 @@
 import { memo, useContext, useEffect, useRef } from 'react';
 
-import {
-  IoGameControllerOutline,
-  IoSearch,
-  IoNotificationsOutline,
-} from 'react-icons/io5';
+import { IoSearch, IoNotificationsOutline } from 'react-icons/io5';
 
 import { AiOutlineMenu, AiOutlinePlus } from 'react-icons/Ai';
 import { BsBook } from 'react-icons/bs';
@@ -21,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import UserBox from '../../box/UserBox';
 import { userService } from '../../../features/user/userService';
 import Loading from '../../button/Loading';
-import { getUsername } from '../../../ultils';
+import { getUserLocalStorageItem, getUsername } from '../../../ultils';
 import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { readNotify, selectNotify } from '../../../features/notify/notifySlice';
 import Button from '../../button/Button';
@@ -30,6 +26,12 @@ import Confirm from '../../modal/Confirm';
 import { authService } from '../../../features/auth/authService';
 import LoadingScreen from '../../button/LoadingScreen';
 import { AuthContext } from '../../../ultils/context/Auth';
+import { RiMessengerLine } from 'react-icons/ri';
+import {
+  resetUnReadNumberMessage,
+  selectMessage,
+} from '../../../features/message/messageSlice';
+import { selectConversation } from '../../../features/conversation/conversationSlice';
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -49,6 +51,8 @@ export interface IPopSearchBox {
   setIsShow?: (value: boolean) => void;
   users?: IUser[];
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const Header: FC<IPropHeader> = memo(
   ({ setIsOpen, isOpen, setShowMobile, showMobile }) => {
@@ -71,6 +75,8 @@ const Header: FC<IPropHeader> = memo(
     const dispatch = useAppDispatch();
     const { numberNotifyUnRead: totalNotify, notifies } =
       useAppSelector(selectNotify);
+    const { unReadNumberMessage } = useAppSelector(selectMessage);
+    const { conversations } = useAppSelector(selectConversation);
     const debounceValue = useDebounce(searchValue, 500);
 
     const handleLogout = async () => {
@@ -118,6 +124,13 @@ const Header: FC<IPropHeader> = memo(
       if (totalNotify !== 0) {
         dispatch(readNotify(notifies[0]._id));
       }
+    };
+
+    const resetUnReadMessage = () => {
+      if (unReadNumberMessage !== 0) {
+        dispatch(resetUnReadNumberMessage());
+      }
+      navigate(`/conversation/${Array.from(conversations.keys())[0]}`);
     };
 
     // For responsive
@@ -224,8 +237,24 @@ const Header: FC<IPropHeader> = memo(
               <div className='bg-gray-200 p-2 rounded-full cursor-pointer'>
                 <BsBook className='text-black text-xl' />
               </div>
-              <div className='bg-gray-200 p-2 rounded-full cursor-pointer'>
-                <IoGameControllerOutline className='text-black text-xl' />
+              <div className='relative'>
+                <div
+                  onClick={resetUnReadMessage}
+                  className='bg-gray-200 p-2 rounded-full cursor-pointer'
+                >
+                  <RiMessengerLine className='text-black text-xl' />
+                </div>
+                <div
+                  className={`absolute right-0 -top-[50%] ${
+                    unReadNumberMessage === 0 && 'hidden'
+                  } flex items-center justify-center translate-y-1/2 translate-x-1/2 min-w-[22px] min-h-[22px] bg-red-500 rounded-full`}
+                >
+                  <span className='text-sm text-white'>
+                    {unReadNumberMessage > 5
+                      ? `${unReadNumberMessage}+`
+                      : unReadNumberMessage}
+                  </span>
+                </div>
               </div>
               <div className='relative'>
                 <div
@@ -255,9 +284,7 @@ const Header: FC<IPropHeader> = memo(
             <div onClick={handleShowModel} className='relative float-right'>
               <Avatar
                 className={'w-[42px] h-[42px] min-h-[42px] min-w-[42px]'}
-                avatarUrl={
-                  'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
-                }
+                avatarUrl={userLocal.avatarUrl}
               />
               <div
                 ref={modelRef}

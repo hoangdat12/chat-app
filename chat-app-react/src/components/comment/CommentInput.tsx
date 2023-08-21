@@ -16,6 +16,7 @@ import Button from '../button/Button';
 import { commentService } from '../../features/comment/commentService';
 import { CommentType } from '../../ultils/constant';
 import useEnterListener from '../../hooks/useEnterEvent';
+import { getUserLocalStorageItem } from '../../ultils';
 // import { socket } from '../../ultils/context/Socket';
 
 export interface IPropCommentInput {
@@ -27,6 +28,8 @@ export interface IPropCommentInput {
   setComments: Dispatch<SetStateAction<IComment[] | null>>;
   postId: string;
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const CommentInput: FC<IPropCommentInput> = memo(
   ({
@@ -50,11 +53,13 @@ const CommentInput: FC<IPropCommentInput> = memo(
           comment_parent_id: parentCommentId ?? null,
         };
         const res = await commentService.createComment(data);
-        setComments((prev) => {
-          return prev !== null
-            ? [res.data.metaData, ...prev]
-            : [res.data.metaData];
-        });
+        if (res.status === 201 || res.status === 200) {
+          setComments((prev) => {
+            return prev !== null
+              ? [res.data.metaData, ...prev]
+              : [res.data.metaData];
+          });
+        }
         setCommentContent('');
         inputRef?.current?.focus();
       }
@@ -86,9 +91,7 @@ const CommentInput: FC<IPropCommentInput> = memo(
         className={`relative flex items-start gap-2 mt-2 mb-4 border p-4 rounded-lg`}
       >
         <Avatar
-          avatarUrl={
-            'https://toigingiuvedep.vn/wp-content/uploads/2021/01/avatar-dep-cute.jpg'
-          }
+          avatarUrl={userLocal.avatarUrl}
           className={sizeAvatar ?? 'w-12 h-12 min-h-[3rem] min-w-[3rem]'}
         />
         <div className='w-full'>

@@ -1,3 +1,9 @@
+import { FC } from 'react';
+
+export interface IProps {
+  text: string;
+}
+
 const Loading = () => {
   return (
     <div role='status'>
@@ -18,6 +24,17 @@ const Loading = () => {
         />
       </svg>
       <span className='sr-only text-black'>Loading...</span>
+    </div>
+  );
+};
+
+export const LoadingWithText: FC<IProps> = ({ text }) => {
+  return (
+    <div className='fixed top-0 bottom-0 left-0 right-0 bg-blackOverlay flex items-center justify-center'>
+      <div className='flex flex-col items-center justify-center w-2/5 h-2/5 lg:w-[30%] lg:h-[30%] bg-white rounded-lg'>
+        <h1>{text}</h1>
+        <Loading />
+      </div>
     </div>
   );
 };

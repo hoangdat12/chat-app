@@ -19,11 +19,14 @@ import { IUserCreated } from '../ultils/interface';
 import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { Ok } from '../ultils/response';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
-import { multerOptions } from '../ultils/constant';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('post')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get('/all')
   async getAllPost(
@@ -46,7 +49,7 @@ export class PostController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('file', multerOptions))
+  @UseInterceptors(FileInterceptor('file'))
   async createPost(
     @Req() req: Request,
     @Body('data') data: string,
@@ -54,9 +57,12 @@ export class PostController {
   ) {
     try {
       const body = JSON.parse(data) as DataCreatePost;
-      const post_image = file
-        ? `http://localhost:8080/assets/${file.filename}`
-        : null;
+      let post_image = null;
+      if (file) {
+        const image = await this.cloudinaryService.uploadFile(file);
+        post_image = image.url;
+      }
+
       const user = req.user as IUserCreated;
       const responseData = await this.postService.createPost(
         user,

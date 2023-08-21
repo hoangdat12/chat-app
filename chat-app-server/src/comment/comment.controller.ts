@@ -19,10 +19,14 @@ import {
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
 import { Created, Ok } from '../ultils/response';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('/comment')
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(
+    private readonly commentService: CommentService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @Post()
   async createComment(@Req() req: Request, @Body() body: DataCreateComment) {
@@ -32,7 +36,14 @@ export class CommentController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return new Created(await this.commentService.createComment(user, body));
+      const { notify, responseData } = await this.commentService.createComment(
+        user,
+        body,
+      );
+      if (notify) {
+        this.eventEmitter.emit('comment.create', notify);
+      }
+      return new Created(responseData);
     } catch (err) {
       throw err;
     }
@@ -103,7 +114,13 @@ export class CommentController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      return new Ok(await this.commentService.likeComment(user, data));
+      const { status, responseData, notify } =
+        await this.commentService.likeComment(user, data);
+      if (status === 'Like' && notify) {
+        // Notify
+        this.eventEmitter.emit('comment.like', notify);
+      }
+      return new Ok(responseData);
     } catch (err) {
       throw err;
     }

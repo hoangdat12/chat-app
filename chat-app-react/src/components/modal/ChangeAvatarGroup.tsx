@@ -21,6 +21,7 @@ import { getUserLocalStorageItem } from '../../ultils';
 import { conversationService } from '../../features/conversation/conversationService';
 import { useAppDispatch } from '../../app/hook';
 import { updateAvatarOfGroup } from '../../features/conversation/conversationSlice';
+import { LoadingWithText } from '../button/Loading';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -30,6 +31,7 @@ const ChangeAvatarGroup = () => {
   const [src, setSrc] = useState('');
   const [mode, setMode] = useState('crop');
   const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -60,7 +62,7 @@ const ChangeAvatarGroup = () => {
       contrast: 0,
     });
   };
-  console.log(location);
+
   const onUpload = (blob: string) => {
     onReset();
     setMode('crop');
@@ -72,6 +74,7 @@ const ChangeAvatarGroup = () => {
   };
 
   const onChangeAvatar = async () => {
+    setIsLoading(true);
     const formData = new FormData();
     if (cropperRef.current && file) {
       formData.append('file', file, 'croppedImage.jpg');
@@ -101,6 +104,7 @@ const ChangeAvatarGroup = () => {
         }
       }
     }
+    setIsLoading(false);
   };
 
   const changed = Object.values(adjustments).some((el) => Math.floor(el * 100));
@@ -192,6 +196,7 @@ const ChangeAvatarGroup = () => {
         setFile={setFile}
         src={src}
       />
+      {isLoading && <LoadingWithText text={'Please wait 10 seconds :))'} />}
     </div>
   );
 };

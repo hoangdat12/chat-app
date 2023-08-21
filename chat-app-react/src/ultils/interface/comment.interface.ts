@@ -9,6 +9,7 @@ export interface IComment {
   comment_left: number;
   comment_right: number;
   comment_parent_id: string;
+  comment_likes_num: number;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;

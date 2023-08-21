@@ -48,6 +48,9 @@ export const Content: FC<IPropComment> = memo(
     const [remainChildComment, setRemainChildComment] = useState<number | null>(
       null
     );
+    const [commentLikeNum, setCommentLikeNum] = useState(
+      comment.comment_likes_num
+    );
 
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -98,7 +101,7 @@ export const Content: FC<IPropComment> = memo(
       };
       const res = await commentService.updateComment(data);
       if (res.status === 200) {
-        setChildComments(null);
+        comment.comment_content = res.data.metaData.comment_content;
       }
       setIsUpdate(false);
     };
@@ -109,8 +112,11 @@ export const Content: FC<IPropComment> = memo(
         comment_id: comment._id,
         comment_post_id: comment.comment_post_id,
       };
-      await commentService.likeComment(data);
-
+      const res = await commentService.likeComment(data);
+      console.log(res);
+      if (res.status === 200 || res.status === 201) {
+        setCommentLikeNum(res.data.metaData.comment_likes_num);
+      }
       setIsLiked(!isLiked);
     };
 
@@ -181,9 +187,14 @@ export const Content: FC<IPropComment> = memo(
                 onClick={handleLikeComment}
                 className={`${
                   isLiked && 'text-blue-700'
-                } cursor-pointer hover:opacity-80`}
+                } relative cursor-pointer hover:opacity-80`}
               >
                 Like
+                {commentLikeNum !== 0 && (
+                  <span className='absolute -bottom-1 -right-2 px-1 bg-blue-500 text-white text-[8px] rounded-full'>
+                    {commentLikeNum}
+                  </span>
+                )}
               </span>
               <span
                 onClick={() => setIsReply(true)}

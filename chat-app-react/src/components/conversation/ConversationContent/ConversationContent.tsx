@@ -47,7 +47,7 @@ import { MessageContentType } from '../../../ultils/constant/message.constant';
 import { getUserNameAndAvatarUrl } from '../../../ultils';
 import ConversationSetting from '../ConversationSetting';
 import useEnterListener from '../../../hooks/useEnterEvent';
-import Loading from '../../button/Loading';
+import { LoadingWithText } from '../../button/Loading';
 
 export interface IPropConversationContent {
   user: IUser | null;
@@ -384,12 +384,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
       )}
 
       {isLoadingSendImage && (
-        <div className='fixed top-0 bottom-0 left-0 right-0 bg-blackOverlay flex items-center justify-center'>
-          <div className='flex flex-col items-center justify-center w-2/5 h-2/5 lg:w-[30%] lg:h-[30%] bg-white rounded-lg'>
-            <h1>Please wait 10 seconds :))</h1>
-            <Loading />
-          </div>
-        </div>
+        <LoadingWithText text={'Please wait 10 seconds :))'} />
       )}
     </div>
   );

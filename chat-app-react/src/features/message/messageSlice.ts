@@ -13,12 +13,16 @@ export interface IMessageInitialState {
   messages: IDataFormatMessage[];
   isLoading: boolean;
   status: 'idle' | 'pending' | 'succeeded' | 'failed';
+  unReadNumberMessage: number;
+  unReadMessageOfConversation: string[];
 }
 
 const initialState: IMessageInitialState = {
   messages: [],
   isLoading: false,
   status: 'idle',
+  unReadNumberMessage: 0,
+  unReadMessageOfConversation: [],
 };
 
 export const fetchMessageOfConversation = createAsyncThunk(
@@ -117,6 +121,27 @@ const messageSlice = createSlice({
     deleteAllMessageOfConversation: (state) => {
       state.messages = [];
     },
+    setUnReadNumberMessage: (
+      state,
+      action: PayloadAction<{
+        quantity: number;
+        conversationId: string;
+      }>
+    ) => {
+      if (
+        state.unReadMessageOfConversation.indexOf(
+          action.payload.conversationId
+        ) === -1
+      ) {
+        state.unReadNumberMessage =
+          state.unReadNumberMessage + action.payload.quantity;
+        state.unReadMessageOfConversation.push(action.payload.conversationId);
+      }
+    },
+    resetUnReadNumberMessage: (state) => {
+      state.unReadNumberMessage = 0;
+      state.unReadMessageOfConversation = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -142,6 +167,8 @@ export const {
   updateMessage,
   addMessage,
   deleteAllMessageOfConversation,
+  setUnReadNumberMessage,
+  resetUnReadNumberMessage,
 } = messageSlice.actions;
 export default messageSlice.reducer;
 export const selectMessage = (state: RootState) => state.message;

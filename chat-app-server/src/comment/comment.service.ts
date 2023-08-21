@@ -7,17 +7,24 @@ import {
   DataUpdateComment,
 } from './comment.dto';
 import { PostRepository } from '../post/post.repository';
-import { CommentType } from '../ultils/constant';
+import { CommentType, NotifyType } from '../ultils/constant';
+import { getContentNotify, getMessageNotify, getUsername } from '../ultils';
+import { NotifyService } from '../notify/notify.service';
 
 @Injectable()
 export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
     private readonly postRepository: PostRepository,
+    private readonly notifyService: NotifyService,
   ) {}
 
   async createComment(user: IUserCreated, data: DataCreateComment) {
     const { comment_parent_id, comment_post_id } = data;
+    const { foundPost } = await this.checkPostAndCommentFound({
+      comment_id: comment_parent_id,
+      comment_post_id,
+    });
     let rightValue: number = 1;
     // Reply
     if (comment_parent_id) {
@@ -55,8 +62,39 @@ export class CommentService {
 
     await this.postRepository.increQuantityCommentNum(comment_post_id);
     const comment = await this.commentRepository.create(user, data, rightValue);
+    // Create notify
+    let notify = null;
+    if (foundPost.user._id.toString() !== user._id) {
+      const notifyData = {
+        notifyType: comment_parent_id
+          ? NotifyType.COMMENT_REPLY
+          : NotifyType.COMMENT,
+        ownerNotify: { userId: foundPost.user._id.toString() },
+        notifyLink: {
+          parrentCommentId: comment_parent_id,
+          commentId: comment._id.toString(),
+          postId: comment_post_id,
+        },
+        post: {
+          userId: foundPost.user._id,
+          userName: getUsername(foundPost.user),
+        },
+        notify_friend: null,
+      };
+      notify = await this.notifyService.createNotify(
+        {
+          userId: user._id,
+          avatarUrl: user.avatarUrl,
+          userName: getUsername(user),
+        },
+        notifyData,
+      );
+    }
 
-    return this.convertCommentToString(comment, user);
+    return {
+      notify,
+      responseData: this.convertCommentToString(comment, user),
+    };
   }
 
   async getListCommentOfPost(
@@ -114,7 +152,7 @@ export class CommentService {
     if (comment_content.trim() === '')
       throw new HttpException('Invalid content!', HttpStatus.BAD_REQUEST);
 
-    const foundComment = await this.checkPostAndCommentFound(data);
+    const { foundComment } = await this.checkPostAndCommentFound(data);
 
     if (foundComment.comment_type !== CommentType.TEXT)
       throw new HttpException('Not valid!', HttpStatus.BAD_REQUEST);
@@ -131,7 +169,7 @@ export class CommentService {
   async deleteComment(user: IUserCreated, data: DataDeleteComment) {
     const { comment_post_id } = data;
 
-    const foundComment = await this.checkPostAndCommentFound(data);
+    const { foundComment } = await this.checkPostAndCommentFound(data);
 
     const leftValue = foundComment.comment_left;
     const rightValue = foundComment.comment_right;
@@ -168,16 +206,62 @@ export class CommentService {
     return foundComment;
   }
 
-  async likeComment(user: IUserCreated, data: DataDeleteComment) {
-    await this.checkPostAndCommentFound(data);
+  async likeComment(
+    user: IUserCreated,
+    data: DataDeleteComment,
+  ): Promise<{
+    status: string;
+    responseData: any;
+    notify: any;
+  }> {
+    const { foundPost, foundComment } = await this.checkPostAndCommentFound(
+      data,
+    );
     const isLiked = await this.commentRepository.isLiked(user, data);
     // If isLiked then cancel like
     if (isLiked) {
       // Cancel like
-      return await this.commentRepository.cancelLikeComment(user, data);
+      return {
+        status: 'UnLike',
+        responseData: await this.commentRepository.cancelLikeComment(
+          user,
+          data,
+        ),
+        notify: null,
+      };
     } else {
       // Like
-      return await this.commentRepository.likeComment(user, data);
+      let notify = null;
+      if (foundComment.comment_user_id.toString() !== user._id) {
+        const notifyData = {
+          notifyType: NotifyType.COMMENT_EMOJI,
+          ownerNotify: { userId: foundComment.comment_user_id.toString() },
+          notifyLink: {
+            parrentCommentId: foundComment.comment_parent_id,
+            commentId: foundComment._id.toString(),
+            postId: data.comment_post_id,
+          },
+          post: {
+            userId: foundPost.user._id,
+            userName: getUsername(foundPost.user),
+          },
+          notify_friend: null,
+        };
+        notify = await this.notifyService.createNotify(
+          {
+            userId: user._id,
+            avatarUrl: user.avatarUrl,
+            userName: getUsername(user),
+          },
+          notifyData,
+        );
+      }
+
+      return {
+        status: 'Like',
+        responseData: await this.commentRepository.likeComment(user, data),
+        notify,
+      };
     }
   }
 
@@ -191,11 +275,14 @@ export class CommentService {
     if (!foundPost)
       throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
 
-    const foundComment = await this.commentRepository.findById(comment_id);
-    if (!foundComment)
-      throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
+    let foundComment = null;
+    if (comment_id) {
+      foundComment = await this.commentRepository.findById(comment_id);
+      if (!foundComment)
+        throw new HttpException('Comment not found!', HttpStatus.NOT_FOUND);
+    }
 
-    return foundComment;
+    return { foundPost, foundComment };
   }
 
   convertCommentToString(comment: any, user: IUserCreated) {

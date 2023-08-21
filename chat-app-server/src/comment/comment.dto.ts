@@ -14,8 +14,7 @@ export class DataCreateComment {
 export class DataDeleteComment {
   @IsNotEmpty()
   comment_post_id: string;
-  @IsNotEmpty()
-  comment_id: string;
+  comment_id?: string;
 }
 
 export class DataUpdateComment extends DataDeleteComment {

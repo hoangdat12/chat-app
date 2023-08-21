@@ -8,6 +8,7 @@ import useClickOutside from '../../hooks/useClickOutside';
 import { useAppDispatch } from '../../app/hook';
 import { deleteNotify } from '../../features/notify/notifySlice';
 import { notifyService } from '../../features/notify/notifyService';
+import { useNavigate } from 'react-router-dom';
 
 export interface IPropNotify {
   notify: INotify;
@@ -29,6 +30,8 @@ export const Notify: FC<IPropNotify> = ({
     setShow(!show);
   };
 
+  const navigate = useNavigate();
+
   useClickOutside(modelRef, () => setShow(false), 'mousedown');
 
   const handleDeleteNotify = async () => {
@@ -48,7 +51,12 @@ export const Notify: FC<IPropNotify> = ({
         className={`h-16 w-16 min-h-[4rem] min-w-[4rem]`}
       />
 
-      <div className='text-black font-poppins'>
+      <div
+        onClick={
+          notify.notify_link ? () => navigate(notify.notify_link) : undefined
+        }
+        className='text-black font-poppins'
+      >
         <FormatTitleNotify title={notify.notify_content} />
         <div
           className={`${
@@ -123,7 +131,7 @@ export const FormatTitleNotify: FC<IPropFormatTitleNotify> = ({ title }) => {
     });
   }, [title, regex]);
   return (
-    <h1 className='text-[15px] w-full max-h-[48px] text-content line-clamp-2'>
+    <h1 className='text-[15px] w-full max-h-[48px] text-content line-clamp-2 cursor-pointer'>
       {titleFormatted()}
     </h1>
   );

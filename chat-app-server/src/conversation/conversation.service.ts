@@ -398,7 +398,7 @@ export class ConversationService {
   async changeAvatarGroup(
     user: IUserCreated,
     conversationId: string,
-    file: Express.Multer.File,
+    avatarUrl: string,
   ) {
     const foundConversation = await this.conversationRepository.findUserExist(
       conversationId,
@@ -422,7 +422,6 @@ export class ConversationService {
     if (!message)
       throw new HttpException('Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
 
-    const avatarUrl = `http://localhost:8080/assets/${file.filename}`;
     foundConversation.avatarUrl = avatarUrl;
     foundConversation.lastMessage = convertMessageWithIdToString(message);
     return await foundConversation.save();

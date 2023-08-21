@@ -96,7 +96,7 @@ export const PostLikeShareComment: FC<IPropPostLikeShareComment> = ({
       quantity: activeHeart ? -1 : 1,
     };
     dispatch(likePost(data));
-    setQuantityLike(activeHeart ? -1 : 1);
+    setQuantityLike(activeHeart ? quantityLike - 1 : quantityLike + 1);
     setActiveHeart(!activeHeart);
   };
 

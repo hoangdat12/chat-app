@@ -291,16 +291,16 @@ export class ConversationController {
   ) {
     try {
       const user = req.user as IUserCreated;
+      const image = await this.cloudinaryService.uploadFile(file);
       const responseData = await this.conversationService.changeAvatarGroup(
         user,
         conversationId,
-        file,
+        image.url,
       );
       this.eventEmiter.emit('conversation.changeAvatarGroup', {
         user,
         conversation: responseData,
       });
-      this.cloudinaryService.uploadFile(file);
       return new Ok(responseData);
     } catch (err) {
       throw err;

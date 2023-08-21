@@ -9,6 +9,7 @@ import {
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { NotifyType } from '../ultils/constant/notify.constant';
 import { DataCreateNotify } from './notify.dto';
+import { getContentNotify, getNotifyLink } from '../ultils';
 
 @Injectable()
 export class NotifyService {
@@ -30,8 +31,8 @@ export class NotifyService {
     if (!foundUser)
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
 
-    const notify_content = this.getContentNotify(user, notifyType, post);
-    const notify_link = this.getNotifyLink(notifyLink, notifyType);
+    const notify_content = getContentNotify(user, notifyType, post);
+    const notify_link = getNotifyLink(notifyLink, notifyType);
 
     const payload = {
       user_id: ownerNotify.userId,
@@ -87,54 +88,5 @@ export class NotifyService {
 
   async readNotify(user: IUserCreated, notifyId: string) {
     return await this.notifyRepository.readNotify(user, notifyId);
-  }
-
-  getContentNotify(
-    user: UserNotify,
-    notifyType: string,
-    post: INotifyPost | null,
-  ) {
-    const userName = user.userName;
-    switch (notifyType) {
-      case NotifyType.ADD_FRIEND:
-        return `**${userName}** sent you a friend request`;
-      case NotifyType.CONFIRM_FRIEND:
-        return `**${userName}** has accepted your friend request`;
-      case NotifyType.COMMENT:
-        return `**${userName}** commented on **your photo**`;
-      case NotifyType.COMMENT_REPLY:
-        return `**${userName}** reply to your comment about **${post.userName}'s post**`;
-      case NotifyType.COMMENT_EMOJI:
-        return `**${userName}** express your feelings about your comment about **${post.userName}'s post**`;
-      case NotifyType.LIKE_IMAGE:
-        return `**${userName}** liked **your photo**`;
-      default:
-        console.log('Not valid type!');
-        return;
-    }
-  }
-
-  getNotifyLink(notifyLink: INotifyLink, notifyType: string) {
-    switch (notifyType) {
-      case NotifyType.ADD_FRIEND:
-        return null;
-      case NotifyType.CONFIRM_FRIEND:
-        return null;
-      case NotifyType.COMMENT:
-        if (notifyLink.parrentCommentId) {
-          return `${notifyLink.postId}/${notifyLink.parrentCommentId}/${notifyLink.commentId}`;
-        } else {
-          return `${notifyLink.postId}/${notifyLink.commentId}`;
-        }
-      case NotifyType.COMMENT_REPLY:
-        return `${notifyLink.postId}/${notifyLink.parrentCommentId}/${notifyLink.commentId}`;
-      case NotifyType.COMMENT_EMOJI:
-        return `${notifyLink.postId}/${notifyLink.parrentCommentId}/${notifyLink.commentId}`;
-      case NotifyType.LIKE_IMAGE:
-        return `${notifyLink.postId}`;
-      default:
-        console.log('Type invalid!');
-        return;
-    }
   }
 }

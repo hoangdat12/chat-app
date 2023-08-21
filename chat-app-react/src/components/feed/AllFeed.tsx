@@ -3,10 +3,13 @@ import { IPost } from '../../ultils/interface';
 import Feed from './Feed';
 import PostShared from './PostShared';
 import { PostType } from '../../ultils/constant';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface IProps {
   posts: IPost[] | null;
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const AllFeed: FC<IProps> = memo(({ posts }) => {
   return (
@@ -16,7 +19,7 @@ const AllFeed: FC<IProps> = memo(({ posts }) => {
           return post.post_type === PostType.POST ? (
             <Feed
               key={post._id}
-              isOwner={true}
+              isOwner={userLocal._id === post.user._id}
               post={post}
               background={'bg-gray-100'}
             />

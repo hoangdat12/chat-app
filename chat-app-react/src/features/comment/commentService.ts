@@ -27,7 +27,9 @@ const getListComment = async (
   return res;
 };
 
-const updateComment = async (data: IDataUpdateComment) => {
+const updateComment = async (
+  data: IDataUpdateComment
+): Promise<IResponse<IComment>> => {
   const res = await myAxios.patch('/comment', data);
   return res;
 };
@@ -37,7 +39,9 @@ const deleteComment = async (data: IDataDeleteComment) => {
   return res;
 };
 
-const likeComment = async (data: IDataDeleteComment) => {
+const likeComment = async (
+  data: IDataDeleteComment
+): Promise<IResponse<IComment>> => {
   const res = await myAxios.post('/comment/like', data);
   return res;
 };

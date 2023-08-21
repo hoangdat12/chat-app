@@ -4,10 +4,13 @@ import { selectPost } from '../../features/post/postSlice';
 import { PostType } from '../../ultils/constant';
 import Feed from './Feed';
 import PostShared from './PostShared';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface IPropListFeed {
   background?: string;
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const ListFeed: FC<IPropListFeed> = ({ background }) => {
   const { posts } = useAppSelector(selectPost);
@@ -17,7 +20,7 @@ const ListFeed: FC<IPropListFeed> = ({ background }) => {
         return post.post_type === PostType.POST ? (
           <Feed
             key={post._id}
-            isOwner={true}
+            isOwner={userLocal._id === post.user._id}
             post={post}
             background={background}
           />

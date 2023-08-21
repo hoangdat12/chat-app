@@ -107,14 +107,25 @@ const ChangeInformation = () => {
     }
   };
 
-  const handleCloseForm = () => {
+  const handleCloseForm = (form: string) => {
     if (profile) {
-      setIsEdit(false);
-      setInformationUser({
-        firstNameValue: profile?.profile_user.firstName,
-        lastNameValue: profile?.profile_user.lastName,
-        jobValue: profile?.profile_job,
-      });
+      if (form === 'information') {
+        setIsEdit(false);
+        setInformationUser({
+          firstNameValue: profile?.profile_user.firstName,
+          lastNameValue: profile?.profile_user.lastName,
+          jobValue: profile?.profile_job,
+        });
+      } else if (form === 'address') {
+        setIsEditAddress(false);
+        setAddressValue({
+          countryValue: profile.profile_address.address_country,
+          stateValue:
+            profile.profile_address.address_state ||
+            profile.profile_address.address_city,
+          streetValue: profile.profile_address.address_street,
+        });
+      }
     }
   };
 
@@ -297,7 +308,6 @@ const ChangeInformation = () => {
               >
                 <InformationUserV2
                   label={'Country'}
-                  data={'Viet Nam'}
                   isEdit={isEditAddress}
                   value={addressValue.countryValue}
                   onChange={(value: string) =>
@@ -309,7 +319,6 @@ const ChangeInformation = () => {
                 />
                 <InformationUserV2
                   label={'City/State'}
-                  data={'Hue'}
                   isEdit={isEditAddress}
                   value={addressValue.stateValue}
                   onChange={(value: string) =>
@@ -321,7 +330,6 @@ const ChangeInformation = () => {
                 />
                 <InformationUserV2
                   label={'Street Address'}
-                  data={'Huong ho'}
                   isEdit={isEditAddress}
                   value={addressValue.streetValue}
                   onChange={(value: string) =>
@@ -390,7 +398,7 @@ export const InformationUserV2: FC<IPropInformationUser> = memo(
               'px-2 py-[6px] border rounded-lg cursor-not-allowed opacity-50'
             }`}
           >
-            {data ?? value}
+            {value ?? data}
           </p>
         )}
       </div>

@@ -6,9 +6,15 @@ import { PostController } from './post.controller';
 import { PostRepository } from './post.repository';
 import { RedisModule } from '../redis/redis.module';
 import { ProfileModule } from '../profile/profile.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([PostModel]), RedisModule, ProfileModule],
+  imports: [
+    MongooseModule.forFeature([PostModel]),
+    RedisModule,
+    ProfileModule,
+    CloudinaryModule,
+  ],
   providers: [PostService, PostRepository],
   controllers: [PostController],
   exports: [PostRepository],

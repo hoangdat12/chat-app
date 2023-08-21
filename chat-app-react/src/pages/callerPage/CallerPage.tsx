@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 import CallReceiveDialog from '../../components/call/CallReceiveDialog';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
@@ -9,7 +9,7 @@ import {
   setRemoteStream,
 } from '../../features/call/callSlice';
 import { useVideoCall } from '../../hooks/call/useVideoCall';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getUserLocalStorageItem } from '../../ultils';
 import Peer from 'peerjs';
 import { useVideoCallAccept } from '../../hooks/call/useVideoCallAccept';
@@ -22,9 +22,19 @@ import { useVoiceCallClose } from '../../hooks/call/useVoiceCallClose';
 import CallHidden from '../../components/call/VideoCallHidden';
 import VoiceCallHidden from '../../components/call/VoiceCallHidden';
 import CallEndNotify from '../../components/call/CallEndNotify';
-import { useNotify } from '../../hooks/notify/useNotify';
 import { NotifyAlert } from '../../components/alert/Alert';
-import { useConversation } from '../../hooks/conversation/useConversation';
+import { SocketContext } from '../../ultils/context/Socket';
+import { useCountDown } from '../../hooks/useCountDown';
+import {
+  deleteNotify,
+  receivedNotify,
+} from '../../features/notify/notifySlice';
+import { IMessage, INotify } from '../../ultils/interface';
+import {
+  selectMessage,
+  setUnReadNumberMessage,
+} from '../../features/message/messageSlice';
+import { fetchConversationOfUser } from '../../features/conversation/conversationSlice';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -32,6 +42,7 @@ const CallerPage = () => {
   const [showNotify, setShowNotify] = useState(false);
   const [showNewMessageConversation, setShowNewMessageConversation] =
     useState(false);
+  const { conversationId } = useParams();
 
   const dispatch = useAppDispatch();
   const {
@@ -45,6 +56,9 @@ const CallerPage = () => {
     isMini,
     endCall,
   } = useAppSelector(selectCall);
+  const { unReadMessageOfConversation } = useAppSelector(selectMessage);
+
+  const socket = useContext(SocketContext);
 
   useEffect(() => {
     if (!userLocal) return;
@@ -127,8 +141,69 @@ const CallerPage = () => {
     }
   }, [connection]);
 
-  useNotify(showNotify, setShowNotify);
-  useConversation(showNewMessageConversation, setShowNewMessageConversation);
+  useCountDown(showNotify, () => setShowNotify(false), showNotify);
+
+  // Socket received request add friend
+  const handleReceivedNotify = (data: INotify) => {
+    setShowNotify(true);
+    dispatch(receivedNotify(data));
+  };
+
+  // Socket received Friend cancel request
+  const handleDeleteNotify = (data: INotify) => {
+    dispatch(deleteNotify(data));
+  };
+
+  useEffect(() => {
+    socket.on('connection', (data: any) => {
+      console.log(data);
+    });
+    socket.on('receivedNotify', handleReceivedNotify);
+    socket.on('deleteNotify', handleDeleteNotify);
+
+    return () => {
+      socket.off('connection', (data: any) => {
+        console.log(data);
+      });
+      socket.off('receivedNotify');
+      socket.off('deleteNotify');
+    };
+  }, []);
+
+  useCountDown(
+    showNewMessageConversation,
+    () => setShowNewMessageConversation(false),
+    showNewMessageConversation,
+    5000
+  );
+
+  console.log(conversationId);
+
+  useEffect(() => {
+    socket.on('onMessage', (data: IMessage) => {
+      if (conversationId) return;
+      console.log('Show');
+      if (
+        unReadMessageOfConversation.indexOf(data.message_conversation) === -1
+      ) {
+        setShowNewMessageConversation(true);
+        dispatch(
+          setUnReadNumberMessage({
+            quantity: 1,
+            conversationId: data.message_conversation,
+          })
+        );
+      }
+    });
+
+    return () => {
+      socket.off('onMessage');
+    };
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchConversationOfUser(userLocal._id));
+  }, [userLocal]);
 
   return (
     <div className='relative'>

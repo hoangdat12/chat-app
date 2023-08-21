@@ -4,13 +4,14 @@ export const useCountDown = (
   condition: boolean,
   handler: any,
   dependence: any,
-  time?: number | 2000
+  time?: number | 3000
 ) => {
   useEffect(() => {
     if (condition) {
       const timer = setTimeout(() => {
+        console.log('close');
         handler();
-      }, time);
+      }, time || 3000);
 
       return () => clearTimeout(timer);
     }
@@ -22,7 +23,7 @@ export const useCountDown = (
 //   if (showNotify) {
 //     const timer = setTimeout(() => {
 //       setShowNotify(false);
-//     }, 2000);
+//     }, 3000);
 
 //     return () => clearTimeout(timer);
 //   }

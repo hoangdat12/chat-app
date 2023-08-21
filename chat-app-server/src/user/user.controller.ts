@@ -18,11 +18,14 @@ import { Request } from 'express';
 import { ChangeUsername } from '../auth/auth.dto';
 import { Ok } from '../ultils/response';
 import { IUserCreated } from '../ultils/interface';
-import { multerOptions } from '../ultils/constant/multer.config';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get()
   async getAllUser() {
@@ -65,7 +68,7 @@ export class UserController {
   }
 
   @Patch('change-avatar')
-  @UseInterceptors(FileInterceptor('file', multerOptions))
+  @UseInterceptors(FileInterceptor('file'))
   async changeAvatar(
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
@@ -73,7 +76,8 @@ export class UserController {
     try {
       if (!file) throw new HttpException('Bad request', HttpStatus.BAD_REQUEST);
       const user = req.user as IUserCreated;
-      const avatarUrl = `${process.env.IMAGE_URL}/${file.filename}`;
+      const image = await this.cloudinaryService.uploadFile(file);
+      const avatarUrl = image.url;
 
       return new Ok(
         await this.userService.changeUserAvatar(user._id, avatarUrl),

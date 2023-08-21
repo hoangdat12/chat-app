@@ -209,10 +209,17 @@ export class MessagingGateway implements OnModuleInit {
     if (userSocket) userSocket.emit('deleteNotify', payload.notify);
   }
 
-  // @OnEvent('comment.create')
-  // handleCreateComment(payload: IComment) {
-  //   const {comment_user_id} = payload;
-  // }
+  @OnEvent('comment.create')
+  handleCreateComment(payload: INotify) {
+    const authSocket = this.sessions.getUserSocket(payload.user_id);
+    if (authSocket) authSocket.emit('receivedNotify', payload);
+  }
+
+  @OnEvent('comment.like')
+  handleLikeComment(payload: INotify) {
+    const authSocket = this.sessions.getUserSocket(payload.user_id);
+    if (authSocket) authSocket.emit('receivedNotify', payload);
+  }
 
   // CALL
   @SubscribeMessage(SocketCall.ON_VIDEO_CALL_REQUEST)

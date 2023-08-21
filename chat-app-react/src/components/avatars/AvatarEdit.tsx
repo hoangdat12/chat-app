@@ -31,7 +31,7 @@ const AvatarEdit: FC<IPropAvatarEdit> = ({
       <div
         className={`${className} overflow-hidden rounded-full cursor-pointer`}
       >
-        <img className='w-full rounded-full' src={avatarUrl} alt='' />
+        <img className='w-full h-full rounded-full' src={avatarUrl} alt='' />
       </div>
       <span className='absolute bottom-0 left-1 translate-y-1/4 text-black text-lg p-1 rounded-full bg-gray-300'>
         <CiEdit />
