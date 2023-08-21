@@ -214,9 +214,20 @@ export class ConversationController {
         throw new Error('Missing value!');
       }
       const user = req.user as IUserCreated;
-      const response =
+      const { conversation, newMember, lastMessage } =
         await this.conversationService.addPaticipantOfConversation(user, body);
-      return new Ok(response);
+      if (lastMessage) {
+        this.eventEmiter.emit('conversaiton.participant.add', {
+          conversation,
+          newMember,
+          lastMessage,
+        });
+      }
+      return new Ok({
+        conversationId: conversation._id,
+        newMember,
+        lastMessage,
+      });
     } catch (err) {
       throw err;
     }

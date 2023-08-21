@@ -9,6 +9,7 @@ import {
 
 import useInnerWidth from '../../../hooks/useInnterWidth';
 import {
+  addMemberToGroup,
   changeAvatarOfConversation,
   changeEmojiOfConversation,
   changeNameOfConversation,
@@ -31,6 +32,7 @@ import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import { SocketContext } from '../../../ultils/context/Socket';
 import {
   IConversation,
+  IDataAddNewMemberResponse,
   IDataChangeUsernameOfConversation,
   IDataDeleteMemberResponse,
   IDataUserLeaveGroupResponse,
@@ -296,6 +298,18 @@ const ConversationContent: FC<IPropConversationContent> = ({
     dispatch(leaveGroup(payload));
   };
 
+  const handleAddMemberToGroup = (data: IDataAddNewMemberResponse) => {
+    if (data.lastMessage) {
+      dispatch(addMemberToGroup(data));
+      dispatch(
+        updateLastMessage({
+          conversationId: data.conversationId,
+          lastMessage: data.lastMessage,
+        })
+      );
+    }
+  };
+
   // Handle event Enter
   useEnterListener(
     handleSendMessage,
@@ -327,6 +341,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
 
     socket.on('onDeleteMemberOfGroup', handleDeleteMember);
     socket.on('onUserLeaveGroup', handleUserLeaveGroup);
+    socket.on('onAddMemberGroup', handleAddMemberToGroup);
 
     socket.on(
       'onChangeUsernameOfConversation',
@@ -346,6 +361,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
       socket.off('onChangeEmojiOfConversation');
       socket.off('onChangeAvatarOfGroup');
       socket.off('onChangeNameGroup');
+      socket.off('onAddMemberGroup');
     };
   }, []);
 

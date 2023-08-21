@@ -47,7 +47,7 @@ export interface IConversation {
   _id: string;
   conversation_type: string;
   participants: IParticipant[];
-  lastMessage?: IMessage;
+  lastMessage: IMessage;
   nameGroup: string | undefined;
   updatedAt: string;
   createdAt: string;

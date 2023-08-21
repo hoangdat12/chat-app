@@ -1,10 +1,7 @@
 import { FC, memo, useEffect, useRef, useState } from 'react';
 import Search from '../search/Search';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
-import {
-  addFriendToGroup,
-  selectConversation,
-} from '../../features/conversation/conversationSlice';
+import { selectConversation } from '../../features/conversation/conversationSlice';
 import { getUserLocalStorageItem } from '../../ultils';
 import { IParticipant, IUser } from '../../ultils/interface';
 import useDebounce from '../../hooks/useDebounce';
@@ -124,7 +121,8 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
             conversation_type: conversation.conversation_type,
             newParticipants: listUserAddGroup,
           };
-          await dispatch(addFriendToGroup(data));
+          const res = await conversationService.handleAddNewMember(data);
+          console.log('add new Member::: ', res);
           handleCloseForm();
         }
       }

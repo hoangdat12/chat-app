@@ -21,6 +21,7 @@ import {
   IMessage,
   INotify,
   IRejectVideoPayload,
+  ISocketAddMember,
   ISocketCallInitiate,
   ISocketChangeEmoji,
   ISocketChangeUsername,
@@ -121,6 +122,20 @@ export class MessagingGateway implements OnModuleInit {
       const participantSocket = this.sessions.getUserSocket(participant.userId);
       if (participantSocket)
         participantSocket.emit('onUserLeaveGroup', payload);
+    }
+  }
+
+  @OnEvent('conversaiton.participant.add')
+  handleAddParticipant(payload: ISocketAddMember) {
+    const { conversation, newMember, lastMessage } = payload;
+    for (let participant of payload.conversation.participants) {
+      const participantSocket = this.sessions.getUserSocket(participant.userId);
+      if (participantSocket)
+        participantSocket.emit('onAddMemberGroup', {
+          conversationId: conversation._id,
+          newMember,
+          lastMessage,
+        });
     }
   }
 

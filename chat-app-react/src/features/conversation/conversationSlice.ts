@@ -3,7 +3,7 @@ import { RootState } from '../../app/store';
 import { conversationService } from './conversationService';
 import {
   IConversation,
-  IDataAddNewMember,
+  IDataAddNewMemberResponse,
   IDataChangeEmoji,
   IDataChangeUsernameOfConversation,
   IDataDeleteMember,
@@ -39,13 +39,6 @@ export const getFirstConversation = createAsyncThunk(
   'conversation/getFirst',
   async () => {
     return await conversationService.getFirstConversation();
-  }
-);
-
-export const addFriendToGroup = createAsyncThunk(
-  'conversation/addMember',
-  async (data: IDataAddNewMember) => {
-    return await conversationService.handleAddNewMember(data);
   }
 );
 
@@ -292,6 +285,20 @@ const conversationSlice = createSlice({
         foundConversation._id = action.payload.newConversationId;
       }
     },
+    addMemberToGroup: (
+      state,
+      action: PayloadAction<IDataAddNewMemberResponse>
+    ) => {
+      if (!action.payload.newMember.length) return;
+      const { conversationId, newMember } = action.payload;
+      const conversation = state.conversations.get(conversationId);
+      if (conversation) {
+        conversation.participants = [
+          ...conversation.participants,
+          ...newMember,
+        ];
+      }
+    },
   },
   extraReducers: (builder) => {
     // Get last conversation
@@ -324,29 +331,6 @@ const conversationSlice = createSlice({
         state.firstConversation = action.payload;
       })
       .addCase(getFirstConversation.rejected, (state) => {
-        state.status = 'failed';
-        state.isLoading = false;
-      })
-
-      // Add member
-      .addCase(addFriendToGroup.pending, (state) => {
-        state.status = 'pending';
-        state.isLoading = true;
-      })
-      .addCase(addFriendToGroup.fulfilled, (state, action) => {
-        state.status = 'idle';
-        state.isLoading = false;
-        if (!action.payload.newMember.length) return;
-        const { conversationId, newMember } = action.payload;
-        const conversation = state.conversations.get(conversationId);
-        if (conversation) {
-          conversation.participants = [
-            ...conversation.participants,
-            ...newMember,
-          ];
-        }
-      })
-      .addCase(addFriendToGroup.rejected, (state) => {
         state.status = 'failed';
         state.isLoading = false;
       })
@@ -476,6 +460,7 @@ export const {
   updateAvatarOfGroup,
   createFakeConversation,
   updateConversationIdOfFakeConversation,
+  addMemberToGroup,
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
 export const selectConversation = (state: RootState) => state.conversation;

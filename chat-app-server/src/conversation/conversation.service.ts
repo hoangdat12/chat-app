@@ -277,7 +277,7 @@ export class ConversationService {
       );
     } else
       return {
-        conversationId,
+        conversation: foundConversation,
         newMember: [],
         lastMessage: null,
       };
@@ -314,7 +314,7 @@ export class ConversationService {
     );
 
     return {
-      conversationId,
+      conversation: foundConversation,
       newMember: [...newMember, ...userWasDeleted],
       lastMessage: message,
     };
