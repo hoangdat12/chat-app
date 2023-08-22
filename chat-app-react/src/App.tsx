@@ -27,7 +27,7 @@ function App() {
   const [user, setUser] = useState<IUser | null>(null);
 
   return (
-    <AuthContext.Provider value={{ user, updateAuthUser: setUser }}>
+    <AuthContext.Provider value={{ user, setUser }}>
       <SocketContext.Provider value={socket}>
         <Router>
           <Routes>

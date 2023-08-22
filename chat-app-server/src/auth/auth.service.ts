@@ -101,12 +101,12 @@ export class AuthService {
     const { email, password } = data;
     const user = await this.authRepository.findByEmail(email);
     if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
-
-    if (user.loginWith !== 'email')
+    if (user.loginWith !== 'email') {
       throw new HttpException(
         'User is already login with google!',
         HttpStatus.NOT_FOUND,
       );
+    }
 
     if (user.isLocked) {
       // unLock account

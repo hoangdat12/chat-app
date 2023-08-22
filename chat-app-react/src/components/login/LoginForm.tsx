@@ -14,7 +14,8 @@ import { ILoginData } from '../../pages/authPage/Login';
 import { AuthContext } from '../../ultils/context/Auth';
 
 const LoginForm = () => {
-  const { updateAuthUser } = useContext(AuthContext);
+  const [errorMessage, setErrorMessage] = useState('');
+  const { setUser } = useContext(AuthContext);
 
   const dispatch = useAppDispatch();
 
@@ -47,11 +48,26 @@ const LoginForm = () => {
     const handleNavigate = () => {
       window.location.href = 'http://localhost:5173';
     };
-    if (status === 'succeeded') {
-      updateAuthUser(user);
+    if (status === 'succeeded' && user) {
+      setUser(user);
       handleNavigate();
     }
+    if (status === 'failed') {
+      setErrorMessage('You have entered an invalid username or password!');
+    }
   }, [status]);
+
+  useEffect(() => {
+    if (errorMessage !== '') {
+      let timer = setTimeout(() => {
+        setErrorMessage('');
+      }, 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [errorMessage]);
 
   return (
     <div className='absolute w-full h-full text-white flex sm:flex-col items-center justify-center top-0 left-0 bottom-0 right-0 bg-blackOverlay'>
@@ -120,6 +136,9 @@ const LoginForm = () => {
           >
             Sign In
           </button>
+          {errorMessage !== '' && (
+            <div className='text-xs text-red-500'>{errorMessage}</div>
+          )}
           <div className='sm:flex justify-between sm:mt-8 mt-4 cursor-pointer text-sm text-gray-blur'>
             <div className=''>
               <span className='hover:text-[#bdc7da] duration-300 mr-3 inline cursor-pointer'>

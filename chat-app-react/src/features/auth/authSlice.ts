@@ -47,6 +47,7 @@ export const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.data.metaData.user;
         state.token = action.payload.data.metaData.token;
+        console.log('Successed!!!!');
       })
       .addCase(login.rejected, (state) => {
         state.status = 'failed';
@@ -60,8 +61,8 @@ export const authSlice = createSlice({
       .addCase(getInforUserWithOauth2.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.user = action.payload.data.metaData.user;
+        state.token = action.payload.data.metaData.token;
       })
       .addCase(getInforUserWithOauth2.rejected, (state) => {
         state.status = 'failed';
@@ -71,4 +72,5 @@ export const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
+// export const { setErrorMessage } = authSlice.actions;
 export const selectAuth = (state: RootState) => state.auth;

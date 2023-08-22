@@ -11,8 +11,10 @@ export class ErrorHandler implements ExceptionFilter {
     response.status(statusCode).json({
       status: 'Error',
       code: statusCode,
-      message:
-        err?.response?.message || err?.message || 'Internal Server Error!',
+      metaData: {
+        message:
+          err?.response?.message || err?.message || 'Internal Server Error!',
+      },
     });
   }
 }

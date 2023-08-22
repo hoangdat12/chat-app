@@ -1,12 +1,12 @@
 import { createContext } from 'react';
 import { IUser } from '../interface';
 
-type AuthContextType = {
+interface AuthContext {
   user: IUser | null;
-  updateAuthUser: (data: IUser | null) => void;
-};
+  setUser: (user: IUser | null) => void;
+}
 
-export const AuthContext = createContext<AuthContextType>({
-  updateAuthUser: () => {},
+export const AuthContext = createContext<AuthContext>({
   user: null,
+  setUser: () => {},
 });
