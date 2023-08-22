@@ -177,8 +177,6 @@ const CallerPage = () => {
     5000
   );
 
-  console.log(conversationId);
-
   useEffect(() => {
     socket.on('onMessage', (data: IMessage) => {
       if (conversationId) return;

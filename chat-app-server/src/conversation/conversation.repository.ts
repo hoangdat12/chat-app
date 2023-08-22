@@ -313,6 +313,22 @@ export class ConversationRepository {
     });
   }
 
+  async findGroups(userId: string) {
+    return await this.conversationModel.find({
+      conversation_type: MessageType.GROUP,
+      'participants.userId': userId,
+    });
+  }
+
+  async findGroupByKeyword(userId: string, keyword: string) {
+    const searchRegex = new RegExp(keyword, 'i');
+    return await this.conversationModel.find({
+      conversation_type: MessageType.GROUP,
+      'participants.userId': userId,
+      nameGroup: searchRegex,
+    });
+  }
+
   // ULTILS
   modifyDataPaticipants(participants: IParticipant[], userId: string) {
     for (let participant of participants) {

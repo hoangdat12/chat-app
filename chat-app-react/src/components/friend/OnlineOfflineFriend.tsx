@@ -8,25 +8,28 @@ export interface IProps {
   avatarSize?: string;
   titleSize?: string;
   gap?: string;
+  nameSize?: string;
+  onlineStatusSize?: string;
 }
 
 const OnlineOfflineFriend: FC<IProps> = ({
   onlineFriends,
   offlineFriends,
   avatarSize,
-  titleSize,
   gap,
+  nameSize,
+  onlineStatusSize,
 }) => {
   return (
     <>
       <div className={`flex flex-col ${gap ?? 'gap-3'}`}>
-        <h1
+        {/* <h1
           className={`${
             onlineFriends && onlineFriends.length ? 'block' : 'hidden'
           } ${titleSize}`}
         >
           Online
-        </h1>
+        </h1> */}
         {onlineFriends &&
           onlineFriends.map((online) => (
             <FriendBoxCircle
@@ -45,13 +48,13 @@ const OnlineOfflineFriend: FC<IProps> = ({
         } my-4`}
       />
       <div className={`flex flex-col ${gap ?? 'gap-3'}`}>
-        <h1
+        {/* <h1
           className={`${
             offlineFriends && offlineFriends.length ? 'block' : 'hidden'
           } ${titleSize}`}
         >
           Offline
-        </h1>
+        </h1> */}
         {offlineFriends &&
           offlineFriends.map((offline) => (
             <FriendBoxCircle
@@ -60,8 +63,8 @@ const OnlineOfflineFriend: FC<IProps> = ({
               status={'offline'}
               onlineStatus='Tired!'
               key={offline._id}
-              nameSize='text-lg'
-              onlineStatusSize='text-base'
+              nameSize={nameSize ?? 'text-lg'}
+              onlineStatusSize={onlineStatusSize ?? 'text-base'}
             />
           ))}
       </div>

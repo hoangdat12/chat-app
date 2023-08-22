@@ -392,6 +392,34 @@ export class ConversationController {
     }
   }
 
+  @Get('/group/:userId')
+  async getGroups(@Req() req: Request, @Param('userId') userId: string) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(
+        await this.conversationService.getGroupOfUser(user, userId),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('/group/search/:userId')
+  async findGroupByKeyword(
+    @Req() req: Request,
+    @Param('userId') userId: string,
+    @Query('search') keyword: string,
+  ) {
+    try {
+      const user = req.user as IUserCreated;
+      return new Ok(
+        await this.conversationService.handleSearchGroup(user, userId, keyword),
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get('/bug/fix')
   async fixBug() {
     return await this.conversationService.fixBug();

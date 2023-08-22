@@ -133,6 +133,23 @@ const changeNotification = async (
   return res;
 };
 
+const getAllGroupOfUser = async (
+  userId: string
+): Promise<IResponse<IConversation[]>> => {
+  const res = await myAxios.get(`/conversation/group/${userId}`);
+  return res;
+};
+
+const findGroupByKeyword = async (
+  userId: string,
+  keyword: string
+): Promise<IResponse<IConversation[]>> => {
+  const res = await myAxios.get(
+    `/conversation/group/search/${userId}?search=${keyword}`
+  );
+  return res;
+};
+
 export const conversationService = {
   fetchConversationOfUser,
   searchConversationByName,
@@ -149,4 +166,6 @@ export const conversationService = {
   handleLeaveGroup,
   findMatchConversation,
   changeNotification,
+  getAllGroupOfUser,
+  findGroupByKeyword,
 };

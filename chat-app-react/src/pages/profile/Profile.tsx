@@ -1,6 +1,6 @@
 import Layout from '../../components/layout/Layout';
 import { FC, memo, useEffect, useRef, useState } from 'react';
-import { Route, Routes, useParams } from 'react-router-dom';
+import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { getUserLocalStorageItem } from '../../ultils';
 import { friendService } from '../../features/friend/friendService';
 import { ICheckFriendResponse } from '../../ultils/interface/friend.interface';
@@ -48,6 +48,8 @@ const Profile = () => {
   const [statusFriend, setStatusFriend] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { userId } = useParams();
+
+  const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
   const { isLoading: loadingLoadPost } = useAppSelector(selectPost);
@@ -105,7 +107,11 @@ const Profile = () => {
     if (userId) {
       const getProfile = async () => {
         const res = await profileService.viewProfile(userId);
-        setProfile(res.data.metaData);
+        if (res.status === 200 || res.status === 201) {
+          setProfile(res.data.metaData);
+        } else {
+          navigate('/not-found');
+        }
         if (res.data.metaData?._id === userLocalstorage._id) {
           setIsOwner(true);
         }

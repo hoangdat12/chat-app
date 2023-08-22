@@ -8,53 +8,98 @@ import AllFeed from '../components/feed/AllFeed';
 import { memo, useEffect, useRef, useState } from 'react';
 import { postService } from '../features/post/postService';
 import { IPagination, IPost } from '../ultils/interface';
+import { getUserLocalStorageItem } from '../ultils';
+import { profileService } from '../features/profile/profileService';
+import { IProfile } from '../ultils/interface/profile.interface';
+import ProfileInformation from '../components/profile/ProfileInformation';
+import { useNavigate } from 'react-router-dom';
+import Loading from '../components/button/Loading';
+
+const userLocal = getUserLocalStorageItem();
 
 const Home = () => {
+  const [profile, setProfile] = useState<IProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsLoading(true);
+    const getProfile = async () => {
+      const res = await profileService.viewProfile(userLocal._id);
+      if (res.status === 200 || res.status === 201) {
+        setProfile(res.data.metaData);
+      }
+    };
+    // Get data
+    getProfile();
+  }, [userLocal]);
+
+  useEffect(() => {
+    const timmer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timmer);
+    };
+  }, [userLocal]);
+
   return (
     <Layout>
-      <div className='relative md:grid md:grid-cols-12 flex gap-4 lg-gap-6 xl:gap-8 px-4 lg-px-6 xl:px-10 w-full h-full overflow-hidden bg-white'>
-        <div className='hidden xl:flex flex-col gap-8 xl:col-span-3 pt-6'>
-          <div className='p-3 bg-gray-100 rounded cursor-pointer'>
-            <h1 className='text-gray-400 text-sm'>May are you know</h1>
-            <div className='mt-2'>
-              <img
-                src='https://images.pexels.com/photos/17494608/pexels-photo-17494608/free-photo-of-police-station.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-                alt=''
+      {isLoading ? (
+        <div className='w-full h-full flex items-center justify-center'>
+          <Loading />
+        </div>
+      ) : (
+        <div className='relative md:grid md:grid-cols-12 flex gap-4 lg-gap-6 xl:gap-8 px-4 lg-px-6 xl:px-10 w-full h-full overflow-hidden bg-white'>
+          <div className='hidden xl:flex flex-col items-center justify-start bg-gray-100 mt-6 py-8 px-5 gap-6 xl:col-span-3 shadow-box'>
+            <div
+              onClick={() => navigate(`/profile/${profile?.profile_user._id}`)}
+              className='w-20 h-20 max-w-[5rem] max-h-[5rem] border-2 rounded-full'
+            >
+              <Avatar
+                avatarUrl={profile?.profile_user.avatarUrl ?? ''}
+                className='w-full h-full'
               />
             </div>
+            <ProfileInformation
+              profile={profile}
+              isOwner={true}
+              className='p-0 w-full'
+            />
           </div>
-        </div>
 
-        <MainContent />
+          <MainContent />
 
-        <div className='flex flex-col pb-4 gap-4 xl:gap-8 max-h-[calc(100vh-76px)] h-[calc(100vh-76px)] overflow-y-auto scrollbar-hide xl:col-span-3 col-span-4 pt-6'>
-          <div className='relative bg-gray-100 rounded p-2'>
-            <div className='absolute top-2 right-2 left-2 flex justify-between text-sm p-3 text-white bg-blue-500'>
-              <div className='flex gap-2 items-center'>
-                <Avatar
-                  avatarUrl={
-                    'https://thuthuatnhanh.com/wp-content/uploads/2021/02/Avatar-ngau-dep.jpg'
-                  }
-                  className={'w-12 h-12 min-h-[3rem] min-w-[3rem]'}
-                />
-                <div>
-                  <p>Hoang Dat</p>
-                  <h1>22th Birthday</h1>
+          <div className='flex flex-col pb-4 gap-4 xl:gap-8 max-h-[calc(100vh-76px)] h-[calc(100vh-76px)] overflow-y-auto scrollbar-hide xl:col-span-3 col-span-4 pt-6'>
+            <div className='relative bg-gray-100 rounded p-2 shadow-box'>
+              <div className='absolute top-2 right-2 left-2 flex justify-between text-sm p-3 text-white bg-blue-500'>
+                <div className='flex gap-2 items-center'>
+                  <Avatar
+                    avatarUrl={
+                      'https://thuthuatnhanh.com/wp-content/uploads/2021/02/Avatar-ngau-dep.jpg'
+                    }
+                    className={'w-12 h-12 min-h-[3rem] min-w-[3rem]'}
+                  />
+                  <div>
+                    <p>Hoang Dat</p>
+                    <h1>22th Birthday</h1>
+                  </div>
+                </div>
+                <div className='flex flex-col items-center justify-center'>
+                  <span className='text-xl'>19</span>
+                  <span>November</span>
                 </div>
               </div>
-              <div className='flex flex-col items-center justify-center'>
-                <span className='text-xl'>19</span>
-                <span>November</span>
+              <div>
+                <img src={happyBirthday} alt='' />
               </div>
             </div>
-            <div>
-              <img src={happyBirthday} alt='' />
-            </div>
-          </div>
 
-          <ListFriendOfUser />
+            <ListFriendOfUser />
+          </div>
         </div>
-      </div>
+      )}
     </Layout>
   );
 };
@@ -103,7 +148,7 @@ export const MainContent = memo(() => {
         onScroll={handleScroll}
         className='max-h-[calc(100vh-76px)] h-[calc(100vh-76px)] overflow-y-auto scrollbar-hide flex flex-col items-center gap-4 lg:gap-6 xl:gap-8'
       >
-        <div className='p-4 rounded-md bg-gray-100 w-full'>
+        <div className='p-4 rounded-md bg-gray-100 w-full shadow-box'>
           <CreateFeed mode={ModeCreateFeed.CREATE} />
         </div>
         <div

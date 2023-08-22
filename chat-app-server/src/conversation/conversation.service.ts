@@ -24,14 +24,12 @@ import {
   getUsername,
 } from '../ultils';
 import { MessageContentType } from '../ultils/constant/message.constant';
-import { AuthRepository } from '../auth/repository/auth.repository';
 
 @Injectable()
 export class ConversationService {
   constructor(
     private readonly conversationRepository: ConversationRepository,
     private readonly messageRepository: MessageRepository,
-    private readonly authRepository: AuthRepository,
   ) {}
 
   async createConversation(
@@ -521,6 +519,22 @@ export class ConversationService {
     return await this.conversationRepository.changeNotification(
       userId,
       conversationId,
+    );
+  }
+
+  async getGroupOfUser(user: IUserCreated, userId: string) {
+    if (user._id !== userId)
+      throw new HttpException('You not permission!', HttpStatus.BAD_REQUEST);
+
+    return await this.conversationRepository.findGroups(userId);
+  }
+
+  async handleSearchGroup(user: IUserCreated, userId: string, keyword: string) {
+    if (user._id !== userId)
+      throw new HttpException('You not permission!', HttpStatus.BAD_REQUEST);
+    return await this.conversationRepository.findGroupByKeyword(
+      userId,
+      keyword,
     );
   }
 

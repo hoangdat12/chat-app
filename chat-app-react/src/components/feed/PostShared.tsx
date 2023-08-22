@@ -14,9 +14,9 @@ const userLocal = getUserLocalStorageItem();
 
 const PostShared: FC<IPropPostShared> = ({ post, isOwner, background }) => {
   return (
-    <div className={`${background ?? 'bg-gray-100'} p-4 rounded-lg`}>
+    <div className={`${background ?? 'bg-gray-100'} p-4 rounded-lg shadow-box`}>
       <PostOwner post={post} isOwner={isOwner} />
-      <div className='mt-6 border-2'>
+      <div className='mt-6 border-2 rounded-lg'>
         <Feed
           isOwner={userLocal._id === post.user._id}
           post={post.post_share}

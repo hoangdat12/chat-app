@@ -31,7 +31,11 @@ const Feed: FC<IFeedProp> = memo(
     return (
       post && (
         <>
-          <div className={`${background ?? 'bg-gray-100'} p-4 rounded-lg`}>
+          <div
+            className={`${background ?? 'bg-gray-100'} p-4 rounded-lg ${
+              !post.post_share && !shared && 'shadow-box'
+            }`}
+          >
             <PostOwner
               post={post}
               isOwner={isOwner}

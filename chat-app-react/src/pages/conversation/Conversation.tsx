@@ -2,7 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 
 import Layout from '../../components/layout/Layout';
 import './conversation.scss';
-import { Route, Routes, useLocation, useParams } from 'react-router-dom';
+import {
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import ConversationList from '../../components/conversation/ConversationList';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import {
@@ -21,6 +27,7 @@ import NoConversation from '../../components/conversation/NoConversation';
 const Conversation = () => {
   const [showListConversationSM, setShowListConversationSM] = useState(false);
   const [showMoreConversation, setShowMoreConversation] = useState(false);
+  const [conversation, setConversation] = useState<IConversation>();
   const dispatch = useAppDispatch();
   const { conversations } = useAppSelector(selectConversation);
 
@@ -28,7 +35,8 @@ const Conversation = () => {
   const user = getUserLocalStorageItem();
   const { conversationId } = useParams();
   const location = useLocation();
-  const conversation = conversations.get(conversationId ?? '');
+
+  const navigate = useNavigate();
 
   const userPermissionChat = useCallback(
     (userId: string | undefined, conversation: IConversation | undefined) => {
@@ -71,6 +79,15 @@ const Conversation = () => {
       location.state.fakeConversation = undefined;
     }
   }, [location]);
+
+  useEffect(() => {
+    const foundConversation = conversations.get(conversationId ?? '');
+    if (foundConversation) {
+      setConversation(foundConversation);
+    } else {
+      navigate('/not-found');
+    }
+  }, [conversationId]);
 
   return (
     <Layout>

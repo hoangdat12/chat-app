@@ -11,7 +11,6 @@ import { SocketContext, socket } from './ultils/context/Socket';
 import useInnerWidth from './hooks/useInnterWidth';
 import Profile from './pages/profile/Profile';
 import Setting from './pages/setting/Setting';
-import Game from './pages/game/Game';
 import ChangeAvatarGroup from './components/modal/ChangeAvatarGroup';
 import CallerPage from './pages/callerPage/CallerPage';
 import VideoCall from './pages/callerPage/VideoCall';
@@ -21,6 +20,7 @@ import { IUser } from './ultils/interface';
 import { useState } from 'react';
 import CallHidden from './components/call/VideoCallHidden';
 import ManageNotification from './pages/ManageNotification';
+import NotFound from './pages/NotFound/NotFound';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -50,7 +50,6 @@ function App() {
               )}
               <Route path='/profile/:userId/*' element={<Profile />} />
               <Route path='/setting/*' element={<Setting />} />
-              <Route path='/game/*' element={<Game />} />
               <Route path='/crop/avatar' element={<ChangeAvatarGroup />} />
               <Route path='/call' element={<VideoCall />} />
               <Route path='/call/audio' element={<AudioCall />} />
@@ -60,6 +59,7 @@ function App() {
                 element={<ManageNotification />}
               />
             </Route>
+            <Route path='*' element={<NotFound />} />
           </Routes>
         </Router>
       </SocketContext.Provider>

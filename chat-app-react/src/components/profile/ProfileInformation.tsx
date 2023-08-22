@@ -10,11 +10,13 @@ import { IProfile } from '../../ultils/interface/profile.interface';
 export interface IPropProfileInformation {
   profile: IProfile | null;
   isOwner: boolean;
+  className?: string;
 }
 
 const ProfileInformation: FC<IPropProfileInformation> = ({
   profile,
   isOwner,
+  className,
 }) => {
   const [addSocial, setAddSocial] = useState('');
   const handleAddLinkSocial = (title: string) => {
@@ -22,7 +24,7 @@ const ProfileInformation: FC<IPropProfileInformation> = ({
   };
 
   return (
-    <div className='p-4 rounded-md bg-gray-100'>
+    <div className={`${className} p-4 rounded-md bg-gray-100`}>
       <div className='flex items-center justify-between pb-2 border-b border-gray-300'>
         <h1 className='text-2xl'>
           {getUsername(profile?.profile_user ?? null)}
