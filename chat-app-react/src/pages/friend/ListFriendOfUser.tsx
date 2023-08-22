@@ -14,6 +14,8 @@ import { getUserLocalStorageItem } from '../../ultils';
 import Avatar from '../../components/avatars/Avatar';
 import { AiOutlineCheck, AiOutlineClose } from 'react-icons/Ai';
 import Loading from '../../components/button/Loading';
+import { setIsError } from '../../features/showError';
+import { useAppDispatch } from '../../app/hook';
 
 const userJson = getUserLocalStorageItem();
 
@@ -204,6 +206,7 @@ export const ListFriendsV2: FC<IPropListFriendsV2> = ({
   setFriends,
 }) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const handleRefuseRequestAddFriend = async (friendId: string) => {
     const res = await friendService.refuseFriend(friendId);
@@ -211,6 +214,8 @@ export const ListFriendsV2: FC<IPropListFriendsV2> = ({
       setFriends((prev) =>
         prev ? prev?.filter((friend) => friend._id !== friendId) : null
       );
+    } else {
+      dispatch(setIsError());
     }
   };
 
@@ -220,6 +225,8 @@ export const ListFriendsV2: FC<IPropListFriendsV2> = ({
       setFriends((prev) =>
         prev ? prev?.filter((friend) => friend._id !== friendId) : null
       );
+    } else {
+      dispatch(setIsError());
     }
   };
 

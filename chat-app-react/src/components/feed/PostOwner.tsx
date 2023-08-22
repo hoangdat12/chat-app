@@ -11,12 +11,16 @@ import { postService } from '../../features/post/postService';
 import PostMode from './PostMode';
 import { postMode } from '../../ultils/list/post.list';
 import CreatePostWith from './CreatePostWith';
+import { useAppDispatch } from '../../app/hook';
+import { setIsError, setIsSuccess } from '../../features/showError';
 
 export interface IPropPostOwner {
   post: IPost;
   isOwner: boolean;
   shared?: boolean;
   saved?: boolean;
+  feedSave?: IPost;
+  handleDeletePost: (post: IPost) => void;
 }
 
 export interface IPostMode {
@@ -29,11 +33,15 @@ const PostOwner: FC<IPropPostOwner> = ({
   isOwner,
   shared = false,
   saved = false,
+  feedSave,
+  handleDeletePost,
 }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [showChangePostMode, setShowChangePostMode] = useState(false);
   const [modeDefault, setModeDefault] = useState<IPostMode | null>(null);
   const optionRef = useRef<HTMLUListElement | null>(null);
+
+  const dispatch = useAppDispatch();
 
   const handleShowOptions = () => {
     setShowOptions(false);
@@ -44,7 +52,7 @@ const PostOwner: FC<IPropPostOwner> = ({
   };
 
   const handleSavePost = async () => {
-    if (saved) {
+    if (!saved) {
       const formData = new FormData();
       const data = {
         post_type: PostType.SAVE,
@@ -52,7 +60,12 @@ const PostOwner: FC<IPropPostOwner> = ({
         post_share: post.post_type === PostType.POST ? post : post.post_share,
       };
       formData.append('data', JSON.stringify(data));
-      await postService.createNewPost(formData);
+      const res = await postService.createNewPost(formData);
+      if (res.status === 200 || res.status === 201) {
+        dispatch(setIsSuccess());
+      } else {
+        dispatch(setIsError);
+      }
     }
     setShowOptions(false);
   };
@@ -74,6 +87,8 @@ const PostOwner: FC<IPropPostOwner> = ({
         const res = await postService.changePostMode(data);
         if (res.status === 200) {
           setModeDefault(mode);
+        } else {
+          dispatch(setIsError());
         }
       }
     }
@@ -150,7 +165,12 @@ const PostOwner: FC<IPropPostOwner> = ({
                 <FaRegBookmark />
                 <span>Save post</span>
               </li>
-              <li className='h-12 flex items-center justify-center gap-2 hover:bg-gray-50 cursor-pointer'>
+              <li
+                onClick={() =>
+                  handleDeletePost(saved && feedSave ? feedSave : post)
+                }
+                className='h-12 flex items-center justify-center gap-2 hover:bg-gray-50 cursor-pointer'
+              >
                 <span className='text-red-500'>
                   <MdReportProblem />
                 </span>

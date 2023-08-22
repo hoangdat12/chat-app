@@ -22,7 +22,11 @@ import { useVoiceCallClose } from '../../hooks/call/useVoiceCallClose';
 import CallHidden from '../../components/call/VideoCallHidden';
 import VoiceCallHidden from '../../components/call/VoiceCallHidden';
 import CallEndNotify from '../../components/call/CallEndNotify';
-import { NotifyAlert } from '../../components/alert/Alert';
+import {
+  ErrorAlert,
+  NotifyAlert,
+  SuccessAlert,
+} from '../../components/alert/Alert';
 import { SocketContext } from '../../ultils/context/Socket';
 import { useCountDown } from '../../hooks/useCountDown';
 import {
@@ -35,6 +39,7 @@ import {
   setUnReadNumberMessage,
 } from '../../features/message/messageSlice';
 import { fetchConversationOfUser } from '../../features/conversation/conversationSlice';
+import { selectShowError } from '../../features/showError';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -57,6 +62,7 @@ const CallerPage = () => {
     endCall,
   } = useAppSelector(selectCall);
   const { unReadMessageOfConversation } = useAppSelector(selectMessage);
+  const { isError, isSuccess, isNotify } = useAppSelector(selectShowError);
 
   const socket = useContext(SocketContext);
 
@@ -210,10 +216,14 @@ const CallerPage = () => {
         isMini &&
         (callType === 'video' ? <CallHidden /> : <VoiceCallHidden />)}
       {endCall && <CallEndNotify />}
-      {showNotify && <NotifyAlert msg={'You have some new notify'} />}
+      {(showNotify || isNotify) && (
+        <NotifyAlert msg={'You have some new notify'} />
+      )}
       {showNewMessageConversation && (
         <NotifyAlert msg={'You have some new message'} />
       )}
+      {isError && <ErrorAlert msg={'Have some error, please try again!'} />}
+      {isSuccess && <SuccessAlert msg={'Successfully!'} />}
       <Outlet />
     </div>
   );

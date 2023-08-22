@@ -14,6 +14,8 @@ import { IProfile } from '../ultils/interface/profile.interface';
 import ProfileInformation from '../components/profile/ProfileInformation';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../components/button/Loading';
+import { setIsError } from '../features/showError';
+import { useAppDispatch } from '../app/hook';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -21,6 +23,7 @@ const Home = () => {
   const [profile, setProfile] = useState<IProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     setIsLoading(true);
@@ -28,6 +31,8 @@ const Home = () => {
       const res = await profileService.viewProfile(userLocal._id);
       if (res.status === 200 || res.status === 201) {
         setProfile(res.data.metaData);
+      } else {
+        dispatch(setIsError());
       }
     };
     // Get data
@@ -110,6 +115,8 @@ export const MainContent = memo(() => {
   const [currentPage, setCurrentPage] = useState(1);
   const [endCall, setEndCall] = useState(false);
 
+  const dispatch = useAppDispatch();
+
   const handleScroll = () => {
     if (
       bottomOfListRef.current &&
@@ -135,6 +142,7 @@ export const MainContent = memo(() => {
       }
     } else {
       setEndCall(true);
+      dispatch(setIsError());
     }
   };
 

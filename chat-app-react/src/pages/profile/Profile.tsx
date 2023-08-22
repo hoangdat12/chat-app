@@ -15,6 +15,7 @@ import ProfileFriend from '../../components/profile/ProfileFriend';
 import Loading from '../../components/button/Loading';
 import { profileService } from '../../features/profile/profileService';
 import { IProfile } from '../../ultils/interface/profile.interface';
+import { setIsError } from '../../features/showError';
 
 const userLocalstorage = getUserLocalStorageItem();
 
@@ -59,6 +60,8 @@ const Profile = () => {
       const res = await friendService.addFriend(profile.profile_user._id);
       if (res.status === 200 || res.status === 201) {
         setStatusFriend(StatusFriend.CANCEL);
+      } else {
+        dispatch(setIsError());
       }
     }
   };
@@ -68,6 +71,8 @@ const Profile = () => {
       const res = await friendService.refuseFriend(profile.profile_user._id);
       if (res.status === 200 || res.status === 201) {
         setStatusFriend(StatusFriend.UNFRIENDED);
+      } else {
+        dispatch(setIsError());
       }
     }
   };
@@ -77,6 +82,8 @@ const Profile = () => {
       const res = await friendService.confirmFriend(profile.profile_user._id);
       if (res.status === 200 || res.status === 201) {
         setStatusFriend(StatusFriend.FRIEND);
+      } else {
+        dispatch(setIsError());
       }
     }
   };
@@ -123,6 +130,8 @@ const Profile = () => {
           if (res.status === 200) {
             const status = getStatusFriend(res.data.metaData);
             setStatusFriend(status);
+          } else {
+            dispatch(setIsError());
           }
         }
       };

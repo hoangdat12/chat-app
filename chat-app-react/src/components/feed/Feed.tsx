@@ -20,6 +20,8 @@ export interface IFeedProp {
   background?: string;
   shared?: boolean;
   postType?: string;
+  feedSave?: IPost;
+  handleDeletePost: (post: IPost) => void;
 }
 
 export interface IPropPostLikeShareComment {
@@ -27,7 +29,15 @@ export interface IPropPostLikeShareComment {
 }
 
 const Feed: FC<IFeedProp> = memo(
-  ({ isOwner, post, background, shared = false, postType = PostType.POST }) => {
+  ({
+    isOwner,
+    post,
+    background,
+    feedSave,
+    shared = false,
+    postType = PostType.POST,
+    handleDeletePost,
+  }) => {
     return (
       post && (
         <>
@@ -41,6 +51,8 @@ const Feed: FC<IFeedProp> = memo(
               isOwner={isOwner}
               shared={shared}
               saved={postType === PostType.SAVE}
+              feedSave={feedSave}
+              handleDeletePost={handleDeletePost}
             />
             <div className='mt-6'>
               <p

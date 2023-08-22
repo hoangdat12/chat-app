@@ -44,7 +44,9 @@ const Notification: FC<INotificationProps> = memo(
     // View Profile's friend
     const handleViewProfile = (friendId: string) => {
       setShowNotification(false);
-      navigate(`/profile/${friendId}`);
+      if (friendId) {
+        navigate(`/profile/${friendId}`);
+      }
     };
 
     useClickOutside(modelRef, () => setShowNotification(false), 'mousedown');

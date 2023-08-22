@@ -21,6 +21,7 @@ import { friendService } from '../../features/friend/friendService';
 import useClickOutside from '../../hooks/useClickOutside';
 import Loading from '../button/Loading';
 import { getUserLocalStorageItem } from '../../ultils';
+import { setIsError } from '../../features/showError';
 
 export interface IPropTagFriend {
   friend: IFriend;
@@ -62,6 +63,8 @@ const TagFriendModel: FC<IPropTagFriendModel> = ({
       const res = await friendService.searchFriendByUserName(debounceValue);
       if (res.status === 200) {
         setSearchFriends(res.data.metaData.friends);
+      } else {
+        dispatch(setIsError());
       }
       setIsLoading(false);
     };

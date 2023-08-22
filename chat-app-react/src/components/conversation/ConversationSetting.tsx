@@ -34,6 +34,7 @@ import { IInforConversation } from './ConversationContent/HeaderContent';
 import { getUserLocalStorageItem, getUserNameAndAvatarUrl } from '../../ultils';
 import InputAutoFocus from '../input/InputAutoFocus';
 import MessageImge from '../message/MessageImge';
+import { setIsError } from '../../features/showError';
 
 export interface IPropConversationSetting {
   showMoreConversation?: boolean;
@@ -165,6 +166,8 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
         });
         if (res.status === 200) {
           setNewNameGroup(res.data.metaData.nameGroup ?? '');
+        } else {
+          dispatch(setIsError());
         }
       }
       setIsShowRenameGroup(false);
@@ -196,6 +199,8 @@ const ConversationSetting: FC<IPropConversationSetting> = memo(
         );
         if (res.status === 200 || res.status === 201) {
           setReceiveNotification((prev) => !prev);
+        } else {
+          dispatch(setIsError());
         }
       }
     };

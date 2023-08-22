@@ -15,6 +15,8 @@ import { useNavigate } from 'react-router-dom';
 import { IProfile } from '../../ultils/interface/profile.interface';
 import { conversationService } from '../../features/conversation/conversationService';
 import { IConversation } from '../../ultils/interface';
+import { setIsError } from '../../features/showError';
+import { useAppDispatch } from '../../app/hook';
 
 export interface IUserInformationProp {
   profile: IProfile | null;
@@ -41,6 +43,8 @@ const UserInformation: FC<IUserInformationProp> = memo(
     const navigate = useNavigate();
     const buttonRef = useRef<HTMLDivElement | null>(null);
 
+    const dispatch = useAppDispatch();
+
     const handleUnFriend = async () => {
       if (profile) {
         const res = await friendService.deleteFriend(
@@ -49,7 +53,7 @@ const UserInformation: FC<IUserInformationProp> = memo(
         if (res.status === 200 || res.status === 201) {
           setShowDeleteFriend(false);
         } else {
-          // Show error
+          dispatch(setIsError());
         }
       }
     };
@@ -69,7 +73,6 @@ const UserInformation: FC<IUserInformationProp> = memo(
           const res = await conversationService.findMatchConversation(
             profile?.profile_user._id
           );
-          console.log(res);
           if (res.status === 200) {
             const foundConversation = res.data.metaData;
             if (foundConversation) {
@@ -96,6 +99,8 @@ const UserInformation: FC<IUserInformationProp> = memo(
                 });
               }
             }
+          } else {
+            dispatch(setIsError());
           }
         } else {
           // Follow

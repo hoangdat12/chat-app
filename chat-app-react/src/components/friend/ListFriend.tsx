@@ -9,6 +9,8 @@ import OnlineOfflineFriend from './OnlineOfflineFriend';
 import { conversationService } from '../../features/conversation/conversationService';
 import Avatar from '../avatars/Avatar';
 import { useNavigate } from 'react-router-dom';
+import { setIsError } from '../../features/showError';
+import { useAppDispatch } from '../../app/hook';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -29,6 +31,7 @@ const ListFriendOfUser = memo(() => {
   >(null);
 
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const debounceValue = useDebounce(searchValue);
 
@@ -51,6 +54,8 @@ const ListFriendOfUser = memo(() => {
         if (res.status === 200) {
           setSearchResultOnline(res.data.metaData.onlineFriends);
           setSearchResultOffline(res.data.metaData.offlineFriends);
+        } else {
+          dispatch(setIsError());
         }
       }
     };
@@ -64,6 +69,8 @@ const ListFriendOfUser = memo(() => {
         console.log(res);
         if (res.status === 200 || res.status === 201) {
           setSearchGroupResult(res.data.metaData);
+        } else {
+          dispatch(setIsError());
         }
       }
     };
@@ -84,6 +91,8 @@ const ListFriendOfUser = memo(() => {
         if (res.status === 200 || res.status === 201) {
           setOnlineFriends(res.data.metaData.onlineFriends);
           setOfflineFriends(res.data.metaData.offlineFriends);
+        } else {
+          dispatch(setIsError());
         }
       }
     };
@@ -93,6 +102,8 @@ const ListFriendOfUser = memo(() => {
         const res = await conversationService.getAllGroupOfUser(userLocal._id);
         if (res.status === 200 || res.status === 201) {
           setGroups(res.data.metaData);
+        } else {
+          dispatch(setIsError());
         }
       }
     };

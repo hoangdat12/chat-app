@@ -32,6 +32,7 @@ import {
   selectMessage,
 } from '../../../features/message/messageSlice';
 import { selectConversation } from '../../../features/conversation/conversationSlice';
+import { setIsError } from '../../../features/showError';
 
 export interface IPropHeader {
   isOpen: boolean;
@@ -86,6 +87,8 @@ const Header: FC<IPropHeader> = memo(
       if (res.status === 200) {
         setLoadingLogout(false);
         navigate('/login');
+      } else {
+        dispatch(setIsError());
       }
     };
 
@@ -151,6 +154,8 @@ const Header: FC<IPropHeader> = memo(
         if (res.status === 200) {
           setUserSearch(res.data.metaData.users);
           setIsShowSearchModal(true);
+        } else {
+          dispatch(setIsError());
         }
         setIsLoading(false);
       };

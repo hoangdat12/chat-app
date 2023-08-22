@@ -4,6 +4,8 @@ import { IMessage } from '../../ultils/interface';
 import './index.scss';
 import { ButtonRounded } from '../button/ButtonRounded';
 import { AiOutlineArrowLeft } from 'react-icons/Ai';
+import { setIsError } from '../../features/showError';
+import { useAppDispatch } from '../../app/hook';
 
 export interface IProps {
   conversationId?: string;
@@ -12,6 +14,7 @@ export interface IProps {
 
 const MessageImge: FC<IProps> = ({ conversationId, setShowListImage }) => {
   const [messageImages, setMessageImages] = useState<IMessage[] | null>(null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (conversationId) {
@@ -21,6 +24,8 @@ const MessageImge: FC<IProps> = ({ conversationId, setShowListImage }) => {
         );
         if (res.status === 200) {
           setMessageImages(res.data.metaData);
+        } else {
+          dispatch(setIsError());
         }
       };
 

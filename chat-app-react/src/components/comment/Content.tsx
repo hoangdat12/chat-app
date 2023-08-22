@@ -26,6 +26,8 @@ import CommentInput from './CommentInput';
 import useClickOutside from '../../hooks/useClickOutside';
 import useEnterListener from '../../hooks/useEnterEvent';
 import CommentContent from './CommentContent';
+import { setIsError } from '../../features/showError';
+import { useAppDispatch } from '../../app/hook';
 
 export interface IPropComment {
   comment: IComment;
@@ -53,6 +55,7 @@ export const Content: FC<IPropComment> = memo(
     );
 
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const dispatch = useAppDispatch();
 
     const handleGetListComment = async () => {
       const data = {
@@ -89,6 +92,8 @@ export const Content: FC<IPropComment> = memo(
             return prevs;
           }
         });
+      } else {
+        dispatch(setIsError);
       }
       setShowOption(false);
     };
@@ -102,6 +107,8 @@ export const Content: FC<IPropComment> = memo(
       const res = await commentService.updateComment(data);
       if (res.status === 200) {
         comment.comment_content = res.data.metaData.comment_content;
+      } else {
+        dispatch(setIsError);
       }
       setIsUpdate(false);
     };
@@ -116,6 +123,8 @@ export const Content: FC<IPropComment> = memo(
       console.log(res);
       if (res.status === 200 || res.status === 201) {
         setCommentLikeNum(res.data.metaData.comment_likes_num);
+      } else {
+        dispatch(setIsError());
       }
       setIsLiked(!isLiked);
     };

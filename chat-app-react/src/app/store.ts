@@ -8,6 +8,7 @@ import friendReducer from '../features/friend/friendSlice';
 import notifyReducer from '../features/notify/notifySlice';
 import postReducer from '../features/post/postSlice';
 import callReducer from '../features/call/callSlice';
+import showErrorReducer from '../features/showError';
 // import commentReducer from '../features/comment/commentSlice';
 
 enableMapSet();
@@ -21,6 +22,7 @@ export const store = configureStore({
     post: postReducer,
     call: callReducer,
     // comment: commentReducer,
+    showError: showErrorReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

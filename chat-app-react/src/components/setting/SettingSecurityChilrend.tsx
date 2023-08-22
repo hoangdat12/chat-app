@@ -10,15 +10,21 @@ import { getUserLocalStorageItem } from '../../ultils';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from '../button/LoadingScreen';
 import { AuthContext } from '../../ultils/context/Auth';
+import { setIsError } from '../../features/showError';
+import { useAppDispatch } from '../../app/hook';
 
 export const ConfirmChangeEmail = () => {
   const [isValid, setIsValid] = useState(false);
   const [showModelConfirm, setShowModelConfirm] = useState('');
 
+  const dispatch = useAppDispatch();
+
   const handleConfirmChangeEmail = async () => {
     const res = await authService.verifyEmail(OtpType.EMAIL);
     if (res.status === 200) {
       setIsValid(true);
+    } else {
+      dispatch(setIsError());
     }
   };
 
@@ -66,6 +72,8 @@ export const ChangePassword = () => {
   const [isValid, setIsValid] = useState(false);
   const [invalidMessage, setInvalidMessage] = useState('');
 
+  const dispatch = useAppDispatch();
+
   const handleChangePassword = async () => {
     const condition =
       currentPassword !== '' &&
@@ -86,6 +94,7 @@ export const ChangePassword = () => {
         setIsValid(true);
       } else {
         setInvalidMessage('Have some error, please try again!');
+        dispatch(setIsError());
       }
     } else {
       setIsValid(false);
@@ -160,6 +169,8 @@ export const LockAccount = () => {
   const { updateAuthUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const dispatch = useAppDispatch();
+
   const handleLockedAccount = async () => {
     if (passwordValue !== '') {
       setIsLoading(true);
@@ -180,6 +191,7 @@ export const LockAccount = () => {
       } else {
         setIsValid(false);
         setInvalidMessasge('Wrong password!');
+        dispatch(setIsError());
       }
       setIsLoading(false);
     }

@@ -133,8 +133,8 @@ export class PostService {
     const foundPost = await this.postReposotpory.findById(postId);
     if (!foundPost)
       throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
-
-    if (user._id !== foundPost.user._id)
+    console.log(foundPost);
+    if (user._id !== foundPost.user._id.toString())
       throw new HttpException('User not permission!', HttpStatus.BAD_REQUEST);
 
     if (foundPost.post_type === PostType.POST) {

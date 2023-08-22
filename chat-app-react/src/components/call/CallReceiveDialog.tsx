@@ -22,6 +22,7 @@ import {
   createNewMessageOfConversation,
   selectConversation,
 } from '../../features/conversation/conversationSlice';
+import { setIsError } from '../../features/showError';
 
 export const sendMessageCallVideo = async (
   caller: IParticipant | undefined,
@@ -53,6 +54,8 @@ export const sendMessageCallVideo = async (
         conversationId: conversation._id,
       };
       dispatch(createNewMessageOfConversation(dataUpdate));
+    } else {
+      dispatch(setIsError());
     }
   }
 };

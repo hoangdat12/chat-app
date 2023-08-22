@@ -1,24 +1,44 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAppSelector } from '../app/hook';
+import { useAppDispatch, useAppSelector } from '../app/hook';
 import Layout from '../components/layout/Layout';
 import { Notify } from '../components/notify/Notify';
-import { selectNotify } from '../features/notify/notifySlice';
+import { deleteNotify, selectNotify } from '../features/notify/notifySlice';
 import { notifyService } from '../features/notify/notifyService';
 import { INotify, IPagination } from '../ultils/interface';
+import { setIsError } from '../features/showError';
+import { confirmFriend, refuseFriend } from '../features/friend/friendSlice';
+import { useNavigate } from 'react-router-dom';
 
 const ManageNotification = () => {
   const { notifies: notifiesSlice } = useAppSelector(selectNotify);
   const [notifies, setNotifies] = useState<INotify[]>(notifiesSlice);
 
-  const handleConfirm = () => {};
+  const navigate = useNavigate();
 
-  const handleDelete = () => {};
+  // Confirm add friend
+  const handleConfirm = async (notify: INotify) => {
+    dispatch(confirmFriend(notify.notify_friend));
+    dispatch(deleteNotify(notify));
+  };
 
-  const handleViewProfile = () => {};
+  // Refuse add friend
+  const handleDelete = (notify: INotify) => {
+    dispatch(refuseFriend(notify.notify_friend));
+    dispatch(deleteNotify(notify));
+  };
+
+  // View Profile's friend
+  const handleViewProfile = (friendId: string) => {
+    if (friendId) {
+      navigate(`/profile/${friendId}`);
+    }
+  };
 
   const bottomOfListRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [endCall, setEndCall] = useState(false);
+
+  const dispatch = useAppDispatch();
 
   const handleScroll = () => {
     if (
@@ -44,6 +64,8 @@ const ManageNotification = () => {
         } else {
           setEndCall(true);
         }
+      } else {
+        dispatch(setIsError());
       }
     };
 
@@ -62,9 +84,11 @@ const ManageNotification = () => {
             {notifies.map((notify) => (
               <Notify
                 notify={notify}
-                handleConfirm={handleConfirm}
-                handleDelete={handleDelete}
-                handleViewProfile={handleViewProfile}
+                handleConfirm={() => handleConfirm(notify)}
+                handleDelete={() => handleDelete(notify)}
+                handleViewProfile={() =>
+                  handleViewProfile(notify.notify_friend._id)
+                }
                 fontSize={'text-lg'}
               />
             ))}

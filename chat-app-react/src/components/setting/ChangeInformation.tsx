@@ -10,6 +10,8 @@ import {
 import { profileService } from '../../features/profile/profileService';
 import { IProfile } from '../../ultils/interface/profile.interface';
 import Loading from '../button/Loading';
+import { setIsError } from '../../features/showError';
+import { useAppDispatch } from '../../app/hook';
 
 export interface IPropInformationUser {
   label: string;
@@ -46,6 +48,8 @@ const ChangeInformation = () => {
   const [loadingChangeUserAddress, setLoadingChangeUserAddress] =
     useState(false);
 
+  const dispatch = useAppDispatch();
+
   const handleChangeUserInformation = async () => {
     const condition1 =
       profile?.profile_user.firstName ===
@@ -68,6 +72,7 @@ const ChangeInformation = () => {
       if (res.status === 200 || res.status === 201) {
         setIsEdit(false);
       } else {
+        dispatch(setIsError());
       }
       setLoadingChangeUserInformation(false);
       // Call api;
@@ -102,6 +107,7 @@ const ChangeInformation = () => {
       if (res.status === 200 || res.status === 201) {
         setIsEditAddress(false);
       } else {
+        dispatch(setIsError());
       }
       setLoadingChangeUserAddress(false);
     }
@@ -157,6 +163,8 @@ const ChangeInformation = () => {
           stateValue: profileDetial.profile_address.address_state,
           streetValue: profileDetial.profile_address.address_street,
         });
+      } else {
+        dispatch(setIsError());
       }
       setIsLoading(false);
     };

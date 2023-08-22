@@ -18,6 +18,20 @@ export const ErrorAlert: FC<IProp> = ({ msg }) => {
   );
 };
 
+export const SuccessAlert: FC<IProp> = ({ msg }) => {
+  return (
+    <div
+      className='fixed bottom-5 right-4 sm:right-6 xl:right-8 z-[1001] flex gap-2 items-center px-4 py-3 mb-4 text-sm text-green-800 rounded-lg bg-green-100 '
+      role='alert'
+    >
+      <span className='font-medium text-white px-2 py-1 rounded bg-green-500'>
+        Success!
+      </span>
+      <span>{msg}</span>
+    </div>
+  );
+};
+
 export const NotifyAlert: FC<IProp> = ({ msg }) => {
   return (
     <div

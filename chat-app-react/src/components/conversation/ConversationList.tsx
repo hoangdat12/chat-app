@@ -12,6 +12,7 @@ import { useAppDispatch } from '../../app/hook';
 import { readLastMessage } from '../../features/conversation/conversationSlice';
 import useDebounce from '../../hooks/useDebounce';
 import { conversationService } from '../../features/conversation/conversationService';
+import { setIsError } from '../../features/showError';
 
 export interface IPropConversationList {
   conversations: Map<string, IConversation>;
@@ -73,6 +74,8 @@ const ConversationList: FC<IPropConversationList> = ({
       if (res.status === 200) {
         setListConversations(res.data.metaData);
         setIsShowSearchResult(true);
+      } else {
+        dispatch(setIsError());
       }
     };
     if (searchValue.trim() !== '') {

@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { IFriend } from '../../ultils/interface';
 import { getUserLocalStorageItem } from '../../ultils';
 import { friendService } from '../../features/friend/friendService';
+import { useAppDispatch } from '../../app/hook';
+import { setIsError } from '../../features/showError';
 
 export interface IPropProfileFriend {
   userId: string | undefined;
@@ -16,6 +18,7 @@ const userJson = getUserLocalStorageItem();
 const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
   const [friends, setFriends] = useState<IFriend[] | null>(null);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const getFriends = async () => {
@@ -26,6 +29,7 @@ const ProfileFriend: FC<IPropProfileFriend> = ({ userId }) => {
         } else {
           // Handle Error
           setFriends(null);
+          dispatch(setIsError());
         }
       }
     };

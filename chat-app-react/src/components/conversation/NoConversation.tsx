@@ -4,6 +4,8 @@ import { getUserLocalStorageItem } from '../../ultils';
 import { friendService } from '../../features/friend/friendService';
 import { IFriend } from '../../ultils/interface';
 import OnlineOfflineFriend from '../friend/OnlineOfflineFriend';
+import { useAppDispatch } from '../../app/hook';
+import { setIsError } from '../../features/showError';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -11,6 +13,7 @@ const NoConversation = memo(() => {
   const [showListFriend, setShowListFriend] = useState(false);
   const [onlineFriends, setOnlineFriends] = useState<IFriend[] | null>(null);
   const [offlineFriends, setOfflineFriends] = useState<IFriend[] | null>(null);
+  const dispatch = useAppDispatch();
 
   const handleShowListFriend = () => {
     setShowListFriend(true);
@@ -22,6 +25,8 @@ const NoConversation = memo(() => {
       if (res.status === 200 || res.status === 201) {
         setOnlineFriends(res.data.metaData.onlineFriends);
         setOfflineFriends(res.data.metaData.offlineFriends);
+      } else {
+        dispatch(setIsError());
       }
     };
 

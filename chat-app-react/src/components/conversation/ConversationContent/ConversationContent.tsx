@@ -50,6 +50,7 @@ import { getUserNameAndAvatarUrl } from '../../../ultils';
 import ConversationSetting from '../ConversationSetting';
 import useEnterListener from '../../../hooks/useEnterEvent';
 import { LoadingWithText } from '../../button/Loading';
+import { setIsError } from '../../../features/showError';
 
 export interface IPropConversationContent {
   user: IUser | null;
@@ -152,6 +153,8 @@ const ConversationContent: FC<IPropConversationContent> = ({
             conversationId: res.data.metaData.message_conversation,
           };
           dispatch(createNewMessageOfConversation(dataUpdate));
+        } else {
+          dispatch(setIsError());
         }
       }
       if (fileImageMessage?.length) {
@@ -175,6 +178,8 @@ const ConversationContent: FC<IPropConversationContent> = ({
               conversationId: conversation?._id,
             };
             dispatch(createNewMessageOfConversation(dataUpdate));
+          } else {
+            dispatch(setIsError());
           }
         }
         setIsLoadingSendImage(false);
@@ -202,6 +207,8 @@ const ConversationContent: FC<IPropConversationContent> = ({
         conversationId: conversation?._id,
       };
       dispatch(createNewMessageOfConversation(dataUpdate));
+    } else {
+      dispatch(setIsError());
     }
   };
 

@@ -63,6 +63,11 @@ const getAllPost = async (pagiantion?: IPagination) => {
   return res;
 };
 
+const deletePost = async (postId: string) => {
+  const res = await myAxios.delete(`/post/${postId}`);
+  return res;
+};
+
 export const postService = {
   createNewPost,
   getPostOfUser,
@@ -72,4 +77,5 @@ export const postService = {
   checkLikePost,
   changePostMode,
   getAllPost,
+  deletePost,
 };

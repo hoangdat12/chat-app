@@ -17,6 +17,7 @@ import { IFriend } from '../../ultils/interface/friend.interface';
 import { friendService } from '../../features/friend/friendService';
 import Loading from '../button/Loading';
 import { useNavigate, useParams } from 'react-router-dom';
+import { setIsError } from '../../features/showError';
 
 export interface IPropCreateNewGroup {
   isShowCreateNewGroup: boolean;
@@ -108,6 +109,8 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
       setShowCreateNewGroup(false);
       if (res.status === 201) {
         navigate(`/conversation/${res.data.metaData._id}`);
+      } else {
+        dispatch(setIsError());
       }
     };
 
@@ -162,6 +165,8 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
         if (res.status === 200) {
           setListFriend(res.data.metaData.friends);
           setKeyWord(res.data.metaData.keyword);
+        } else {
+          dispatch(setIsError());
         }
       };
 

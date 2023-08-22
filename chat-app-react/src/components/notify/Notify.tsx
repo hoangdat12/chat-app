@@ -9,6 +9,7 @@ import { useAppDispatch } from '../../app/hook';
 import { deleteNotify } from '../../features/notify/notifySlice';
 import { notifyService } from '../../features/notify/notifyService';
 import { useNavigate } from 'react-router-dom';
+import { setIsError } from '../../features/showError';
 
 export interface IPropNotify {
   notify: INotify;
@@ -43,6 +44,8 @@ export const Notify: FC<IPropNotify> = ({
       const res = await notifyService.deleteNotify(notify._id);
       if (res.status === 200) {
         dispatch(deleteNotify(notify));
+      } else {
+        dispatch(setIsError());
       }
     }
   };

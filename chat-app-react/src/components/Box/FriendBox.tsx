@@ -9,6 +9,8 @@ import {
   convertUserToParticipant,
   getUserLocalStorageItem,
 } from '../../ultils';
+import { useAppDispatch } from '../../app/hook';
+import { setIsError } from '../../features/showError';
 
 export interface IFriendBoxProp {
   friend: IFriend;
@@ -56,6 +58,7 @@ export const FriendBoxCircle: FC<IFriendBoxProp> = ({
   onlineStatusSize,
 }) => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const handleChat = async () => {
     const res = await conversationService.findMatchConversation(friend._id);
@@ -83,6 +86,8 @@ export const FriendBoxCircle: FC<IFriendBoxProp> = ({
           state: { fakeConversation },
         });
       }
+    } else {
+      dispatch(setIsError());
     }
   };
 

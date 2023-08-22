@@ -9,6 +9,7 @@ import { getUserLocalStorageItem, getUsername } from '../../ultils';
 import { getPost } from '../../features/post/postSlice';
 import { useAppDispatch } from '../../app/hook';
 import { IProfile } from '../../ultils/interface/profile.interface';
+import { setIsError, setIsSuccess } from '../../features/showError';
 
 export enum modeViewProfilePost {
   FEEDS = 'Feeds',
@@ -37,7 +38,11 @@ const ProfilePost: FC<IPropProfilePost> = memo(({ userId, profile }) => {
     setActive(mode);
     if (mode === modeViewProfilePost.SAVE && userId && postSaves.length === 0) {
       const res = await postService.getPostSaveOfUser(userId);
-      setPostSaves(res.data.metaData);
+      if (res.status === 200 || res.status === 201) {
+        setPostSaves(res.data.metaData);
+      } else {
+        dispatch(setIsError());
+      }
     }
   };
   const fetchPosts = async () => {
@@ -57,6 +62,7 @@ const ProfilePost: FC<IPropProfilePost> = memo(({ userId, profile }) => {
           dispatch(getPost(res.data.metaData));
         } else {
           setEndPost(true);
+          dispatch(setIsError());
         }
         setIsLoadingCallApi(false);
         setCurrentPage((prev) => prev + 1);
@@ -81,6 +87,21 @@ const ProfilePost: FC<IPropProfilePost> = memo(({ userId, profile }) => {
       bottomOfListRef.current.getBoundingClientRect().bottom <= 670
     ) {
       fetchPosts();
+    }
+  };
+
+  const handleDeletePost = async (post: IPost) => {
+    if (userLocal._id === post.user._id) {
+      // Delete
+      const res = await postService.deletePost(post._id);
+      if (res.status === 200) {
+        dispatch(setIsSuccess());
+        setPostSaves((prev) =>
+          prev.filter((postSave) => postSave._id !== post._id)
+        );
+      } else {
+        dispatch(setIsError());
+      }
     }
   };
 
@@ -142,13 +163,15 @@ const ProfilePost: FC<IPropProfilePost> = memo(({ userId, profile }) => {
       ) : active === modeViewProfilePost.SAVE ? (
         <div className='flex items-center justify-center w-full min-h-[200px] md:min-h-[300px]'>
           {postSaves.length ? (
-            <div className='w-full'>
+            <div className='w-full flex flex-col gap-4 sm:gap-6 xl:gap-8'>
               {postSaves.map((post) => (
                 <Feed
                   key={post._id}
                   post={post.post_share}
                   postType={post.post_type}
                   isOwner={true}
+                  feedSave={post}
+                  handleDeletePost={handleDeletePost}
                 />
               ))}
             </div>

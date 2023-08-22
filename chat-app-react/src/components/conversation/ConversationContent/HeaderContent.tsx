@@ -26,6 +26,7 @@ import {
 import { SocketCall } from '../../../ultils/constant';
 import { userService } from '../../../features/user/userService';
 import NotAllowed from '../../NotAllowed';
+import { setIsError } from '../../../features/showError';
 
 export interface IPropHeaderContent {
   handleShowMoreConversation: MouseEventHandler<HTMLAnchorElement>;
@@ -133,6 +134,8 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
           const res = await userService.checkUserOnline(conversationUserId);
           if (res.status === 200) {
             setIsOnline(res.data.metaData.isOnline);
+          } else {
+            dispatch(setIsError());
           }
         }
       };
