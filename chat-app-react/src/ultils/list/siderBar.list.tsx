@@ -49,7 +49,7 @@ export const selectNav2 = [
   },
   {
     display: 'Help',
-    path: '/page/login',
+    path: '/help',
     icons: <IoHelpBuoyOutline />,
   },
 ];

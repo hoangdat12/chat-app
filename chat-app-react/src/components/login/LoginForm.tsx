@@ -130,16 +130,20 @@ const LoginForm = () => {
           {errors.password && touched.password && (
             <p className='text-red-500'>{errors.password}</p>
           )}
-          <button
-            type='submit'
-            className='bg-[#579a90] w-full rounded-lg  px-4 py-2  text-white text-lg sm:mt-8 mt-6'
-          >
-            Sign In
-          </button>
-          {errorMessage !== '' && (
-            <div className='text-xs text-red-500'>{errorMessage}</div>
-          )}
-          <div className='sm:flex justify-between sm:mt-8 mt-4 cursor-pointer text-sm text-gray-blur'>
+
+          <div className='flex flex-col'>
+            <button
+              type='submit'
+              className='bg-[#579a90] w-full rounded-lg  px-4 py-2  text-white text-lg sm:mt-8 mt-6'
+            >
+              Sign In
+            </button>
+            {errorMessage !== '' && (
+              <div className='text-xs text-red-500'>{errorMessage}</div>
+            )}
+          </div>
+
+          <div className='sm:flex justify-between w-full sm:mt-8 mt-4 cursor-pointer text-sm text-gray-blur'>
             <div className=''>
               <span className='hover:text-[#bdc7da] duration-300 mr-3 inline cursor-pointer'>
                 Do not have account?

@@ -120,7 +120,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 } relative hover:bg-blue-700`}
               >
                 <Link
-                  className={`link whitespace-nowrap overflow-hidden ${
+                  className={`link whitespace-nowrap overflow-hidden  w-full ${
                     showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
                   to={`${
@@ -171,7 +171,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 } relative hover:bg-blue-700`}
               >
                 <Link
-                  className={`link whitespace-nowrap overflow-hidden ${
+                  className={`link whitespace-nowrap overflow-hidden  w-full ${
                     showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
                   to='/'
@@ -216,7 +216,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 } relative hover:bg-blue-700`}
               >
                 <Link
-                  className={`link whitespace-nowrap overflow-hidden ${
+                  className={`link whitespace-nowrap overflow-hidden  w-full ${
                     showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
                   to={select.path}
@@ -248,7 +248,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
               } relative hover:bg-blue-700`}
             >
               <Link
-                className={`link whitespace-nowrap overflow-hidden ${
+                className={`link whitespace-nowrap overflow-hidden w-full ${
                   showMobile ? 'text-base sm:text-lg' : 'text-base'
                 }`}
                 to={select.path}

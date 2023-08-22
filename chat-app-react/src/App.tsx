@@ -21,6 +21,7 @@ import { useState } from 'react';
 import CallHidden from './components/call/VideoCallHidden';
 import ManageNotification from './pages/ManageNotification';
 import NotFound from './pages/NotFound/NotFound';
+import Help from './pages/help/Help';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -35,6 +36,7 @@ function App() {
             <Route path='/login/*' element={<Login />} />
             <Route path='/register' element={<Register />} />
             <Route path='/register/success' element={<RegisterSuccess />} />
+            <Route path='/help/*' element={<Help />} />
             <Route element={<ProtectedRoutes children={<CallerPage />} />}>
               <Route path='/' element={<Home />} />
               {innerWitdh < 640 ? (
