@@ -5,6 +5,7 @@ import { IFriend } from '../../ultils/interface';
 import { FriendBoxCircle } from '../box/FriendBox';
 import { AiOutlineClose, AiOutlineSearch } from 'react-icons/Ai';
 import useDebounce from '../../hooks/useDebounce';
+import OnlineOfflineFriend from './OnlineOfflineFriend';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -108,52 +109,10 @@ const ListFriendOfUser = memo(() => {
               ))}
           </div>
         ) : (
-          <>
-            <div className='flex flex-col gap-4'>
-              <h1
-                className={`${
-                  onlineFriends && onlineFriends.length ? 'block' : 'hidden'
-                }`}
-              >
-                Online
-              </h1>
-              {onlineFriends &&
-                onlineFriends.map((online) => (
-                  <FriendBoxCircle
-                    friend={online}
-                    className='w-10 h-10'
-                    status={'online'}
-                    onlineStatus='Tired!'
-                    key={online._id}
-                  />
-                ))}
-            </div>
-            <hr
-              className={`${
-                (offlineFriends && !offlineFriends.length) ||
-                (onlineFriends && !onlineFriends.length && 'hidden')
-              } my-4`}
-            />
-            <div className='flex flex-col gap-3'>
-              <h1
-                className={`${
-                  offlineFriends && offlineFriends.length ? 'block' : 'hidden'
-                }`}
-              >
-                Offline
-              </h1>
-              {offlineFriends &&
-                offlineFriends.map((offline) => (
-                  <FriendBoxCircle
-                    friend={offline}
-                    className='w-10 h-10'
-                    status={'offline'}
-                    onlineStatus='Tired!'
-                    key={offline._id}
-                  />
-                ))}
-            </div>
-          </>
+          <OnlineOfflineFriend
+            onlineFriends={onlineFriends}
+            offlineFriends={offlineFriends}
+          />
         )}
       </div>
     </div>

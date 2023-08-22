@@ -16,6 +16,7 @@ import myAxios from '../../ultils/myAxios';
 import useInnerWidth from '../../hooks/useInnterWidth';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
 import { IConversation } from '../../ultils/interface';
+import NoConversation from '../../components/conversation/NoConversation';
 
 const Conversation = () => {
   const [showListConversationSM, setShowListConversationSM] = useState(false);
@@ -73,60 +74,64 @@ const Conversation = () => {
 
   return (
     <Layout>
-      <div className='relative md:grid md:grid-cols-12 flex w-full h-full overflow-hidden'>
-        {innerWitdh < 640 ? (
-          <Routes>
-            <Route
-              path='/list'
-              element={
-                <ConversationList
-                  handleSelectConversation={handleSelectConversation}
-                  conversations={conversations}
-                  user={user}
-                  to={true}
-                />
-              }
-            />
-            <Route
-              path='/'
-              element={
-                <>
-                  <ConversationContent
+      {conversations.size === 0 && !conversationId ? (
+        <NoConversation />
+      ) : (
+        <div className='relative md:grid md:grid-cols-12 flex w-full h-full overflow-hidden'>
+          {innerWitdh < 640 ? (
+            <Routes>
+              <Route
+                path='/list'
+                element={
+                  <ConversationList
+                    handleSelectConversation={handleSelectConversation}
+                    conversations={conversations}
                     user={user}
-                    showMoreConversation={showMoreConversation}
-                    setShowMoreConversation={setShowMoreConversation}
+                    to={true}
                   />
-                </>
-              }
-            />
-          </Routes>
-        ) : (
-          <>
-            <ConversationList
-              handleSelectConversation={handleSelectConversation}
-              conversations={conversations}
-              user={user}
-              showListConversationSM={showListConversationSM}
-            />
-            <ConversationContent
-              user={user}
-              handleShowListConversation={handleShowListConversation}
-              showListConversationSM={showListConversationSM}
-              showMoreConversation={showMoreConversation}
-              setShowMoreConversation={setShowMoreConversation}
-              isValidSendMessage={isValid}
-            />
-            {conversation && (
-              <ConversationSetting
+                }
+              />
+              <Route
+                path='/'
+                element={
+                  <>
+                    <ConversationContent
+                      user={user}
+                      showMoreConversation={showMoreConversation}
+                      setShowMoreConversation={setShowMoreConversation}
+                    />
+                  </>
+                }
+              />
+            </Routes>
+          ) : (
+            <>
+              <ConversationList
+                handleSelectConversation={handleSelectConversation}
+                conversations={conversations}
+                user={user}
+                showListConversationSM={showListConversationSM}
+              />
+              <ConversationContent
+                user={user}
+                handleShowListConversation={handleShowListConversation}
+                showListConversationSM={showListConversationSM}
                 showMoreConversation={showMoreConversation}
                 setShowMoreConversation={setShowMoreConversation}
-                conversation={conversation}
                 isValidSendMessage={isValid}
               />
-            )}
-          </>
-        )}
-      </div>
+              {conversation && (
+                <ConversationSetting
+                  showMoreConversation={showMoreConversation}
+                  setShowMoreConversation={setShowMoreConversation}
+                  conversation={conversation}
+                  isValidSendMessage={isValid}
+                />
+              )}
+            </>
+          )}
+        </div>
+      )}
     </Layout>
   );
 };

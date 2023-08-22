@@ -15,7 +15,7 @@ import {
   selectFriend,
 } from '../../features/friend/friendSlice';
 import { FriendBoxCircle } from '../box/FriendBox';
-import { IFriend, IFriendResponse } from '../../ultils/interface';
+import { IFriend } from '../../ultils/interface';
 import useDebounce from '../../hooks/useDebounce';
 import { friendService } from '../../features/friend/friendService';
 import useClickOutside from '../../hooks/useClickOutside';
@@ -39,7 +39,7 @@ const TagFriendModel: FC<IPropTagFriendModel> = ({
   setShowTagFriend,
 }) => {
   const [searchValue, setSearchValue] = useState('');
-  const [searchFriends, setSearchFriends] = useState<IFriendResponse[]>([]);
+  const [searchFriends, setSearchFriends] = useState<IFriend[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const modelRef = useRef<HTMLDivElement | null>(null);
 
@@ -90,7 +90,7 @@ const TagFriendModel: FC<IPropTagFriendModel> = ({
             friends &&
             Array.from(friends.values()).map((friend) => (
               <TagFriend
-                key={friend.userId}
+                key={friend._id}
                 friend={friend}
                 setListFriendTag={setListFriendTag}
               />
@@ -101,10 +101,11 @@ const TagFriendModel: FC<IPropTagFriendModel> = ({
             <Loading />
           </div>
         ) : (
+          searchFriends &&
           searchFriends.map((friend) => (
             <TagFriend
-              key={friend.friends.userId}
-              friend={friend.friends}
+              key={friend._id}
+              friend={friend}
               setListFriendTag={setListFriendTag}
             />
           ))
@@ -122,17 +123,16 @@ export const TagFriend: FC<IPropTagFriend> = ({ friend, setListFriendTag }) => {
       setListFriendTag((prevs) => [...prevs, friend]);
     } else {
       setListFriendTag((prevs) =>
-        prevs.filter((prev) => prev.userId !== friend.userId)
+        prevs.filter((prev) => prev._id !== friend._id)
       );
     }
     setAdd(!add);
   };
 
   return (
-    <div key={friend.userId} className='flex justify-between items-center'>
+    <div key={friend._id} className='flex justify-between items-center'>
       <FriendBoxCircle
-        avatarUrl={friend.avatarUrl}
-        userName={friend.userName}
+        friend={friend}
         className={'w-10 h-10'}
         status={'online'}
       />

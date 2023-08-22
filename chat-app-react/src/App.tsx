@@ -20,6 +20,7 @@ import { AuthContext } from './ultils/context/Auth';
 import { IUser } from './ultils/interface';
 import { useState } from 'react';
 import CallHidden from './components/call/VideoCallHidden';
+import ManageNotification from './pages/ManageNotification';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -54,6 +55,10 @@ function App() {
               <Route path='/call' element={<VideoCall />} />
               <Route path='/call/audio' element={<AudioCall />} />
               <Route path='/call/hidden' element={<CallHidden />} />
+              <Route
+                path='/notification/:userId'
+                element={<ManageNotification />}
+              />
             </Route>
           </Routes>
         </Router>

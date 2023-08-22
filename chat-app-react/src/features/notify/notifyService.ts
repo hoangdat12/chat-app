@@ -3,7 +3,7 @@ import { INotify } from '../../ultils/interface/notify.interface';
 import myAxios from '../../ultils/myAxios';
 
 const getAllNotify = async (
-  pagination: IPagination = { limit: 10, page: 1, sortedBy: 'ctime' }
+  pagination: IPagination = { limit: 20, page: 1, sortedBy: 'ctime' }
 ): Promise<
   IResponse<{
     unRead: number;
@@ -19,6 +19,7 @@ const getAllNotify = async (
 
 const readNotify = async (notifyId: string): Promise<IResponse<any>> => {
   const res = await myAxios.patch(`/notify/${notifyId}`);
+  console.log(res);
   return res;
 };
 

@@ -13,7 +13,7 @@ import Notification from '../../modal/Notification';
 import { IUser } from '../../../ultils/interface';
 import useDebounce from '../../../hooks/useDebounce';
 import { AiOutlineClose } from 'react-icons/Ai';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UserBox from '../../box/UserBox';
 import { userService } from '../../../features/user/userService';
 import Loading from '../../button/Loading';
@@ -78,6 +78,7 @@ const Header: FC<IPropHeader> = memo(
     const { unReadNumberMessage } = useAppSelector(selectMessage);
     const { conversations } = useAppSelector(selectConversation);
     const debounceValue = useDebounce(searchValue, 500);
+    const { conversationId } = useParams();
 
     const handleLogout = async () => {
       setLoadingLogout(true);
@@ -130,7 +131,9 @@ const Header: FC<IPropHeader> = memo(
       if (unReadNumberMessage !== 0) {
         dispatch(resetUnReadNumberMessage());
       }
-      navigate(`/conversation/${Array.from(conversations.keys())[0]}`);
+      if (!conversationId) {
+        navigate(`/conversation/${Array.from(conversations.keys())[0]}`);
+      }
     };
 
     // For responsive

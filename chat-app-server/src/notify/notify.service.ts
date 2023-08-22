@@ -79,10 +79,10 @@ export class NotifyService {
   async getNotify(user: IUserCreated, pagination: Pagination) {
     const notifies = await this.notifyRepository.findNotify(user, pagination);
     let unRead = 0;
-    notifies.slice(0, 6).map((notify) => {
-      if (notify.notify_readed) return;
+    for (let notify of notifies.slice(0, 6)) {
+      if (notify.notify_readed) break;
       else unRead++;
-    });
+    }
     return { unRead, notifies };
   }
 

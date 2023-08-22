@@ -12,11 +12,14 @@ import {
 } from '../../features/notify/notifySlice';
 import { Notify } from '../notify/Notify';
 import useClickOutside from '../../hooks/useClickOutside';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface INotificationProps {
   showNotification: boolean;
   setShowNotification: (value: boolean) => void;
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const Notification: FC<INotificationProps> = memo(
   ({ showNotification, setShowNotification }) => {
@@ -96,6 +99,7 @@ const Notification: FC<INotificationProps> = memo(
                 fontSize={'text-sm'}
                 border={'border-none'}
                 hover={'hover:bg-gray-200 '}
+                onClick={() => navigate(`/notification/${userLocal._id}`)}
               />
             </div>
           </>

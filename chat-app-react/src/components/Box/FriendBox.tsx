@@ -20,6 +20,8 @@ export interface IFriendBoxProp {
   margin?: string;
   onClick?: any;
   onlineStatus?: string;
+  nameSize?: string;
+  onlineStatusSize?: string;
 }
 
 const userLocal = getUserLocalStorageItem();
@@ -50,12 +52,13 @@ export const FriendBoxCircle: FC<IFriendBoxProp> = ({
   className,
   status,
   onlineStatus,
+  nameSize,
+  onlineStatusSize,
 }) => {
   const navigate = useNavigate();
 
   const handleChat = async () => {
     const res = await conversationService.findMatchConversation(friend._id);
-    console.log(res);
     if (res.status === 200) {
       const foundConversation = res.data.metaData;
       if (foundConversation) {
@@ -94,9 +97,11 @@ export const FriendBoxCircle: FC<IFriendBoxProp> = ({
         status={status}
       />
       <div>
-        <h1 className='text-sm'>{friend.userName}</h1>
+        <h1 className={nameSize ?? 'text-sm'}>{friend.userName}</h1>
         {onlineStatus && (
-          <p className='text-xs text-gray-500'>{onlineStatus}</p>
+          <p className={`${onlineStatusSize ?? 'text-xs'} text-gray-500`}>
+            {onlineStatus}
+          </p>
         )}
       </div>
     </div>

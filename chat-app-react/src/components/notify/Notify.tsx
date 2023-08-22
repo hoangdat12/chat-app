@@ -15,6 +15,8 @@ export interface IPropNotify {
   handleConfirm: (userAddFriend: IFriend) => void;
   handleDelete: (userAddFriend: IFriend) => void;
   handleViewProfile: MouseEventHandler<HTMLDivElement>;
+  fontSize?: string;
+  className?: string;
 }
 
 export const Notify: FC<IPropNotify> = ({
@@ -22,6 +24,8 @@ export const Notify: FC<IPropNotify> = ({
   handleConfirm,
   handleDelete,
   handleViewProfile,
+  fontSize,
+  className,
 }) => {
   const [show, setShow] = useState(false);
   const modelRef = useRef<HTMLDivElement | null>(null);
@@ -44,45 +48,50 @@ export const Notify: FC<IPropNotify> = ({
   };
 
   return (
-    <div className='flex items-center justify-between gap-3'>
-      <Avatar
-        onClick={handleViewProfile}
-        avatarUrl={notify.notify_image}
-        className={`h-16 w-16 min-h-[4rem] min-w-[4rem]`}
-      />
+    <div className={`${className} flex items-center justify-between`}>
+      <div className='flex gap-3 items-center'>
+        <Avatar
+          onClick={handleViewProfile}
+          avatarUrl={notify.notify_image}
+          className={`h-16 w-16 min-h-[4rem] min-w-[4rem]`}
+        />
 
-      <div
-        onClick={
-          notify.notify_link ? () => navigate(notify.notify_link) : undefined
-        }
-        className='text-black font-poppins'
-      >
-        <FormatTitleNotify title={notify.notify_content} />
         <div
-          className={`${
-            notify.notify_type === NotifyType.ADD_FRIEND ? 'flex' : 'hidden'
-          } gap-3 mt-1 font-normal`}
+          onClick={
+            notify.notify_link ? () => navigate(notify.notify_link) : undefined
+          }
+          className='text-black font-poppins'
         >
-          <Button
-            text={'Confirm'}
-            color={'text-slate-700'}
-            paddingY={'py-[2px]'}
-            background={'bg-white'}
-            fontSize={'text-sm'}
-            hover={'hover:bg-blue-500 hover:text-white'}
-            border={'border-none'}
-            onClick={handleConfirm}
+          <FormatTitleNotify
+            title={notify.notify_content}
+            fontSize={fontSize ?? 'text-[15px]'}
           />
-          <Button
-            text={'Delete'}
-            color={'text-black'}
-            paddingY={'py-[2px]'}
-            background={'bg-white'}
-            fontSize={'text-sm'}
-            hover={'hover:bg-black hover:text-white'}
-            border={'border-none'}
-            onClick={handleDelete}
-          />
+          <div
+            className={`${
+              notify.notify_type === NotifyType.ADD_FRIEND ? 'flex' : 'hidden'
+            } gap-3 mt-1 font-normal`}
+          >
+            <Button
+              text={'Confirm'}
+              color={'text-slate-700'}
+              paddingY={'py-[2px]'}
+              background={'bg-white'}
+              fontSize={'text-sm'}
+              hover={'hover:bg-blue-500 hover:text-white'}
+              border={'border-none'}
+              onClick={handleConfirm}
+            />
+            <Button
+              text={'Delete'}
+              color={'text-black'}
+              paddingY={'py-[2px]'}
+              background={'bg-white'}
+              fontSize={'text-sm'}
+              hover={'hover:bg-black hover:text-white'}
+              border={'border-none'}
+              onClick={handleDelete}
+            />
+          </div>
         </div>
       </div>
 
@@ -117,9 +126,13 @@ export const Notify: FC<IPropNotify> = ({
 
 export interface IPropFormatTitleNotify {
   title: string;
+  fontSize: string;
 }
 
-export const FormatTitleNotify: FC<IPropFormatTitleNotify> = ({ title }) => {
+export const FormatTitleNotify: FC<IPropFormatTitleNotify> = ({
+  title,
+  fontSize,
+}) => {
   const regex = /\*\*(.*?)\*\*/g;
   const titleFormatted = useCallback(() => {
     return title.split(regex).map((part, index) => {
@@ -131,7 +144,9 @@ export const FormatTitleNotify: FC<IPropFormatTitleNotify> = ({ title }) => {
     });
   }, [title, regex]);
   return (
-    <h1 className='text-[15px] w-full max-h-[48px] text-content line-clamp-2 cursor-pointer'>
+    <h1
+      className={`${fontSize} w-full max-h-[48px] text-content line-clamp-2 cursor-pointer`}
+    >
       {titleFormatted()}
     </h1>
   );
