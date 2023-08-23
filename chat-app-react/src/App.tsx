@@ -22,6 +22,7 @@ import CallHidden from './components/call/VideoCallHidden';
 import ManageNotification from './pages/ManageNotification';
 import NotFound from './pages/NotFound/NotFound';
 import Help from './pages/help/Help';
+import About from './pages/about/About';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -37,6 +38,7 @@ function App() {
             <Route path='/register' element={<Register />} />
             <Route path='/register/success' element={<RegisterSuccess />} />
             <Route path='/help/*' element={<Help />} />
+            <Route path='/about/' element={<About />} />
             <Route element={<ProtectedRoutes children={<CallerPage />} />}>
               <Route path='/' element={<Home />} />
               {innerWitdh < 640 ? (

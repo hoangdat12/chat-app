@@ -1,12 +1,13 @@
 import { AiOutlineHome } from 'react-icons/Ai';
 import { FiSend, FiSettings } from 'react-icons/fi';
-import { BsPerson } from 'react-icons/bs';
+import { BsPerson, BsGithub } from 'react-icons/bs';
 import {
   IoGameControllerOutline,
   IoHelpBuoyOutline,
   IoMusicalNotesOutline,
 } from 'react-icons/io5';
 import { getUserLocalStorageItem } from '..';
+import { SiAboutdotme } from 'react-icons/si';
 
 const user = getUserLocalStorageItem();
 
@@ -38,6 +39,19 @@ export const selectNavUtils = [
     display: 'Music',
     path: '/page/login',
     icons: <IoMusicalNotesOutline />,
+  },
+];
+
+export const selectNavExplore = [
+  {
+    display: 'About me',
+    path: '/about',
+    icons: <SiAboutdotme />,
+  },
+  {
+    display: 'Github',
+    path: 'https://github.com/hoangdat12',
+    icons: <BsGithub />,
   },
 ];
 

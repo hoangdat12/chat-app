@@ -15,6 +15,7 @@ import './siderBar.scss';
 import {
   selectNav1,
   selectNav2,
+  selectNavExplore,
   selectNavUtils,
 } from '../../../ultils/list/siderBar.list';
 
@@ -202,13 +203,13 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                 : 'opacity-0 overflow-hidden h-0'
             } justify-between flex px-4 text-base duration-300`}
           >
-            <h2 className='text-[#ebe4e4]'>Utils</h2>
+            <h2 className='text-[#ebe4e4]'>Explore</h2>
             <span className='cursor-pointer'>
               <AiOutlinePlus />
             </span>
           </div>
           <ul className='list'>
-            {selectNavUtils.map((select, index) => (
+            {selectNavExplore.map((select, index) => (
               <li
                 key={index}
                 className={`selectorNav show_element flex items-center w-full ${
@@ -220,6 +221,7 @@ const SiderBar: FC<IPropSiderBar> = ({ isOpen, showMobile, setShowMobile }) => {
                     showMobile ? 'text-base sm:text-lg' : 'text-base'
                   }`}
                   to={select.path}
+                  target={select.display === 'Github' ? '_blank' : ''}
                 >
                   <i className='select__icon w-16 flex justify-center whitespace-nowrap'>
                     {select.icons}
