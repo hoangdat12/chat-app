@@ -38,7 +38,6 @@ export class AuthService {
 
   async register(data: UserRegister) {
     const { email, password } = data;
-
     const userExist = await this.authRepository.findByEmail(email);
     if (userExist)
       throw new HttpException('User already Eixst!', HttpStatus.CONFLICT);
@@ -64,14 +63,17 @@ export class AuthService {
     const link = `http://localhost:8080/api/v1/auth/active/${otpToken?.token}`;
     const userName = `${newUser.firstName} ${newUser.lastName}`;
     const content = activeAccountTemplate(userName, link);
-    await this.mailSender.sendEmailWithText(
-      email,
-      'Active your Account',
-      content,
-    );
+    // this.mailSender.sendEmailWithText(
+    //   email,
+    //   'Active your Account',
+    //   content,
+    // );
 
-    return new Created<string>(
-      `We send a email for account ${email}, please follow the guide to activate your account`,
+    return new Created<any>(
+      {
+        msg: `We send a email for account ${email}, please follow the guide to activate your account`,
+        link: link,
+      },
       'Register success!',
     );
   }

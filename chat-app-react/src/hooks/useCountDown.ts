@@ -9,7 +9,6 @@ export const useCountDown = (
   useEffect(() => {
     if (condition) {
       const timer = setTimeout(() => {
-        console.log('close');
         handler();
       }, time || 3000);
 

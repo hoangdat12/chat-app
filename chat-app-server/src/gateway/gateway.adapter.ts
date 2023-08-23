@@ -17,7 +17,6 @@ export class WebsocketAdapter extends IoAdapter {
     const server = super.createIOServer(port, options);
 
     server.use(async (socket: AuthenticatedSocket, next: any) => {
-      console.log('Inside Websocket Adapter');
       const userJson = socket.handshake.headers['x-user'];
       const user = userJson ? JSON.parse(userJson as string) : null;
       if (!user) {

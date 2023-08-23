@@ -19,7 +19,6 @@ const getAllNotify = async (
 
 const readNotify = async (notifyId: string): Promise<IResponse<any>> => {
   const res = await myAxios.patch(`/notify/${notifyId}`);
-  console.log(res);
   return res;
 };
 

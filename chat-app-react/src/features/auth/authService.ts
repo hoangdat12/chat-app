@@ -27,7 +27,6 @@ const login = async (
       localStorage.setItem('token', JSON.stringify(token));
       localStorage.setItem('refreshToken', JSON.stringify(refreshToken));
     }
-    console.log(response);
     return response;
   } catch (error: any) {
     throw error;
@@ -56,7 +55,7 @@ const register = async (data: IRegisterData) => {
     'http://localhost:8080/api/v1/auth/register',
     data
   );
-  return response.data;
+  return response;
 };
 
 const logout = async (updateAuthUser: (data: IUser | null) => void) => {

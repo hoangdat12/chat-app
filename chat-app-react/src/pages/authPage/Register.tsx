@@ -27,7 +27,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [messageError, setMessageError] = useState(false);
+  const [messageError, setMessageError] = useState('');
 
   const settings = {
     infinite: true,
@@ -53,18 +53,21 @@ const Register = () => {
       .required('Confirm password is a required field'),
   });
 
-  const handleLogin = async (data: IRegisterDataReceived) => {
+  const handleRegister = async (data: IRegisterDataReceived) => {
     const { rePassword, ...payload } = data;
     setIsLoading(true);
     const response = await authService.register(payload);
+    console.log(response);
     if (response.status === 201) {
       setIsLoading(false);
       setIsError(false);
-      navigate('/');
+      navigate('/register/success', {
+        state: { link: response.data.metaData.link },
+      });
     } else {
       setIsLoading(false);
       setIsError(true);
-      setMessageError(response.message);
+      setMessageError('Have some error, Please try again!');
     }
   };
 
@@ -82,7 +85,7 @@ const Register = () => {
         lastName: '',
       },
       validationSchema: registerSchema,
-      onSubmit: handleLogin,
+      onSubmit: handleRegister,
     }
   );
   return (

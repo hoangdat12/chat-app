@@ -34,13 +34,13 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() body: UserRegister, @Res() res: Response) {
+  async register(@Body() body: UserRegister) {
     try {
       const errors = await validate(body);
       if (errors.length > 0) {
         throw new Error('Missing value!');
       }
-      return (await this.authService.register(body)).sender(res);
+      return await this.authService.register(body);
     } catch (err) {
       throw err;
     }

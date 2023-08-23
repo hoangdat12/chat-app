@@ -120,7 +120,6 @@ export const Content: FC<IPropComment> = memo(
         comment_post_id: comment.comment_post_id,
       };
       const res = await commentService.likeComment(data);
-      console.log(res);
       if (res.status === 200 || res.status === 201) {
         setCommentLikeNum(res.data.metaData.comment_likes_num);
       } else {

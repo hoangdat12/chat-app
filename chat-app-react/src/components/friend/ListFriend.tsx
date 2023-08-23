@@ -66,7 +66,6 @@ const ListFriendOfUser = memo(() => {
           userLocal._id,
           searchValue.trim()
         );
-        console.log(res);
         if (res.status === 200 || res.status === 201) {
           setSearchGroupResult(res.data.metaData);
         } else {

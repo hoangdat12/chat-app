@@ -126,7 +126,6 @@ const Profile = () => {
       const statusFriend = async () => {
         if (userId !== userLocalstorage._id) {
           const res = await friendService.statusFriend(userId);
-          console.log('status friend:::: ', res);
           if (res.status === 200) {
             const status = getStatusFriend(res.data.metaData);
             setStatusFriend(status);

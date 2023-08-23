@@ -30,7 +30,6 @@ export const ButtonCall = () => {
 
   useEffect(() => {
     if (!peer) return;
-    console.log('peer exists: ', peer.id);
     console.log(peer);
     peer.on('call', async (call) => {
       setIsReceivingCall(true);

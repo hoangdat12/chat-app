@@ -47,7 +47,6 @@ export const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.data.metaData.user;
         state.token = action.payload.data.metaData.token;
-        console.log('Successed!!!!');
       })
       .addCase(login.rejected, (state) => {
         state.status = 'failed';

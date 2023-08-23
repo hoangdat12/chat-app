@@ -36,7 +36,6 @@ const ProfileSocial: FC<IPropProfileSocial> = ({
   };
 
   const handleUpdateSocialLink = async () => {
-    console.log(addSocial, inputLink);
     if (
       addSocial !== '' &&
       inputLink !== '' &&
@@ -47,10 +46,7 @@ const ProfileSocial: FC<IPropProfileSocial> = ({
         social_link: inputLink.trim(),
       };
       const res = await userService.updateSocialLink(data);
-      link =
-        title === 'Github'
-          ? res.data.metaData.social_github
-          : res.data.metaData.social_facebook;
+      link = res.data.metaData.social_link;
     }
     setAddSocial('');
     setInputLink('');

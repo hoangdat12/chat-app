@@ -30,7 +30,6 @@ const HelpForm = () => {
         tags,
       };
       const res = await myAxios.post('/report', data);
-      console.log('Report response::: ', res);
       if (res.status === 200 || res.status === 201) {
         // redirect
         navigate('/help/success');

@@ -18,12 +18,8 @@ const findUserByName = async (
 
 const updateSocialLink = async (
   data: IDataUpdateSocialLink
-): Promise<IResponse<IUser>> => {
+): Promise<IResponse<IDataUpdateSocialLink>> => {
   const res = await myAxios.patch('/user/update/social-link', data);
-  if (res.status === 200) {
-    // Update localstore
-    localStorage.setItem('user', JSON.stringify(res.data.metaData));
-  }
   return res;
 };
 

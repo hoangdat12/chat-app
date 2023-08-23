@@ -124,8 +124,7 @@ const CreateNewGroup: FC<IPropCreateNewGroup> = memo(
             conversation_type: conversation.conversation_type,
             newParticipants: listUserAddGroup,
           };
-          const res = await conversationService.handleAddNewMember(data);
-          console.log('add new Member::: ', res);
+          await conversationService.handleAddNewMember(data);
           handleCloseForm();
         }
       }

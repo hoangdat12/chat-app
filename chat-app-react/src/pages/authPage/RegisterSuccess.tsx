@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from 'react-router-dom';
 
 const RegisterSuccess = () => {
+  const location = useLocation();
+  console.log(location.state);
   return (
     <div className='flex items-center justify-center w-screen h-screen'>
       <div className='w-3/5'>
@@ -16,6 +18,16 @@ const RegisterSuccess = () => {
           >
             Login now
           </Link>
+        </div>
+        <div className='flex items-center justify-center mt-4'>
+          <span className='font-bold pr-2'>Link active</span>
+          <a
+            href={location.state.link ?? '#'}
+            target='_blank'
+            className='text-blue-500'
+          >
+            Click here to active your account
+          </a>
         </div>
       </div>
     </div>
