@@ -26,6 +26,11 @@ export class AuthRepository {
       .lean();
   }
 
+  async findByIdContainPassword(userId: string): Promise<IUserCreated | null> {
+    const objectId = new mongoose.Types.ObjectId(userId);
+    return await this.userModel.findOne({ _id: objectId }).lean();
+  }
+
   async findByEmail(userEmail: string): Promise<IUserCreated | null> {
     return await this.userModel.findOne({ email: userEmail }).lean();
   }

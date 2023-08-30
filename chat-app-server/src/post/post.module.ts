@@ -7,6 +7,7 @@ import { PostRepository } from './post.repository';
 import { RedisModule } from '../redis/redis.module';
 import { ProfileModule } from '../profile/profile.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { NotifyModule } from '../notify/notify.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module';
     RedisModule,
     ProfileModule,
     CloudinaryModule,
+    NotifyModule
   ],
   providers: [PostService, PostRepository],
   controllers: [PostController],

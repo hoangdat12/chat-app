@@ -4,9 +4,11 @@ import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { PostRepository } from './post.repository';
 import { AuthRepository } from '../auth/repository/auth.repository';
 import { RedisService } from '../redis/redis.service';
-import { PostMode, PostType } from '../ultils/constant';
+import { NotifyType, PostMode, PostType } from '../ultils/constant';
 import { ProfileRepository } from '../profile/repository/profile.repository';
 import mongoose from 'mongoose';
+import { getUsername } from '../ultils';
+import { NotifyService } from '../notify/notify.service';
 
 @Injectable()
 export class PostService {
@@ -15,6 +17,7 @@ export class PostService {
     private readonly userRepository: AuthRepository,
     private readonly profileRepository: ProfileRepository,
     private readonly redisService: RedisService,
+    private readonly notifyService: NotifyService,
   ) {}
 
   async findPostByUserId(
@@ -165,9 +168,46 @@ export class PostService {
     if (!foundPost)
       throw new HttpException('Post not found!', HttpStatus.NOT_FOUND);
 
+    let notify = null;
+    if (foundPost.user._id.toString() !== user._id) {
+      const notifyData = {
+        notifyType: NotifyType.LIKE_IMAGE,
+        ownerNotify: { userId: foundPost.user._id.toString() },
+        notifyLink: {
+          parrentCommentId: null,
+          commentId: null,
+          postId: postId,
+        },
+        post: {
+          userId: foundPost.user._id,
+          userName: getUsername(foundPost.user),
+        },
+        notify_friend: null,
+      };
+      notify = await this.notifyService.createNotify(
+        {
+          userId: user._id,
+          avatarUrl: user.avatarUrl,
+          userName: getUsername(user),
+        },
+        notifyData,
+      );
+    }
+
     if (quantity === -1) {
-      return await this.postReposotpory.decreLikePost(user, postId, -1);
-    } else return await this.postReposotpory.likePost(user, postId, 1);
+      return {
+        responseData: await this.postReposotpory.decreLikePost(
+          user,
+          postId,
+          -1,
+        ),
+        notify,
+      };
+    } else
+      return {
+        responseData: await this.postReposotpory.likePost(user, postId, 1),
+        notify,
+      };
   }
 
   async changePostMode(user: IUserCreated, postId: string, post_mode: string) {

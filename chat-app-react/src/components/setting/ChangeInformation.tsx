@@ -135,17 +135,6 @@ const ChangeInformation = () => {
     }
   };
 
-  const handleCloseAddressForm = () => {
-    if (profile) {
-      setIsEdit(false);
-      setAddressValue({
-        countryValue: profile.profile_address.address_country,
-        stateValue: profile.profile_address.address_state,
-        streetValue: profile.profile_address.address_street,
-      });
-    }
-  };
-
   useEffect(() => {
     const handleGetProfile = async () => {
       setIsLoading(true);
@@ -276,7 +265,7 @@ const ChangeInformation = () => {
                   background={'bg-gray-400'}
                   color={'text-white'}
                   hover={'hover:bg-gray-500 duration-300'}
-                  onClick={handleCloseForm}
+                  onClick={() => handleCloseForm('information')}
                 />
                 {loadingChangeUserInformation ? (
                   <Loading />
@@ -359,7 +348,7 @@ const ChangeInformation = () => {
                   background={'bg-gray-400'}
                   color={'text-white'}
                   hover={'hover:bg-gray-500 duration-300'}
-                  onClick={handleCloseAddressForm}
+                  onClick={() => handleCloseForm('address')}
                 />
                 {loadingChangeUserAddress ? (
                   <Loading />

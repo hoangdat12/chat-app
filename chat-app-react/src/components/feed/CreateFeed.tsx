@@ -3,6 +3,7 @@ import { FC, useState } from 'react';
 import CreatePostModel from '../modal/CreatePostModel';
 import { IUser } from '../../ultils/interface';
 import { FaFileImage } from 'react-icons/fa';
+import { getUserLocalStorageItem } from '../../ultils';
 
 export interface IPropCreateFeed {
   mode: string;
@@ -15,6 +16,8 @@ export enum ModeCreateFeed {
   WRITE_TIME = 'Write time',
 }
 
+const userLocal = getUserLocalStorageItem();
+
 const CreateFeed: FC<IPropCreateFeed> = ({ mode, placeHolder, user }) => {
   const [show, setShow] = useState(false);
 
@@ -26,20 +29,13 @@ const CreateFeed: FC<IPropCreateFeed> = ({ mode, placeHolder, user }) => {
     <div className='w-full p-3 rounded-lg bg-white'>
       <div className='flex justify-between gap-3 '>
         <Avatar
-          avatarUrl={
-            'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
-          }
+          avatarUrl={userLocal.avatarUrl}
           className='w-12 h-12 min-h-[3rem] min-w-[3rem]'
         />
         <div className='flex items-center w-full'>
-          <input
-            type='text'
-            name=''
-            id=''
-            className='w-full outline-none'
-            placeholder={placeHolder ?? 'What are you think?'}
-            onClick={setShowModelCreatePost}
-          />
+          <div className='w-full outline-none' onClick={setShowModelCreatePost}>
+            <p className='text-gray-500'>What do you think?</p>
+          </div>
           <span onClick={setShowModelCreatePost} className='p-1 cursor-pointer'>
             <FaFileImage />
           </span>

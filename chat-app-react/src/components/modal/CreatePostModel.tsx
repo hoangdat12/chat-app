@@ -12,18 +12,25 @@ import CreatePostWith from '../feed/CreatePostWith';
 import OptionCreatePost from '../feed/OptionCreatePost';
 import { PostType } from '../../ultils/constant';
 import { useAppDispatch } from '../../app/hook';
-import { createPost } from '../../features/post/postSlice';
+import { createNewPost, createPost } from '../../features/post/postSlice';
 import PostMode from '../feed/PostMode';
 import { postMode } from '../../ultils/list/post.list';
 import { IPropCreateFeed, ModeCreateFeed } from '../feed/CreateFeed';
-import { convertUserToFriend } from '../../ultils';
+import {
+  convertUserToFriend,
+  getUserLocalStorageItem,
+  getUsername,
+} from '../../ultils';
 import { PostMode as PostModeType } from '../../ultils/constant/index';
+import { setIsError } from '../../features/showError';
 
 export interface IPropCreatePostModel extends IPropCreateFeed {
   setShow: (value: boolean) => void;
   type?: string;
   post?: IPost;
 }
+
+const userLocal = getUserLocalStorageItem();
 
 const CreatePostModel: FC<IPropCreatePostModel> = ({
   setShow,
@@ -83,7 +90,12 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
       }
       if (file) formData.append('file', file);
       formData.append('data', JSON.stringify(data));
-      dispatch(createPost(formData));
+      const res = (await dispatch(createPost(formData))) as any;
+      if (res?.payload?.status === 200 || res?.payload?.status === 201) {
+        dispatch(createNewPost(res?.payload?.data?.metaData));
+      } else {
+        dispatch(setIsError());
+      }
       window.URL.revokeObjectURL(previewPicture ?? '');
       setPostContent('');
       setFile(null);
@@ -127,14 +139,12 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
 
         <div className='flex gap-3 items-center'>
           <Avatar
-            avatarUrl={
-              'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien.jpg'
-            }
+            avatarUrl={userLocal.avatarUrl}
             className='w-12 h-12 min-h-[3rem] min-w-[3rem]'
           />
           <div>
             <div className='flex items-center gap-1'>
-              <h1 className='text-lg'>Hoang Dat</h1>
+              <h1 className='text-lg'>{getUsername(userLocal)}</h1>
               <CreatePostWith listFriendTag={listFriendTag} />
             </div>
             <div className='relative flex'>
@@ -169,6 +179,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
               placeholder={placeHolder ?? 'What are you think ...?'}
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
+              autoFocus={true}
             />
             <div className='flex items-center justify-center mb-2'>
               <img
@@ -198,6 +209,7 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
             }
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}
+            autoFocus={true}
           ></textarea>
         )}
 

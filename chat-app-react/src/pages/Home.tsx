@@ -7,7 +7,7 @@ import ListFriendOfUser from '../components/friend/ListFriend';
 import AllFeed from '../components/feed/AllFeed';
 import { memo, useEffect, useRef, useState } from 'react';
 import { postService } from '../features/post/postService';
-import { IPagination, IPost } from '../ultils/interface';
+import { IPagination } from '../ultils/interface';
 import { getUserLocalStorageItem } from '../ultils';
 import { profileService } from '../features/profile/profileService';
 import { IProfile } from '../ultils/interface/profile.interface';
@@ -15,7 +15,8 @@ import ProfileInformation from '../components/profile/ProfileInformation';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../components/button/Loading';
 import { setIsError } from '../features/showError';
-import { useAppDispatch } from '../app/hook';
+import { useAppDispatch, useAppSelector } from '../app/hook';
+import { selectPost, getPost as setPost } from '../features/post/postSlice';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -111,11 +112,11 @@ const Home = () => {
 
 export const MainContent = memo(() => {
   const bottomOfListRef = useRef<HTMLDivElement>(null);
-  const [posts, setPosts] = useState<IPost[] | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [endCall, setEndCall] = useState(false);
 
   const dispatch = useAppDispatch();
+  const { posts } = useAppSelector(selectPost);
 
   const handleScroll = () => {
     if (
@@ -138,7 +139,7 @@ export const MainContent = memo(() => {
       if (!res.data.metaData.length) {
         setEndCall(true);
       } else {
-        setPosts(res.data.metaData);
+        dispatch(setPost(res.data.metaData));
       }
     } else {
       setEndCall(true);

@@ -43,7 +43,13 @@ const postSlice = createSlice({
   initialState,
   reducers: {
     getPost: (state, action: PayloadAction<IPost[]>) => {
-      state.posts = [...state.posts, ...action.payload];
+      state.posts = action.payload;
+    },
+    createNewPost: (state, action: PayloadAction<IPost>) => {
+      state.posts = [action.payload, ...state.posts];
+    },
+    deletePost: (state, action: PayloadAction<string>) => {
+      state.posts = state.posts.filter((post) => post._id !== action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -97,6 +103,6 @@ const postSlice = createSlice({
   },
 });
 
-export const { getPost } = postSlice.actions;
+export const { getPost, createNewPost, deletePost } = postSlice.actions;
 export default postSlice.reducer;
 export const selectPost = (state: RootState) => state.post;

@@ -96,6 +96,7 @@ const UserInformation: FC<IUserInformationProp> = memo(
                 };
                 navigate(`/conversation/${profile?.profile_user._id}`, {
                   state: { fakeConversation },
+                  replace: true,
                 });
               }
             }

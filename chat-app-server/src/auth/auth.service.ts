@@ -310,7 +310,9 @@ export class AuthService {
   }
 
   async changePassword(user: IUserCreated, data: ChangePassword) {
-    const foundUser = await this.authRepository.findById(user._id);
+    const foundUser = await this.authRepository.findByIdContainPassword(
+      user._id,
+    );
     if (!foundUser)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 

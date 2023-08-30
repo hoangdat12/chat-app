@@ -1,4 +1,4 @@
-import { memo, useContext, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 
 import { IoSearch, IoNotificationsOutline } from 'react-icons/io5';
 
@@ -25,7 +25,6 @@ import useClickOutside from '../../../hooks/useClickOutside';
 import Confirm from '../../modal/Confirm';
 import { authService } from '../../../features/auth/authService';
 import LoadingScreen from '../../button/LoadingScreen';
-import { AuthContext } from '../../../ultils/context/Auth';
 import { RiMessengerLine } from 'react-icons/ri';
 import {
   resetUnReadNumberMessage,
@@ -71,7 +70,6 @@ const Header: FC<IPropHeader> = memo(
 
     const modelRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
-    const { updateAuthUser } = useContext(AuthContext);
 
     const dispatch = useAppDispatch();
     const { numberNotifyUnRead: totalNotify, notifies } =
@@ -83,7 +81,7 @@ const Header: FC<IPropHeader> = memo(
 
     const handleLogout = async () => {
       setLoadingLogout(true);
-      const res = await authService.logout(updateAuthUser);
+      const res = await authService.logout();
       if (res.status === 200) {
         setLoadingLogout(false);
         navigate('/login');

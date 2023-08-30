@@ -58,13 +58,12 @@ const register = async (data: IRegisterData) => {
   return response;
 };
 
-const logout = async (updateAuthUser: (data: IUser | null) => void) => {
+const logout = async () => {
   const res = await myAxios.post('/auth/logout');
   if (res.status === 200) {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
-    updateAuthUser(null);
   }
   return res.data;
 };

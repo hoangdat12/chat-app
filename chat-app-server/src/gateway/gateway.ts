@@ -17,7 +17,6 @@ import { Messages } from '../schema/message.model';
 import {
   ICallAccepPayload,
   ICallClosePayload,
-  IConversation,
   IMessage,
   INotify,
   IRejectVideoPayload,

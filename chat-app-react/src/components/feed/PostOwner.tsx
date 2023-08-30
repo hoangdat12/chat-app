@@ -13,6 +13,7 @@ import { postMode } from '../../ultils/list/post.list';
 import CreatePostWith from './CreatePostWith';
 import { useAppDispatch } from '../../app/hook';
 import { setIsError, setIsSuccess } from '../../features/showError';
+import { useNavigate } from 'react-router-dom';
 
 export interface IPropPostOwner {
   post: IPost;
@@ -40,7 +41,7 @@ const PostOwner: FC<IPropPostOwner> = ({
   const [showChangePostMode, setShowChangePostMode] = useState(false);
   const [modeDefault, setModeDefault] = useState<IPostMode | null>(null);
   const optionRef = useRef<HTMLUListElement | null>(null);
-
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const handleShowOptions = () => {
@@ -115,6 +116,7 @@ const PostOwner: FC<IPropPostOwner> = ({
           <Avatar
             avatarUrl={post?.user?.avatarUrl}
             className={'w-12 h-12 min-h-[3rem] min-w-[3rem]'}
+            onClick={() => navigate(`/profile/${post?.user?._id}`)}
           />
           <div>
             <div className='flex items-center'>

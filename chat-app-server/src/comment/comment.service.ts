@@ -21,10 +21,11 @@ export class CommentService {
 
   async createComment(user: IUserCreated, data: DataCreateComment) {
     const { comment_parent_id, comment_post_id } = data;
-    const { foundPost } = await this.checkPostAndCommentFound({
-      comment_id: comment_parent_id,
-      comment_post_id,
-    });
+    const { foundPost, foundComment: foundParrentComment } =
+      await this.checkPostAndCommentFound({
+        comment_id: comment_parent_id,
+        comment_post_id,
+      });
     let rightValue: number = 1;
     // Reply
     if (comment_parent_id) {
@@ -59,17 +60,50 @@ export class CommentService {
         rightValue = maxRightValue.comment_right + 1;
       }
     }
-
+    let notify = null;
     await this.postRepository.increQuantityCommentNum(comment_post_id);
     const comment = await this.commentRepository.create(user, data, rightValue);
     // Create notify
-    let notify = null;
-    if (foundPost.user._id.toString() !== user._id) {
+    if (foundPost.user._id.toString() === user._id && !comment_parent_id)
+      return {
+        notify: null,
+        responseData: this.convertCommentToString(comment, user),
+      };
+    else if (foundPost.user._id.toString() !== user._id && !comment_parent_id) {
+      // Comment on post
       const notifyData = {
         notifyType: comment_parent_id
           ? NotifyType.COMMENT_REPLY
           : NotifyType.COMMENT,
         ownerNotify: { userId: foundPost.user._id.toString() },
+        notifyLink: {
+          parrentCommentId: comment_parent_id,
+          commentId: comment._id.toString(),
+          postId: comment_post_id,
+        },
+        post: {
+          userId: foundPost.user._id,
+          userName: getUsername(foundPost.user),
+        },
+        notify_friend: null,
+      };
+      notify = await this.notifyService.createNotify(
+        {
+          userId: user._id,
+          avatarUrl: user.avatarUrl,
+          userName: getUsername(user),
+        },
+        notifyData,
+      );
+    } else {
+      // Reply comment
+      const notifyData = {
+        notifyType: comment_parent_id
+          ? NotifyType.COMMENT_REPLY
+          : NotifyType.COMMENT,
+        ownerNotify: {
+          userId: foundParrentComment.comment_user_id.toString(),
+        },
         notifyLink: {
           parrentCommentId: comment_parent_id,
           commentId: comment._id.toString(),

@@ -36,8 +36,6 @@ const Conversation = () => {
   const { conversationId } = useParams();
   const location = useLocation();
 
-  const navigate = useNavigate();
-
   const userPermissionChat = useCallback(
     (userId: string | undefined, conversation: IConversation | undefined) => {
       if (userId && conversation) {
@@ -73,10 +71,12 @@ const Conversation = () => {
     fetchListConversationOfUser();
   }, []);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (location?.state?.fakeConversation) {
       dispatch(createFakeConversation(location.state.fakeConversation));
-      location.state.fakeConversation = undefined;
+      navigate('.', { state: null });
     }
   }, [location]);
 
@@ -84,8 +84,6 @@ const Conversation = () => {
     const foundConversation = conversations.get(conversationId ?? '');
     if (foundConversation) {
       setConversation(foundConversation);
-    } else {
-      navigate('/not-found');
     }
   }, [conversationId]);
 

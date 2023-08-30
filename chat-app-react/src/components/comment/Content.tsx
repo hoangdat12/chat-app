@@ -28,6 +28,7 @@ import useEnterListener from '../../hooks/useEnterEvent';
 import CommentContent from './CommentContent';
 import { setIsError } from '../../features/showError';
 import { useAppDispatch } from '../../app/hook';
+import { useNavigate } from 'react-router-dom';
 
 export interface IPropComment {
   comment: IComment;
@@ -54,6 +55,7 @@ export const Content: FC<IPropComment> = memo(
       comment.comment_likes_num
     );
 
+    const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement | null>(null);
     const dispatch = useAppDispatch();
 
@@ -148,6 +150,7 @@ export const Content: FC<IPropComment> = memo(
           <Avatar
             avatarUrl={comment.comment_user_id.avatarUrl}
             className={sizeAvatar ?? 'w-10 h-10 min-h-[2.5rem] min-w-[2.5rem]'}
+            onClick={() => navigate(`/profile/${comment.comment_user_id._id}`)}
           />
           <div className='max-w-[80%]'>
             <div className='relative hover-parent px-3 py-2 text-sm rounded-lg bg-white'>

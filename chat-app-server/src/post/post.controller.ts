@@ -20,12 +20,14 @@ import { DataCreatePost, IDataUpdatePost } from './post.dto';
 import { Ok } from '../ultils/response';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('post')
 export class PostController {
   constructor(
     private readonly postService: PostService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly eventEmiter: EventEmitter2,
   ) {}
 
   @Get('/all')
@@ -189,11 +191,12 @@ export class PostController {
   ) {
     try {
       const user = req.user as IUserCreated;
-      const responseData = await this.postService.likePost(
+      const { responseData, notify } = await this.postService.likePost(
         user,
         postId,
         quantity,
       );
+      // this.eventEmiter.emit('notify.received', { notify });
       return new Ok(responseData);
     } catch (err) {
       throw err;

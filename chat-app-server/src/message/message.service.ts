@@ -56,10 +56,15 @@ export class MessageService {
         avatarUrl: null,
         nameGroup: null,
       };
-      newConversation = await this.conversationService.createConversation(
-        user,
-        payload,
-      );
+      const foundConversationOfTwoUser =
+        await this.conversationService.getMatchConversation(
+          participants[0].userId,
+          participants[1].userId,
+        );
+      newConversation = foundConversationOfTwoUser
+        ? foundConversationOfTwoUser
+        : (await this.conversationService.createConversation(user, payload))
+            .conversation;
     }
     const payload: PayloadCreateMessage = {
       message_type,

@@ -386,7 +386,7 @@ const ConversationContent: FC<IPropConversationContent> = ({
     };
   }, []);
 
-  return (
+  return conversation ? (
     <div className='block xl:col-span-6 md:col-span-8 w-full h-full'>
       <HeaderContent
         handleShowMoreConversation={handleShowMoreConversation}
@@ -425,6 +425,8 @@ const ConversationContent: FC<IPropConversationContent> = ({
         <LoadingWithText text={'Please wait 10 seconds :))'} />
       )}
     </div>
+  ) : (
+    <div></div>
   );
 };
 
