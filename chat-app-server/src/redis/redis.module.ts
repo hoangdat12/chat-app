@@ -9,9 +9,9 @@ import { RedisService } from './redis.service';
       provide: 'REDIS_CLIENT',
       useFactory: () => {
         return new Redis({
-          password: 'wV4ju87vxqX13N9L0up1GBkyJyKf5Ish',
-          host: 'redis-11977.c292.ap-southeast-1-1.ec2.cloud.redislabs.com',
-          port: 11977,
+          password: process.env.REDIS_PASSWORD,
+          host: process.env.REDIS_HOST,
+          port: Number(process.env.REDIS_PORT),
         });
       },
     },
