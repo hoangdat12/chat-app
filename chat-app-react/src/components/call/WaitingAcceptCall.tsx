@@ -12,7 +12,7 @@ const WaitingAcceptCall = () => {
   const [timer, setTimer] = useState(30);
 
   const dispatch = useAppDispatch();
-  const { activeConversationId, callType, caller, receiver } =
+  const { activeConversationId, callType, caller, receiver, localStream } =
     useAppSelector(selectCall);
   const { conversations } = useAppSelector(selectConversation);
   const socket = useContext(SocketContext);
@@ -42,10 +42,13 @@ const WaitingAcceptCall = () => {
   const handleReject = async () => {
     await handleCreateMessageCallVideo();
     dispatch(resetState());
-    const payload = { caller, conversationId: activeConversationId };
-    callType === 'video'
-      ? socket.emit(SocketCall.VIDEO_CALL_REJECTED, payload)
-      : socket.emit(SocketCall.VOICE_CALL_REJECTED, payload);
+    const payload = { receiver };
+    socket.emit(SocketCall.SENDER_REJECT_CALL, payload);
+    localStream &&
+      localStream.getTracks().forEach((track) => {
+        console.log(localStream.id);
+        track.stop();
+      });
   };
 
   useEffect(() => {

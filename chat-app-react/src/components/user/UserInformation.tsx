@@ -124,9 +124,11 @@ const UserInformation: FC<IUserInformationProp> = memo(
           src={profile?.profile_banner}
           alt='user-pic'
         />
-        <div className='absolute top-4 left-4 p-2 rounded-full bg-gray-50 cursor-pointer sm:text-xl md:text-3xl'>
-          <CiEdit />
-        </div>
+        {isOwner && (
+          <div className='absolute top-4 left-4 p-2 rounded-full bg-gray-50 cursor-pointer sm:text-xl md:text-3xl'>
+            <CiEdit />
+          </div>
+        )}
         <div className='absolute top-1/2 left-[50%] -translate-x-1/2 translate-y-[40%] flex flex-col items-center justify-center'>
           <div className='relative'>
             <img
@@ -134,18 +136,20 @@ const UserInformation: FC<IUserInformationProp> = memo(
               src={profile?.profile_user?.avatarUrl}
               alt='user-pic'
             />
-            <div className='absolute bottom-2 right-1 p-2 rounded-full bg-gray-100 cursor-pointer sm:text-lg md:text-xl'>
-              <span className='relative cursor-pointer'>
-                <CiEdit />
-                <input
-                  className='absolute top-0 right-0 bottom-0 left-0 opacity-0'
-                  type='file'
-                  name=''
-                  id=''
-                  onChange={handleFileChange}
-                />
-              </span>
-            </div>
+            {isOwner && (
+              <div className='absolute bottom-2 right-1 p-2 rounded-full bg-gray-100 cursor-pointer sm:text-lg md:text-xl'>
+                <span className='relative cursor-pointer'>
+                  <CiEdit />
+                  <input
+                    className='absolute top-0 right-0 bottom-0 left-0 opacity-0'
+                    type='file'
+                    name=''
+                    id=''
+                    onChange={handleFileChange}
+                  />
+                </span>
+              </div>
+            )}
           </div>
           <h1 className='font-bold text-2xl sm:text-3xl text-center mt-3'>
             {getUsername(profile?.profile_user ?? null)}
@@ -203,14 +207,6 @@ const UserInformation: FC<IUserInformationProp> = memo(
                   : 'Follow'
               }
             />
-            {!isOwner && (
-              <Button
-                className={'text-center align-middle'}
-                text={'...'}
-                paddingY={'py-1'}
-                fontSize={'sm:text-lg'}
-              />
-            )}
           </div>
         </div>
       </div>

@@ -23,6 +23,7 @@ import {
   selectConversation,
 } from '../../features/conversation/conversationSlice';
 import { setIsError } from '../../features/showError';
+import { useNavigate } from 'react-router-dom';
 
 export const sendMessageCallVideo = async (
   caller: IParticipant | undefined,
@@ -65,6 +66,7 @@ const CallReceiveDialog = () => {
   const socket = useContext(SocketContext);
   const [timer, setTimer] = useState(30);
 
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { conversations } = useAppSelector(selectConversation);
   const { caller, receiver, callType, activeConversationId, timeStartCall } =
@@ -133,7 +135,7 @@ const CallReceiveDialog = () => {
 
   return (
     <div className='fixed top-0 left-0 right-0 bottom-0 w-screen h-screen bg-[#3e4651] z-[1001]'>
-      <div className='absolute top-[20%] flex flex-col items-center gap-2 w-full h-full'>
+      <div className='absolute top-[20%] flex flex-col items-center gap-2 w-full'>
         <Avatar
           avatarUrl={
             caller?.avatarUrl ??
@@ -151,7 +153,7 @@ const CallReceiveDialog = () => {
           </span>
         </div>
       </div>
-      <div className='absolute bototm-4 sm:bottom-6 flex items-center justify-center mt-20 w-full'>
+      <div className='absolute bottom-16 flex items-center justify-center mt-20 w-full'>
         <div
           onClick={() => handleCall('reject')}
           className='flex flex-col items-center justify-center gap-1 cursor-pointer'
@@ -169,6 +171,7 @@ const CallReceiveDialog = () => {
         <Button
           text={'Go back'}
           className='bg-blue-500 text-white border-none'
+          onClick={() => navigate(-1)}
         />
       </div>
     </div>

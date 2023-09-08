@@ -23,7 +23,6 @@ import ManageNotification from './pages/ManageNotification';
 import NotFound from './pages/NotFound/NotFound';
 import Help from './pages/help/Help';
 import About from './pages/about/About';
-import WaitingAcceptCall from './components/call/WaitingAcceptCall';
 
 function App() {
   const innerWitdh = useInnerWidth();
@@ -59,7 +58,6 @@ function App() {
               <Route path='/call' element={<VideoCall />} />
               <Route path='/call/audio' element={<AudioCall />} />
               <Route path='/call/hidden' element={<CallHidden />} />
-              <Route path='/call/waiting' element={<WaitingAcceptCall />} />
               <Route
                 path='/notification/:userId'
                 element={<ManageNotification />}

@@ -11,3 +11,7 @@ export interface ICallAccepPayload extends IRejectVideoPayload {
 export interface ICallClosePayload extends IRejectVideoPayload {
   receiver: IParticipant;
 }
+
+export interface ISenderRejectPayload {
+  receiver: IParticipant;
+}

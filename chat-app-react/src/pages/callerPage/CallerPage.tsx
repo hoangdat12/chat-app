@@ -41,6 +41,7 @@ import {
 import { fetchConversationOfUser } from '../../features/conversation/conversationSlice';
 import { selectShowError } from '../../features/showError';
 import WaitingAcceptCall from '../../components/call/WaitingAcceptCall';
+import { useSenderRejectCall } from '../../hooks/call/useSenderRejectCall';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -124,6 +125,7 @@ const CallerPage = () => {
   useVoiceCallAccept();
   useVoiceCallRejected();
   useVoiceCallClose();
+  useSenderRejectCall();
 
   useEffect(() => {
     if (connection) {

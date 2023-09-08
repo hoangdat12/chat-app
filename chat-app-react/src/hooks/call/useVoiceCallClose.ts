@@ -16,7 +16,6 @@ export const useVoiceCallClose = () => {
 
   useEffect(() => {
     socket.on(WebsocketEvents.ON_VOICE_CLOSE, () => {
-      console.log('received onVoiceCallHangUp');
       localStream &&
         localStream.getTracks().forEach((track) => {
           track.stop();

@@ -7,6 +7,7 @@ export enum SocketCall {
   VOICE_CALL_REJECTED = 'onSocketVoiceCallRejected',
   VIDEO_CALL_CLOSE = 'onVideoCallClose',
   VOICE_CALL_CLOSE = 'onVoiceCallClose',
+  SENDER_REJECT_CALL = 'onSockerSenderRejectCall',
 }
 
 export enum WebsocketEvents {
@@ -18,4 +19,5 @@ export enum WebsocketEvents {
   ON_VOICE_CALL = 'onVoiceCall',
   ON_VIDEO_CLOSE = 'onVideoClose',
   ON_VOICE_CLOSE = 'onVoiceClose',
+  ON_SENDER_REJECT_CALL = 'onSenderRejectCall',
 }

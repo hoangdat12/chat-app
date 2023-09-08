@@ -20,6 +20,7 @@ import {
   IMessage,
   INotify,
   IRejectVideoPayload,
+  ISenderRejectPayload,
   ISocketAddMember,
   ISocketCallInitiate,
   ISocketChangeEmoji,
@@ -313,7 +314,10 @@ export class MessagingGateway implements OnModuleInit {
   ) {
     const { receiver } = data;
     const receiverSocket = this.sessions.getUserSocket(receiver.userId);
-    if (!receiverSocket) socket.emit('onUserUnavailable');
+    if (!receiverSocket) {
+      socket.emit('onUserUnavailable');
+      return;
+    }
     receiverSocket.emit(WebsocketEvents.ON_VOICE_CALL, data);
   }
 
@@ -374,5 +378,16 @@ export class MessagingGateway implements OnModuleInit {
     socket.emit(WebsocketEvents.ON_VOICE_CLOSE);
     const callerSocket = this.sessions.getUserSocket(caller.userId);
     callerSocket && callerSocket.emit(WebsocketEvents.ON_VOICE_CLOSE);
+  }
+
+  @SubscribeMessage(SocketCall.SENDER_REJECT_CALL)
+  async handleRejectCallOnSender(
+    @MessageBody() data: ISenderRejectPayload,
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const receiver = data.receiver;
+    const receiverSocker = this.sessions.getUserSocket(receiver.userId);
+    if (receiverSocker)
+      receiverSocker.emit(WebsocketEvents.ON_SENDER_REJECT_CALL);
   }
 }
