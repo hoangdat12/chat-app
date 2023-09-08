@@ -87,10 +87,6 @@
   font-weight: bold;
 }
 
-a:hover {
-  color: #000;
-}
-
 @media only screen and (max-width: 500px) {
   .masthead {
     padding: 3em 0;
@@ -102,6 +98,6 @@ a:hover {
   .where-Im-from,
   .more-about-me,
   .content-footer {
-    font-size: 0.5em;
+    font-size: 1em;
   }
 }

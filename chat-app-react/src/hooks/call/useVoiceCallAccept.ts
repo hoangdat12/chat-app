@@ -32,7 +32,7 @@ export const useVoiceCallAccept = () => {
         dispatch(setActiveConversationId(data.conversation._id));
         dispatch(setIsCallInProgress(true));
         dispatch(setIsReceivingCall(false));
-        dispatch(setIsCalling(true));
+        dispatch(setIsCalling(false));
         if (data.caller.userId === userLocal!._id) {
           console.log('AUDIO: connecting to peer now');
           const connection = peer.connect(data.acceptor.peerId);

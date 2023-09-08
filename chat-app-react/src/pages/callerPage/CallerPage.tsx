@@ -40,6 +40,7 @@ import {
 } from '../../features/message/messageSlice';
 import { fetchConversationOfUser } from '../../features/conversation/conversationSlice';
 import { selectShowError } from '../../features/showError';
+import WaitingAcceptCall from '../../components/call/WaitingAcceptCall';
 
 const userLocal = getUserLocalStorageItem();
 
@@ -60,6 +61,7 @@ const CallerPage = () => {
     isCallInProgress,
     isMini,
     endCall,
+    isCalling,
   } = useAppSelector(selectCall);
   const { unReadMessageOfConversation } = useAppSelector(selectMessage);
   const { isError, isSuccess, isNotify } = useAppSelector(selectShowError);
@@ -212,6 +214,7 @@ const CallerPage = () => {
   return (
     <div className='relative'>
       {isReceivingCall && caller && <CallReceiveDialog />}
+      {isCalling && caller && <WaitingAcceptCall />}
       {isCallInProgress &&
         isMini &&
         (callType === 'video' ? <CallHidden /> : <VoiceCallHidden />)}

@@ -22,9 +22,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IUserCreated } from '../ultils/interface';
 import { validate } from 'class-validator';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
-import { multerOptions } from '../ultils/constant/multer.config';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { getUrlImage } from 'src/ultils';
 
 @Controller('message')
 export class MessageController {

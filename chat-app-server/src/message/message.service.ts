@@ -74,6 +74,8 @@ export class MessageService {
         : conversationId,
       message_received: conversation?.participants ?? participants,
       message_content_type,
+      message_call: data.message_call,
+      message_sender_by: data.message_sender_by,
     };
     // Create new Message
     const message = await this.messageRepository.createMessageConversation(

@@ -77,7 +77,7 @@ const Home = () => {
 
           <MainContent />
 
-          <div className='flex flex-col pb-4 gap-4 xl:gap-8 max-h-[calc(100vh-76px)] h-[calc(100vh-76px)] overflow-y-auto scrollbar-hide xl:col-span-3 col-span-4 pt-6'>
+          <div className='hidden sm:flex flex-col pb-4 gap-4 xl:gap-8 max-h-[calc(100vh-76px)] h-[calc(100vh-76px)] overflow-y-auto scrollbar-hide xl:col-span-3 col-span-4 pt-6'>
             <div className='relative bg-gray-100 rounded p-2 shadow-box'>
               <div className='absolute top-2 right-2 left-2 flex justify-between text-sm p-3 text-white bg-blue-500'>
                 <div className='flex gap-2 items-center'>
@@ -152,7 +152,7 @@ export const MainContent = memo(() => {
   }, [currentPage]);
 
   return (
-    <div className='xl:col-span-6 col-span-8 pt-6'>
+    <div className='xl:col-span-6 col-span-8 pt-6 w-full'>
       <div
         onScroll={handleScroll}
         className='max-h-[calc(100vh-76px)] h-[calc(100vh-76px)] overflow-y-auto scrollbar-hide flex flex-col items-center gap-4 lg:gap-6 xl:gap-8'

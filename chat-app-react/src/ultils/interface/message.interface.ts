@@ -90,6 +90,7 @@ export interface IDataCreateMessage {
   message_content_type?: string;
   message_call?: IMessageCall;
   createdAt?: Date;
+  message_sender_by?: IParticipant;
 }
 
 export interface IMessageCall {

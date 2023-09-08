@@ -142,7 +142,6 @@ const HeaderContent: FC<IPropHeaderContent> = memo(
 
       handleCheckUserOnline();
     }, [conversation]);
-
     return (
       <div className='relative flex items-center justify-between h-16 sm:h-[5.5rem] px-4 sm:px-8 w-full shadow-nomal'>
         {/* Mobile */}

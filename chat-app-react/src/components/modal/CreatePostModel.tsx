@@ -127,11 +127,11 @@ const CreatePostModel: FC<IPropCreatePostModel> = ({
     <div
       className={`fixed top-0 left-0 bottom-0 right-0 w-screen ${
         true ? 'flex' : 'hidden'
-      } items-center justify-center h-screen bg-gray-200 sm:bg-blackOverlay z-[1001]`}
+      } items-center justify-center h-screen bg-blackOverlay z-[1001] px-3 sm:px-0`}
     >
       <div
         ref={modalRef}
-        className='relative flex flex-col gap-2 w-[90%] sm:w-[60%] lg:w-[40%] p-4 bg-white animate__animated animate__fadeInDown sm:rounded-md'
+        className='relative flex flex-col gap-2 w-full sm:w-[60%] lg:w-[40%] p-4 bg-white animate__animated animate__fadeInDown rounded sm:rounded-md'
       >
         <h1 className='text-2xl text-center'>
           {type === PostType.POST ? 'Create new Post' : `Share Post`}

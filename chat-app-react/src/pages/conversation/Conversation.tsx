@@ -23,6 +23,7 @@ import useInnerWidth from '../../hooks/useInnterWidth';
 import ConversationSetting from '../../components/conversation/ConversationSetting';
 import { IConversation } from '../../ultils/interface';
 import NoConversation from '../../components/conversation/NoConversation';
+import { MessageType } from '../../ultils/constant';
 
 const Conversation = () => {
   const [showListConversationSM, setShowListConversationSM] = useState(false);
@@ -114,6 +115,11 @@ const Conversation = () => {
                       user={user}
                       showMoreConversation={showMoreConversation}
                       setShowMoreConversation={setShowMoreConversation}
+                      isValidSendMessage={
+                        conversation?.conversation_type === MessageType.GROUP
+                          ? isValid
+                          : true
+                      }
                     />
                   </>
                 }
@@ -133,14 +139,22 @@ const Conversation = () => {
                 showListConversationSM={showListConversationSM}
                 showMoreConversation={showMoreConversation}
                 setShowMoreConversation={setShowMoreConversation}
-                isValidSendMessage={isValid}
+                isValidSendMessage={
+                  conversation?.conversation_type === MessageType.GROUP
+                    ? isValid
+                    : true
+                }
               />
               {conversation && (
                 <ConversationSetting
                   showMoreConversation={showMoreConversation}
                   setShowMoreConversation={setShowMoreConversation}
                   conversation={conversation}
-                  isValidSendMessage={isValid}
+                  isValidSendMessage={
+                    conversation?.conversation_type === MessageType.GROUP
+                      ? isValid
+                      : true
+                  }
                 />
               )}
             </>

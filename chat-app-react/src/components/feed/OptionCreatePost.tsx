@@ -69,7 +69,7 @@ const OptionCreatePost: FC<IPropOptionCreatePost> = ({
           ref={emojiRef}
           className={`absolute -bottom-2 ${
             !showEmoji ? 'hidden animate__zoomOut' : 'animate__zoomIn'
-          } max-w-[400px] overflow-hidden left-1/2 -translate-x-1/2 animate__animated`}
+          } max-w-[400px] overflow-hidden right-1/2 translate-x-[35%] sm:translate-x-1/2 animate__animated`}
         >
           <Picker data={data} onEmojiSelect={handleSelectEmoji} />
         </div>

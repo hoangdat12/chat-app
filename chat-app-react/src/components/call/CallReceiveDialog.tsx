@@ -45,6 +45,7 @@ export const sendMessageCallVideo = async (
       message_type: MessageType.CONVERSATION,
       ...data,
       createdAt: timeStartCall,
+      message_sender_by: caller,
     };
     const res = await messageService.createNewMessage(body);
     if (res.status === 201) {
@@ -135,13 +136,16 @@ const CallReceiveDialog = () => {
       <div className='absolute top-[20%] flex flex-col items-center gap-2 w-full h-full'>
         <Avatar
           avatarUrl={
+            caller?.avatarUrl ??
             'https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien-600x600.jpg'
           }
           className='w-32 h-32 min-h-[8rem] min-w-[8rem]'
         />
         <div className='flex gap-3 flex-col items-center mt-4'>
           <p className='text-lg text-[#9da2a9]'>Incoming call</p>
-          <h1 className='rounded text-white text-lg sm:text-3xl'>Hoang Dat</h1>
+          <h1 className='rounded text-white text-lg sm:text-3xl'>
+            {caller?.userName ?? 'Hoang Dat'}
+          </h1>
           <span className='text-lg text-[#9da2a9] px-3 py-1 rounded-lg border border-white mt-2'>
             {timer}s
           </span>

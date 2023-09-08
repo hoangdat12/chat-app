@@ -30,7 +30,7 @@ export const useVideoCallAccept = () => {
       (data: ICallAcceptPayload) => {
         dispatch(setIsCallInProgress(true));
         dispatch(setIsReceivingCall(false));
-        dispatch(setIsCalling(true));
+        dispatch(setIsCalling(false));
         dispatch(setActiveConversationId(data.conversation._id));
         if (!peer) return console.log('No peer....');
         if (data.caller.userId === userLocal!._id) {

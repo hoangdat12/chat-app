@@ -23,6 +23,7 @@ export class PayloadCreateMessage {
   message_content_type?: string;
   message_call?: IMessageCall;
   createdAt?: Date;
+  message_sender_by?: IParticipant;
 }
 
 export class CreateMessageData {
@@ -41,6 +42,8 @@ export class CreateMessageData {
   message_call?: IMessageCall;
 
   createdAt?: Date;
+
+  message_sender_by?: IParticipant;
 }
 
 export class CreateMessageCallData extends CreateMessageData {}

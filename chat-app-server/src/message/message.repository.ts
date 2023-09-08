@@ -114,7 +114,7 @@ export class MessageRepository {
     user: IUserCreated,
     data: PayloadCreateMessage,
   ) {
-    const message_sender_by = {
+    const message_sender_by = data.message_sender_by ?? {
       userId: user._id,
       email: user.email,
       avatarUrl: user.avatarUrl,
